@@ -3,17 +3,32 @@
 本仓库是 2D 手绘风格动画的内容生产线。员工产出**数据与 SVG 资产**，由内置的
 Remotion 播放器（`src/lib/`）按分镜表自动合成成片，不要改渲染代码，除非你领的是工程任务。
 
-## 流水线（七段）
+## 流水线（两段：原型 → 量产）
 
-| 阶段 | 产物 | 落点 |
+**原型段（概念设计，验收人必须是老板）**——任何新角色、新视觉风格、新场景基调，
+先做 demo 收进「原型验收任务」（reviewerRole=owner），交付证据必须是老板能直接
+打开的产物（静帧 PNG 或短样片路径）。老板 approve 前，所有依赖它的量产任务不得解锁。
+
+| 原型阶段 | 产物 | 落点 |
 |---|---|---|
-| 1 剧本 | 分场剧本 | `episodes/<ep>/script.md` |
-| 2 角色设计 | 每个角色一目录，每个表情/服装一个 SVG | `public/episodes/<ep>/assets/characters/<id>/<variant>.svg` |
-| 3 服化道 | 道具、挂件 SVG | `public/episodes/<ep>/assets/props/*.svg`（服装差异走角色 variant） |
-| 4 场景 | 背景 SVG，1920×1080 viewBox | `public/episodes/<ep>/assets/scenes/<name>.svg` |
-| 5 分镜 | 镜头表 | `public/episodes/<ep>/shots.json` |
-| 6 配音 | 声线配置 + 生成音轨 | `episode.json` 的 `voices` + `pnpm audio <ep>` |
-| 7 成片 | mp4 | `pnpm render <ep>` → `renders/` |
+| P1 概念剧本 | 分场大纲 + 角色小传 | `episodes/<ep>/script.md` |
+| P2 角色 demo | 新角色 `default` SVG + 一张入镜静帧 | `assets/characters/<id>/default.svg` + `storyboard/frames/` |
+| P3 风格 demo | 场景基调图 + 道具风格样张 | `assets/scenes/<id>.svg` + `assets/props/*.svg` |
+
+**量产段（铺量制作，GM/QA 验收）**——原型过关后由经理解锁：
+
+| 量产阶段 | 产物 | 落点 |
+|---|---|---|
+| M1 剧本定稿 | 完整分场剧本 | `episodes/<ep>/script.md` |
+| M2 角色量产 | 表情/服装变体 SVG | `assets/characters/<id>/<variant>.svg` |
+| M3 服化道量产 | 全量道具、挂件 | `assets/props/*.svg` |
+| M4 场景量产 | 全量背景 | `assets/scenes/*.svg` |
+| M5 分镜 | 镜头表 | `shots.json` |
+| M6 配音 | 声线 + 音轨 | `episode.json` voices + `pnpm audio` |
+| M7 成片 | mp4 | `pnpm render` → `renders/` |
+
+依赖规则：M2 依赖对应角色的 P2 验收任务；M3/M4 依赖 P3；M5 依赖全部原型关；
+M6 依赖 M5；M7 依赖 M6。新增角色永远先走 P2 demo，禁止直接进量产。
 
 ## 数据契约
 
