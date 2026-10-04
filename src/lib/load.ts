@@ -36,3 +36,45 @@ export const fetchText = (path: string): Promise<string> => {
   if (!svgCache.has(path)) svgCache.set(path, fetch(staticFile(path)).then((r) => (r.ok ? r.text() : Promise.reject(new Error(`missing ${path}`)))));
   return svgCache.get(path) as Promise<string>;
 };
+
+const pngCache = new Map<string, Promise<boolean>>();
+const probePng = (path: string): Promise<boolean> => {
+  if (!pngCache.has(path)) {
+    pngCache.set(path, new Promise<boolean>((res) => {
+      const im = new Image();
+      im.onload = () => res(true);
+      im.onerror = () => res(false);
+      im.src = staticFile(path);
+    }));
+  }
+  return pngCache.get(path)!;
+};
+
+export type AssetSrc = {kind: 'png'; url: string} | {kind: 'svg'; svg: string} | null;
+
+/** 资产装载：优先同名 .png（位图基线），缺失回退 .svg。 */
+export const useAssetSrc = (base: string | null): AssetSrc => {
+  const [src, setSrc] = useState<AssetSrc>(null);
+  useEffect(() => {
+    if (!base) return;
+    const h = delayRender(`asset ${base}`);
+    let live = true;
+    (async () => {
+      try {
+        if (await probePng(`${base}.png`)) {
+          if (live) setSrc({kind: 'png', url: `${base}.png`});
+        } else {
+          const svg = await fetchText(`${base}.svg`);
+          if (live) setSrc({kind: 'svg', svg});
+        }
+      } catch (e) {
+        continueRender(h);
+        throw e;
+      } finally {
+        continueRender(h);
+      }
+    })();
+    return () => {live = false;};
+  }, [base]);
+  return src;
+};

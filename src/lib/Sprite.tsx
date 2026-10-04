@@ -1,6 +1,6 @@
-import React, {useEffect, useRef, useState} from 'react';
-import {continueRender, delayRender, useCurrentFrame, useVideoConfig} from 'remotion';
-import {fetchText} from './load';
+import React, {useEffect, useRef} from 'react';
+import {staticFile, useCurrentFrame, useVideoConfig} from 'remotion';
+import {useAssetSrc} from './load';
 import {PlacementSchema} from '../spec';
 import {z} from 'zod';
 
@@ -9,27 +9,23 @@ type Placement = z.infer<typeof PlacementSchema>;
 const hash = (s: string) => [...s].reduce((a, c) => (a * 31 + c.charCodeAt(0)) >>> 0, 7);
 
 /**
- * SVG 角色立绘。约定动画组（可选）：
+ * 角色立绘。位图（.png）优先，缺失回退 SVG。
+ * SVG 约定动画组（可选）：
  *   #mouth-open  说话口型（台词期间 ~6fps 开合）
  *   #eye-l/#eye-r 眨眼（周期性压扁）
  *   #prop-*      道具挂件
+ * 位图无挂点：说话期间做轻微纵向脉动代替口型。
  * 呼吸浮动 + 入/出场滑移由外层 transform 负责。
  */
 export const Sprite: React.FC<{episodeId: string; p: Placement; speaking: boolean}> = ({episodeId, p, speaking}) => {
   const frame = useCurrentFrame();
   const {height: H, fps} = useVideoConfig();
-  const [svg, setSvg] = useState<string | null>(null);
   const host = useRef<HTMLDivElement>(null);
-
-  const src = `episodes/${episodeId}/assets/characters/${p.id}/${p.variant}.svg`;
-  useEffect(() => {
-    const h = delayRender(`sprite ${p.id}`);
-    fetchText(src).then(setSvg).catch((e) => {continueRender(h); throw e;}).finally(() => continueRender(h));
-  }, [src]);
+  const src = useAssetSrc(`episodes/${episodeId}/assets/characters/${p.id}/${p.variant}`);
 
   useEffect(() => {
     const root = host.current;
-    if (!root || !svg) return;
+    if (!root || src?.kind !== 'svg') return;
     const mouthOpen = root.querySelector('#mouth-open') as SVGGElement | null;
     const mouth = root.querySelector('#mouth') as SVGGElement | null;
     const open = speaking && Math.floor(frame / (fps / 6)) % 2 === 0;
@@ -41,11 +37,11 @@ export const Sprite: React.FC<{episodeId: string; p: Placement; speaking: boolea
       const g = root.querySelector(sel) as SVGGElement | null;
       if (g) {g.style.transformBox = 'fill-box'; g.style.transformOrigin = 'center'; g.style.transform = blink ? 'scaleY(0.1)' : '';}
     });
-  }, [svg, frame, speaking, p.id, fps]);
+  }, [src, frame, speaking, p.id, fps]);
 
   const bob = Math.sin((frame / fps) * 2.2 + hash(p.id)) * 4;
+  const talkPulse = src?.kind === 'png' && speaking && Math.floor(frame / (fps / 6)) % 2 === 0 ? 1.015 : 1;
   const slide = p.enter !== 'none' && frame < fps * 0.6 ? (1 - frame / (fps * 0.6)) * (p.enter === 'left' ? -1 : 1) * 0.12 : 0;
-  const slideOut = p.exit !== 'none' ? 0 : 0; // 出场由镜头切换承担，暂保留插槽
 
   return (
     <div
@@ -57,11 +53,13 @@ export const Sprite: React.FC<{episodeId: string; p: Placement; speaking: boolea
         height: H * 0.62 * p.scale,
       }}
     >
-      <div ref={host} style={{height: '100%', transform: `translateY(${bob}px)`}}>
-        {svg ? (
+      <div ref={host} style={{height: '100%', transformOrigin: '50% 100%', transform: `translateY(${bob}px) scaleY(${talkPulse})`}}>
+        {src?.kind === 'png' ? (
+          <img src={staticFile(src.url)} style={{height: '100%', width: 'auto', display: 'block'}} />
+        ) : src?.kind === 'svg' ? (
           <div
             style={{height: '100%'}}
-            dangerouslySetInnerHTML={{__html: svg.replace('<svg', '<svg style="height:100%;width:auto;display:block;overflow:visible" preserveAspectRatio="xMidYMax meet"')}}
+            dangerouslySetInnerHTML={{__html: src.svg.replace('<svg', '<svg style="height:100%;width:auto;display:block;overflow:visible" preserveAspectRatio="xMidYMax meet"')}}
           />
         ) : null}
       </div>

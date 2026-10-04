@@ -12,10 +12,12 @@ const warnings: string[] = [];
 
 const {ep, shots, manifest} = loadEp(id);
 const charsDir = join(epDir(id), 'assets', 'characters');
-const variantsOf = (c: string) => (existsSync(join(charsDir, c)) ? readdirSync(join(charsDir, c)).map((f) => f.replace(/\.svg$/, '')) : []);
+const variantsOf = (c: string) => (existsSync(join(charsDir, c)) ? readdirSync(join(charsDir, c)).map((f) => f.replace(/\.(svg|png)$/, '')) : []);
+const hasAsset = (kind: 'scenes' | 'props', name: string) => existsSync(assetPath(id, kind, `${name}.svg`)) || existsSync(assetPath(id, kind, `${name}.png`));
 
 for (const s of shots) {
-  if (s.scene && !existsSync(assetPath(id, 'scenes', `${s.scene}.svg`))) problems.push(`${s.id}: 缺场景 ${s.scene}.svg`);
+  if (s.scene && !hasAsset('scenes', s.scene)) problems.push(`${s.id}: 缺场景 ${s.scene}（.png/.svg 均无）`);
+  for (const p of s.props) if (!hasAsset('props', p.file)) problems.push(`${s.id}: 缺道具 ${p.file}（.png/.svg 均无）`);
   for (const c of s.characters) {
     const variants = variantsOf(c.id);
     if (!variants.length) {problems.push(`${s.id}: 缺角色目录 ${c.id}`); continue;}
