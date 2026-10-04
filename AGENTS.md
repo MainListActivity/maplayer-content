@@ -5,47 +5,60 @@ Remotion 播放器（`src/lib/`）按分镜表自动合成成片，不要改渲�
 
 ## 岗位轨（discipline）
 
-本项目岗位体系与软件线不同。schema 字段落地前，任务标题统一挂轨标签
-（如「[角色] 凛 表情变体量产」），员工按标签认领对口任务：
+本项目岗位体系与软件线不同：产线分工用**项目岗位轨**表达，不进全局岗位枚举。
+词表与每轨说明写在项目记录 `project.disciplines`；任务按 `discipline=<轨名>`
+挂轨（下表「轨名」列是任务取值，必须与词表一致），编制声明 `tracks` 后只接
+对口轨任务，跨轨领取会被显式拒绝；任务无轨则任何对口岗位都能接。
 
-| 轨 | 职责 | 验收人 |
-|---|---|---|
-| `script` 编剧 | 剧本、分场、角色小传、台词 | GM→owner（原型段）|
-| `character` 角色设计 | 角色 SVG、变体、三视图 | owner（demo）→GM（量产）|
-| `prop` 服化道 | 道具、挂件、服装差异 | GM |
-| `scene` 场景美术 | 背景、氛围图 | owner（基调 demo）→GM |
-| `storyboard` 分镜 | shots.json、镜头设计 | GM |
-| `voice` 配音 | 声线表、台词音轨 | GM |
-| `composite` 合成 | 渲染、成片 | QA |
-| `review` 审片 | 抽帧终验 | QA→owner（里程碑）|
+| 轨名 | slug | 职责 | 验收人 |
+|---|---|---|---|
+| `编剧` | script | 剧本、分场、角色小传、台词 | GM→owner（原型段）|
+| `角色设计` | character | 角色 SVG、变体、三视图 | owner（demo）→GM（量产）|
+| `服化道` | prop | 道具、挂件、服装差异 | GM |
+| `场景` | scene | 背景、氛围图 | owner（基调 demo）→GM |
+| `分镜` | storyboard | shots.json、镜头设计 | GM |
+| `配音` | voice | 声线表、台词音轨 | GM |
+| `合成` | composite | 渲染、成片 | QA |
+| `审片` | review | 抽帧终验 | QA→owner（里程碑）|
 
-过渡期所有轨共享 ai-content 编制，标签只做认领引导；岗位轨字段落地后
-（工程目标 435893bef77a60fa）改为编制级定向派工。
+承接岗位：P 原型段轨（编剧/角色设计/服化道/场景/分镜 的原型任务）由
+`concept-design` 执行、老板 demo 验收；M 量产段任务（全部八轨）由
+`asset-production` 执行、GM/QA 验收。
+
+经理拆产线任务示例（每任务标轨 + 验收人 + 依赖）：
+
+```
+create_task { executorRole:"concept-design", discipline:"角色设计",
+              reviewerRole:"owner",  title:"[P2] 凛 角色 demo", ... }
+create_task { executorRole:"asset-production", discipline:"角色设计",
+              reviewerRole:"gm",     title:"[M2] 凛 表情变体量产",
+              dependencies:["<P2 任务 id>"], ... }
+```
 
 ## 流水线（两段：原型 → 量产）
 
-**原型段（概念设计，验收人必须是老板）**——任何新角色、新视觉风格、新场景基调，
+**原型段（`executorRole=concept-design`，验收人必须是老板）**——任何新角色、新视觉风格、新场景基调，
 先做 demo 收进「原型验收任务」（reviewerRole=owner），交付证据必须是老板能直接
 打开的产物（静帧 PNG 或短样片路径）。老板 approve 前，所有依赖它的量产任务不得解锁。
 
-| 原型阶段 | 产物 | 落点 |
-|---|---|---|
-| P1 概念剧本 | 分场大纲 + 角色小传 | `episodes/<ep>/script.md` |
-| P2 角色 demo | 新角色 `default` SVG + 一张入镜静帧 | `assets/characters/<id>/default.svg` + `storyboard/frames/` |
-| P3 风格 demo | 场景基调图 + 道具风格样张 | `assets/scenes/<id>.svg` + `assets/props/*.svg` |
+| 原型阶段 | 轨 | 产物 | 落点 |
+|---|---|---|---|
+| P1 概念剧本 | `编剧` | 分场大纲 + 角色小传 | `episodes/<ep>/script.md` |
+| P2 角色 demo | `角色设计` | 新角色 `default` SVG + 一张入镜静帧 | `assets/characters/<id>/default.svg` + `storyboard/frames/` |
+| P3 风格 demo | `场景`、`服化道`（各拆一条任务，单任务只能挂一轨） | 场景基调图 + 道具风格样张 | `assets/scenes/<id>.svg` + `assets/props/*.svg` |
 
-**量产段（铺量制作，GM/QA 验收）**——原型过关后由经理解锁：
+**量产段（`executorRole=asset-production`，GM/QA 验收）**——原型过关后由经理解锁：
 
-| 量产阶段 | 产物 | 落点 |
-|---|---|---|
-| M1 剧本定稿 | 完整分场剧本 | `episodes/<ep>/script.md` |
-| M2 角色量产 | 表情/服装变体 SVG | `assets/characters/<id>/<variant>.svg` |
-| M3 服化道量产 | 全量道具、挂件 | `assets/props/*.svg` |
-| M4 场景量产 | 全量背景 | `assets/scenes/*.svg` |
-| M5 分镜 | 镜头表 | `shots.json` |
-| M6 配音 | 声线 + 音轨 | `episode.json` voices + `pnpm audio` |
-| M7 成片 | mp4 | `pnpm render` → `renders/` |
-| M8 QA 终验 | 抽帧检查报告 | `pnpm frames renders/<片>.mp4` → `qa/frames/` |
+| 量产阶段 | 轨 | 产物 | 落点 |
+|---|---|---|---|
+| M1 剧本定稿 | `编剧` | 完整分场剧本 | `episodes/<ep>/script.md` |
+| M2 角色量产 | `角色设计` | 表情/服装变体 SVG | `assets/characters/<id>/<variant>.svg` |
+| M3 服化道量产 | `服化道` | 全量道具、挂件 | `assets/props/*.svg` |
+| M4 场景量产 | `场景` | 全量背景 | `assets/scenes/*.svg` |
+| M5 分镜 | `分镜` | 镜头表 | `shots.json` |
+| M6 配音 | `配音` | 声线 + 音轨 | `episode.json` voices + `pnpm audio` |
+| M7 成片 | `合成` | mp4 | `pnpm render` → `renders/` |
+| M8 QA 终验 | `审片` | 抽帧检查报告 | `pnpm frames renders/<片>.mp4` → `qa/frames/` |
 
 依赖规则：M2 依赖对应角色的 P2 验收任务；M3/M4 依赖 P3；M5 依赖全部原型关；
 M6 依赖 M5；M7 依赖 M6。新增角色永远先走 P2 demo，禁止直接进量产。
