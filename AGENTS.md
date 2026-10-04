@@ -31,6 +31,22 @@ Remotion 播放器（`src/lib/`）按分镜表自动合成成片，不要改渲�
 依赖规则：M2 依赖对应角色的 P2 验收任务；M3/M4 依赖 P3；M5 依赖全部原型关；
 M6 依赖 M5；M7 依赖 M6。新增角色永远先走 P2 demo，禁止直接进量产。
 
+## 原画质量规范（开工前必读）
+
+唯一参照系是 `public/assets/style-bible/`——老板选定的风格定稿。
+**没有基线不许开工**：先走「风格方向」任务，员工出 2~3 个候选方向
+（每方向一张角色+一张场景 demo 帧），老板选定后落定基线。
+现有 ep01 资产全部是基线未定前的占位货，基线落地后要整批按基线重绘。
+
+产出纪律：
+1. 读 `docs/style/STYLE.md`（线宽/墨色/三阶上色/比例/透视硬规范）
+2. 角色一律从 `public/assets/templates/character-front.svg` 骨架起稿，
+   交付前删 `#guide` 参考线层
+3. 共享滤镜/渐变从 `public/assets/shared/defs.svg` 复制 defs 块
+4. 用色限在 `public/episodes/<ep>/palette.json` 色板容差内
+5. `pnpm validate` 的结构项（viewBox/位图/动画组/参考线）永远硬卡口；
+   风格项（复杂度/色板/线宽/滤镜）在基线落地前为警告、落地后升级失败
+
 ## 数据契约
 
 `episode.json`：集号、标题、画幅、声线表（角色 id → edge-tts 声线，如

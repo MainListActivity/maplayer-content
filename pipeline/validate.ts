@@ -4,6 +4,7 @@ import {readdirSync} from 'node:fs';
 import {join} from 'node:path';
 import {assetPath, epDir, loadEp, timelineSummary} from './common';
 import {lineKey} from '../src/spec';
+import {lintEpisodeArt} from './art-lint';
 
 const id = process.argv[2] ?? 'ep01';
 const problems: string[] = [];
@@ -31,6 +32,11 @@ for (const s of shots) {
       warnings.push(`${s.id}: 说话人 ${d.speaker} 不在画面中且未登记声线`);
   });
 }
+
+const art = lintEpisodeArt(epDir(id));
+problems.push(...art.problems);
+warnings.push(...art.warnings);
+if (!art.strict) warnings.push('风格基线 public/assets/style-bible/ 不存在：风格类检查处于警告态，老板选定后升级为失败');
 
 if (!manifest) warnings.push('未生成音频清单：pnpm audio ' + id);
 else {

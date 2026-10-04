@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none">
+  <defs>
+    <!-- 手绘线抖：所有描边组必套（角色 rq / 场景 rq-bg / 道具 rq-sm） -->
+    <filter id="rq"><feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="2" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="4"/></filter>
+    <filter id="rq-sm"><feTurbulence type="fractalNoise" baseFrequency="0.03" numOctaves="2" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2.5"/></filter>
+    <filter id="rq-bg"><feTurbulence type="fractalNoise" baseFrequency="0.012" numOctaves="2" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="5"/></filter>
+    <!-- 发光（全息/屏幕/能量） -->
+    <filter id="glow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="6" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <!-- 纸感颗粒（场景/整帧叠加，opacity 0.04~0.08） -->
+    <filter id="paper"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2"/><feColorMatrix type="saturate" values="0"/></filter>
+    <!-- 肤色/通用材质渐变（备用，优先平涂） -->
+    <radialGradient id="holo-body" cx="0.5" cy="0.35" r="0.8">
+      <stop offset="0" stop-color="#bfeef7" stop-opacity="0.95"/><stop offset="1" stop-color="#4aa8c0" stop-opacity="0.75"/>
+    </radialGradient>
+  </defs>
+</svg>
