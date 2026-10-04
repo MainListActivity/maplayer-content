@@ -1,0 +1,301 @@
+{
+  "shots": [
+    {
+      "id": "sh01-establish",
+      "scene": "bridge",
+      "holdSec": 4.5,
+      "caption": "近地轨道站「聆汐」· 第 3041 天 · 夜班",
+      "camera": {
+        "from": {
+          "x": 0.5,
+          "y": 0.55,
+          "zoom": 1.0
+        },
+        "to": {
+          "x": 0.5,
+          "y": 0.5,
+          "zoom": 1.22
+        }
+      },
+      "transitionIn": "fade",
+      "dialogue": [
+        {
+          "speaker": null,
+          "text": "第三千零四十一天。聆汐仍在轨道上，听。"
+        }
+      ]
+    },
+    {
+      "id": "sh02-log",
+      "scene": "bridge",
+      "camera": {
+        "from": {
+          "x": 0.36,
+          "y": 0.6,
+          "zoom": 1.45
+        },
+        "to": {
+          "x": 0.42,
+          "y": 0.58,
+          "zoom": 1.55
+        }
+      },
+      "characters": [
+        {
+          "id": "rin",
+          "x": 0.32,
+          "y": 0.97,
+          "scale": 0.8,
+          "enter": "left"
+        }
+      ],
+      "dialogue": [
+        {
+          "speaker": "rin",
+          "text": "聆汐值班日志。所有频段，依然安静。"
+        }
+      ]
+    },
+    {
+      "id": "sh03-ask",
+      "scene": "bridge",
+      "camera": {
+        "from": {
+          "x": 0.5,
+          "y": 0.52,
+          "zoom": 1.9
+        }
+      },
+      "characters": [
+        {
+          "id": "rin",
+          "variant": "worried",
+          "x": 0.5,
+          "y": 0.98,
+          "scale": 1.15
+        }
+      ],
+      "dialogue": [
+        {
+          "speaker": "rin",
+          "text": "凯恩……你说，外面是不是已经没人记得我们了？"
+        }
+      ]
+    },
+    {
+      "id": "sh04-kai",
+      "scene": "bridge",
+      "camera": {
+        "from": {
+          "x": 0.62,
+          "y": 0.5,
+          "zoom": 1.6
+        },
+        "to": {
+          "x": 0.58,
+          "y": 0.5,
+          "zoom": 1.75
+        }
+      },
+      "characters": [
+        {
+          "id": "kai",
+          "x": 0.66,
+          "y": 0.96,
+          "scale": 0.9,
+          "flip": true,
+          "enter": "right"
+        },
+        {
+          "id": "rin",
+          "x": 0.28,
+          "y": 0.97,
+          "scale": 0.78,
+          "flip": true
+        }
+      ],
+      "dialogue": [
+        {
+          "speaker": "kai",
+          "text": "记得与否不影响轨道力学。但你今晚的语频，低了百分之十二。"
+        },
+        {
+          "speaker": "rin",
+          "text": "……谢谢关心。"
+        }
+      ]
+    },
+    {
+      "id": "sh05-pip",
+      "scene": "bridge",
+      "holdSec": 3,
+      "camera": {
+        "from": {
+          "x": 0.5,
+          "y": 0.5,
+          "zoom": 1.3
+        },
+        "to": {
+          "x": 0.5,
+          "y": 0.47,
+          "zoom": 1.5
+        }
+      },
+      "characters": [
+        {
+          "id": "rin",
+          "x": 0.28,
+          "y": 0.97,
+          "scale": 0.8
+        }
+      ],
+      "props": [
+        {
+          "file": "signal-pip",
+          "x": 0.68,
+          "y": 0.38,
+          "scale": 1.1,
+          "anim": "blink-fast"
+        }
+      ],
+      "dialogue": [
+        {
+          "speaker": "kai",
+          "text": "等一下。二百三十七频段——有东西回应了呼叫协议。"
+        }
+      ]
+    },
+    {
+      "id": "sh06-alarm",
+      "scene": "corridor",
+      "holdSec": 3,
+      "camera": {
+        "from": {
+          "x": 0.5,
+          "y": 0.5,
+          "zoom": 1.1
+        },
+        "to": {
+          "x": 0.5,
+          "y": 0.5,
+          "zoom": 1.28
+        },
+        "ease": "linear"
+      },
+      "characters": [
+        {
+          "id": "rin",
+          "variant": "worried",
+          "x": 0.5,
+          "y": 0.98,
+          "scale": 1.05
+        }
+      ],
+      "transitionIn": "fade-black",
+      "dialogue": [
+        {
+          "speaker": "rin",
+          "text": "那个频段属于黎明号。它七年前就失联了。"
+        }
+      ]
+    },
+    {
+      "id": "sh07-verify",
+      "scene": "bridge",
+      "camera": {
+        "from": {
+          "x": 0.6,
+          "y": 0.5,
+          "zoom": 1.7
+        }
+      },
+      "characters": [
+        {
+          "id": "kai",
+          "x": 0.6,
+          "y": 0.96,
+          "scale": 1.05,
+          "flip": true
+        }
+      ],
+      "props": [
+        {
+          "file": "signal-pip",
+          "x": 0.28,
+          "y": 0.35,
+          "scale": 1.0,
+          "anim": "blink"
+        }
+      ],
+      "dialogue": [
+        {
+          "speaker": "kai",
+          "text": "信号带着身份校验。校验……通过了。它说——"
+        }
+      ]
+    },
+    {
+      "id": "sh08-dawn",
+      "scene": "dock",
+      "holdSec": 4,
+      "camera": {
+        "from": {
+          "x": 0.55,
+          "y": 0.48,
+          "zoom": 1.15
+        },
+        "to": {
+          "x": 0.62,
+          "y": 0.45,
+          "zoom": 1.35
+        }
+      },
+      "transitionIn": "fade-black",
+      "dialogue": [
+        {
+          "speaker": null,
+          "text": "「黎明号，请求返港。」"
+        }
+      ]
+    },
+    {
+      "id": "sh09-order",
+      "scene": "bridge",
+      "camera": {
+        "from": {
+          "x": 0.5,
+          "y": 0.5,
+          "zoom": 2.0
+        },
+        "to": {
+          "x": 0.5,
+          "y": 0.5,
+          "zoom": 2.15
+        }
+      },
+      "characters": [
+        {
+          "id": "rin",
+          "x": 0.5,
+          "y": 0.98,
+          "scale": 1.2
+        }
+      ],
+      "transitionIn": "cut",
+      "dialogue": [
+        {
+          "speaker": "rin",
+          "text": "打开三号泊位。"
+        }
+      ]
+    },
+    {
+      "id": "sh10-title",
+      "scene": null,
+      "holdSec": 3.5,
+      "caption": "第一集 · 静默信标",
+      "transitionIn": "fade-black",
+      "dialogue": []
+    }
+  ]
+}

@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080">
+  <defs>
+    <radialGradient id="dk" cx="0.5" cy="0.45" r="0.9">
+      <stop offset="0" stop-color="#122036"/>
+      <stop offset="1" stop-color="#04060c"/>
+    </radialGradient>
+    <filter id="rq5"><feTurbulence type="fractalNoise" baseFrequency="0.013" numOctaves="2" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="4"/></filter>
+  </defs>
+  <rect width="1920" height="1080" fill="url(#dk)"/>
+  <g fill="#e8f4ff" opacity="0.75">
+    <circle cx="180" cy="140" r="2"/><circle cx="480" cy="90" r="1.6"/><circle cx="820" cy="180" r="2.2"/><circle cx="1200" cy="100" r="1.8"/><circle cx="1500" cy="220" r="2.4"/><circle cx="1740" cy="120" r="1.7"/><circle cx="240" cy="420" r="1.8"/><circle cx="1650" cy="460" r="2"/>
+  </g>
+  <g filter="url(#rq5)" stroke="#31415c" stroke-width="7" stroke-linejoin="round">
+    <path d="M240 620 L240 380 L420 320 L420 620Z" fill="#0d1420"/>
+    <path d="M420 320 L560 380 L560 620 L420 620Z" fill="#0a0f1a"/>
+    <path d="M290 420 L370 420 M290 500 L370 500" stroke="#31415c"/>
+    <circle cx="340" cy="380" r="10" fill="#3aa6a0" stroke="none"/>
+    <path d="M1330 300 L1700 380 L1700 640 L1330 560Z" fill="#101623"/>
+    <path d="M1330 300 L1260 340 L1260 520 L1330 560Z" fill="#0b0f18"/>
+    <path d="M1380 340 L1640 400 M1380 520 L1640 580" stroke="#31415c"/>
+    <circle cx="1680" cy="430" r="9" fill="#e04a4a" stroke="none"/>
+    <circle cx="1680" cy="500" r="9" fill="#e04a4a" stroke="none" opacity="0.6"/>
+    <path d="M560 470 L1260 470 L1260 500 L560 500Z" fill="#131b2b" opacity="0.9"/>
+    <g fill="#ffd27a" stroke="none" opacity="0.9">
+      <circle cx="640" cy="485" r="4"/><circle cx="760" cy="485" r="4"/><circle cx="880" cy="485" r="4"/><circle cx="1000" cy="485" r="4"/><circle cx="1120" cy="485" r="4"/><circle cx="1210" cy="485" r="4"/>
+    </g>
+  </g>
+</svg>

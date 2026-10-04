@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080">
+  <defs>
+    <linearGradient id="corr" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2a1420"/>
+      <stop offset="0.55" stop-color="#180d16"/>
+      <stop offset="1" stop-color="#0a070c"/>
+    </linearGradient>
+    <filter id="rq4"><feTurbulence type="fractalNoise" baseFrequency="0.015" numOctaves="2" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="4"/></filter>
+  </defs>
+  <rect width="1920" height="1080" fill="url(#corr)"/>
+  <g filter="url(#rq4)">
+    <path d="M0 180 L700 420 L700 660 L0 1080Z" fill="#1d1020" stroke="#33202f" stroke-width="6"/>
+    <path d="M1920 180 L1220 420 L1220 660 L1920 1080Z" fill="#1d1020" stroke="#33202f" stroke-width="6"/>
+    <path d="M700 420 L1220 420 L1220 660 L700 660Z" fill="#120a14" stroke="#33202f" stroke-width="6"/>
+    <rect x="880" y="450" width="160" height="180" rx="10" fill="#0c0710" stroke="#4a2c3a" stroke-width="5"/>
+    <circle cx="960" cy="540" r="14" fill="#e04a4a"/>
+    <g fill="#e04a4a" opacity="0.85">
+      <path d="M120 320 L300 380 L300 400 L120 348Z"/>
+      <path d="M1800 320 L1620 380 L1620 400 L1800 348Z"/>
+      <path d="M540 240 L560 420 L540 420 L512 252Z"/>
+      <path d="M1380 240 L1360 420 L1380 420 L1408 252Z"/>
+    </g>
+    <g stroke="#3a2434" stroke-width="5">
+      <path d="M0 540 L700 560"/><path d="M1920 540 L1220 560"/>
+      <path d="M0 820 L700 620"/><path d="M1920 820 L1220 620"/>
+    </g>
+    <g fill="#ffd27a" opacity="0.5">
+      <circle cx="340" cy="470" r="5"/><circle cx="1560" cy="470" r="5"/>
+    </g>
+  </g>
+</svg>
