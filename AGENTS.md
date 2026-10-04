@@ -26,6 +26,7 @@ Remotion 播放器（`src/lib/`）按分镜表自动合成成片，不要改渲�
 | M5 分镜 | 镜头表 | `shots.json` |
 | M6 配音 | 声线 + 音轨 | `episode.json` voices + `pnpm audio` |
 | M7 成片 | mp4 | `pnpm render` → `renders/` |
+| M8 QA 终验 | 抽帧检查报告 | `pnpm frames renders/<片>.mp4` → `qa/frames/` |
 
 依赖规则：M2 依赖对应角色的 P2 验收任务；M3/M4 依赖 P3；M5 依赖全部原型关；
 M6 依赖 M5；M7 依赖 M6。新增角色永远先走 P2 demo，禁止直接进量产。
@@ -62,11 +63,21 @@ pnpm audio ep01     # 生成全部台词音轨 → audio/manifest.json（改台�
 pnpm storyboard ep01# 每镜头静帧 + contact sheet → public/.../storyboard/
 pnpm studio         # Remotion Studio 实时预览
 pnpm render ep01    # 成片 → renders/
+pnpm frames renders/ep01-smoke.mp4  # QA 抽帧：抽样帧 + 拼贴总览 → qa/frames/
 pnpm typecheck
 ```
 
 依赖：`python3 -m edge_tts`（pip install edge-tts）用于配音；缺它自动退到 `say`。
 FFmpeg 不用装——Remotion 自带合成器。
+
+## QA 终验标准（验收人必查）
+
+1. `pnpm validate <ep>` 全绿；
+2. `pnpm render <ep>` 出片成功；
+3. `pnpm frames renders/<片>.mp4` 后逐张检查抽样帧与 sheet.jpg：
+   黑帧/闪帧、字幕错位截断、口型对不上说话人、机位露黑边、资产穿帮；
+4. 音频：抽查 2~3 段台词音画同步、说话人声线符合声线表；
+5. 时长符合目标（ep01 正式版 ~5 分钟）。证据附 sheet.jpg 路径与问题清单。
 
 ## 红线
 

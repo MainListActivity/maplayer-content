@@ -6,3 +6,4 @@ dist/
 public/episodes/*/audio/
 renders/
 public/episodes/*/storyboard/
+qa/
