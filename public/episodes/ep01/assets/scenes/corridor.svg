@@ -5,27 +5,57 @@
       <stop offset="0.55" stop-color="#180d16"/>
       <stop offset="1" stop-color="#0a070c"/>
     </linearGradient>
+    <radialGradient id="alertGlow" cx="0.5" cy="0.45" r="0.55">
+      <stop offset="0" stop-color="#5a1a28" stop-opacity="0.45"/>
+      <stop offset="1" stop-color="#180d16" stop-opacity="0"/>
+    </radialGradient>
     <filter id="rq4"><feTurbulence type="fractalNoise" baseFrequency="0.015" numOctaves="2" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="4"/></filter>
   </defs>
   <rect width="1920" height="1080" fill="url(#corr)"/>
+  <ellipse cx="960" cy="540" rx="520" ry="360" fill="url(#alertGlow)"/>
   <g filter="url(#rq4)">
+    <!-- 透视墙体 -->
     <path d="M0 180 L700 420 L700 660 L0 1080Z" fill="#1d1020" stroke="#33202f" stroke-width="6"/>
     <path d="M1920 180 L1220 420 L1220 660 L1920 1080Z" fill="#1d1020" stroke="#33202f" stroke-width="6"/>
     <path d="M700 420 L1220 420 L1220 660 L700 660Z" fill="#120a14" stroke="#33202f" stroke-width="6"/>
+    <!-- 远端舱门 -->
     <rect x="880" y="450" width="160" height="180" rx="10" fill="#0c0710" stroke="#4a2c3a" stroke-width="5"/>
     <circle cx="960" cy="540" r="14" fill="#e04a4a"/>
+    <rect x="930" y="470" width="60" height="8" rx="2" fill="#3a2030"/>
+    <!-- 红色警戒灯带 -->
     <g fill="#e04a4a" opacity="0.85">
       <path d="M120 320 L300 380 L300 400 L120 348Z"/>
       <path d="M1800 320 L1620 380 L1620 400 L1800 348Z"/>
       <path d="M540 240 L560 420 L540 420 L512 252Z"/>
       <path d="M1380 240 L1360 420 L1380 420 L1408 252Z"/>
+      <path d="M80 520 L220 545 L220 560 L80 540Z" opacity="0.7"/>
+      <path d="M1840 520 L1700 545 L1700 560 L1840 540Z" opacity="0.7"/>
     </g>
+    <!-- 天花板管道 -->
+    <g stroke="#3a2434" stroke-width="8" fill="none" opacity="0.7">
+      <path d="M0 220 Q480 300 700 430"/>
+      <path d="M1920 220 Q1440 300 1220 430"/>
+    </g>
+    <g fill="#4a2c3a" opacity="0.5">
+      <circle cx="200" cy="250" r="10"/><circle cx="420" cy="310" r="8"/>
+      <circle cx="1720" cy="250" r="10"/><circle cx="1500" cy="310" r="8"/>
+    </g>
+    <!-- 地板接缝 -->
     <g stroke="#3a2434" stroke-width="5">
       <path d="M0 540 L700 560"/><path d="M1920 540 L1220 560"/>
       <path d="M0 820 L700 620"/><path d="M1920 820 L1220 620"/>
+      <path d="M700 640 L1220 640"/>
+    </g>
+    <!-- 墙面检修门暗示 -->
+    <g stroke="#4a2c3a" stroke-width="4" fill="#160c18" opacity="0.8">
+      <rect x="80" y="600" width="90" height="140" rx="4"/>
+      <rect x="1750" y="600" width="90" height="140" rx="4"/>
     </g>
     <g fill="#ffd27a" opacity="0.5">
       <circle cx="340" cy="470" r="5"/><circle cx="1560" cy="470" r="5"/>
+      <circle cx="620" cy="500" r="3.5"/><circle cx="1300" cy="500" r="3.5"/>
     </g>
+    <!-- 地面站立区略亮，给角色脚底锚点留空间 -->
+    <path d="M200 900 Q960 820 1720 900 L1720 1080 L200 1080Z" fill="#0e080f" opacity="0.55"/>
   </g>
 </svg>
