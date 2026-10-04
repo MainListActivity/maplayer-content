@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 520">
+  <!-- 方向A「细线冷调·二阶平涂」：线宽下限 轮廓4/服装3/五官2.5；rq scale 3；无高光 -->
+  <defs>
+    <filter id="rq"><feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="2" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="3"/></filter>
+  </defs>
+  <rect width="240" height="520" fill="#10151f"/>
+  <ellipse cx="127" cy="505" rx="72" ry="10" fill="#0a1626"/>
+  <g filter="url(#rq)" stroke="#1d1826" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+    <!-- 腿 + 靴 -->
+    <path d="M96 380 L92 500 L114 500 L118 380Z" fill="#2b3245"/>
+    <path d="M146 380 L142 500 L164 500 L168 380Z" fill="#2b3245"/>
+    <path d="M96 440 L118 440 L116 452 L94 452Z" fill="#232d42" stroke-width="3"/>
+    <path d="M146 440 L168 440 L170 452 L148 452Z" fill="#232d42" stroke-width="3"/>
+    <path d="M88 496 L116 496 L114 510 L84 510Z" fill="#1d1826"/>
+    <path d="M140 496 L168 496 L172 510 L142 510Z" fill="#1d1826"/>
+    <!-- 躯干工装 -->
+    <path d="M80 212 Q68 300 82 392 L172 392 Q186 300 174 212 Q128 190 80 212Z" fill="#2e6b6f"/>
+    <path d="M150 216 Q166 262 160 380 L172 392 Q186 300 174 212Z" fill="#26545a" stroke="none"/>
+    <path d="M127 226 L127 388" stroke-width="3" fill="none"/>
+    <path d="M90 296 L112 296" stroke-width="3" fill="none"/>
+    <path d="M142 296 L164 296" stroke-width="3" fill="none"/>
+    <path d="M88 330 L108 330" stroke-width="3" fill="none"/>
+    <rect x="96" y="246" width="16" height="22" rx="3" fill="#26545a" stroke-width="3"/>
+    <!-- 袖与袖口 -->
+    <path d="M80 216 Q60 252 66 306 L86 304 L92 244Z" fill="#2e6b6f"/>
+    <path d="M174 216 Q194 252 188 306 L168 304 L162 244Z" fill="#2e6b6f"/>
+    <path d="M66 302 L86 300 L88 312 L68 314Z" fill="#d9d4c8" stroke-width="3"/>
+    <path d="M168 300 L188 302 L186 314 L166 312Z" fill="#d9d4c8" stroke-width="3"/>
+    <!-- 领口与领带 -->
+    <path d="M106 198 L127 226 L148 198 L140 240 L114 240Z" fill="#d9d4c8"/>
+    <rect x="118" y="240" width="18" height="60" rx="4" fill="#d9d4c8" stroke-width="3"/>
+    <!-- 颈 -->
+    <path d="M118 192 L136 192 L134 210 L120 210Z" fill="#e0bfa8" stroke-width="3"/>
+    <!-- 头脸 -->
+    <circle cx="127" cy="152" r="46" fill="#f0d9c8"/>
+    <path d="M127 196 Q145 192 152 178 Q158 190 146 198 Q134 202 127 196Z" fill="#e0bfa8" stroke="none"/>
+    <!-- 发 -->
+    <path d="M81 150 Q73 92 127 86 Q181 92 173 150 L169 118 Q152 98 127 98 Q102 98 87 120Z" fill="#26303e"/>
+    <path d="M81 150 Q79 196 94 216 L98 158Z" fill="#26303e"/>
+    <path d="M173 150 Q175 196 160 216 L156 158Z" fill="#26303e"/>
+    <path d="M92 122 Q108 108 127 106" stroke-width="2.5" fill="none"/>
+    <path d="M162 122 Q146 108 130 106" stroke-width="2.5" fill="none"/>
+    <path d="M96 118 Q127 104 158 118 L154 130 Q127 118 100 130Z" fill="#3aa6a0" stroke-width="3"/>
+  </g>
+  <g id="eyes" filter="url(#rq)">
+    <ellipse cx="110" cy="152" rx="6.5" ry="8.5" fill="#1d1826"/>
+    <ellipse cx="144" cy="152" rx="6.5" ry="8.5" fill="#1d1826"/>
+    <circle cx="112" cy="149" r="2" fill="#f5f2ec"/>
+    <circle cx="146" cy="149" r="2" fill="#f5f2ec"/>
+  </g>
+  <g filter="url(#rq)" stroke="#1d1826" stroke-width="2.5" fill="none" stroke-linecap="round">
+    <path d="M100 140 Q110 136 120 140"/>
+    <path d="M134 140 Q144 136 154 140"/>
+    <path d="M126 158 L124 166 Q127 168 130 166"/>
+  </g>
+  <g id="mouth" filter="url(#rq)">
+    <path d="M118 180 q9 6 18 0" stroke="#1d1826" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+  </g>
+  <ellipse id="mouth-open" cx="127" cy="182" rx="7" ry="9" fill="#4a2c3a" style="display:none"/>
+  <g filter="url(#rq)">
+    <path d="M84 148 Q80 92 127 88" stroke="#ffd27a" stroke-width="4" fill="none" stroke-linecap="round"/>
+    <circle cx="84" cy="154" r="10" fill="#ffd27a" stroke="#1d1826" stroke-width="3"/>
+    <path d="M84 164 L96 186" stroke="#ffd27a" stroke-width="3" fill="none"/>
+  </g>
+</svg>
