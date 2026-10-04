@@ -23,6 +23,30 @@ const paletteFor = (epDir: string): string[] => {
 
 const ALWAYS_HARD = /viewBox|<image|id="guide"|#eyes|#mouth/;
 
+/** 读 PNG IHDR：尺寸 + 色型（4/6 = 带 alpha）。 */
+const pngHeader = (file: string): {w: number; h: number; alpha: boolean} | null => {
+  const buf = readFileSync(file);
+  if (buf.length < 26 || buf.readUInt32BE(0) !== 0x89504e47) return null;
+  return {w: buf.readUInt32BE(16), h: buf.readUInt32BE(20), alpha: [4, 6].includes(buf[25])};
+};
+
+/** 位图资产规范（style-bible 原图路线）：场景满幅 ≥1920×1080；角色/道具需 alpha。 */
+export const lintPng = (file: string, kind: 'character' | 'scene' | 'prop'): {problems: string[]; warnings: string[]} => {
+  const problems: string[] = [];
+  const warnings: string[] = [];
+  const rel = file.split('assets/')[1] ?? file;
+  const hdr = pngHeader(file);
+  if (!hdr) {problems.push(`${rel}: 不是合法 PNG`); return {problems, warnings};}
+  if (kind === 'scene') {
+    if (hdr.w < 1920 || hdr.h < 1080) problems.push(`${rel}: 场景分辨率不足 ${hdr.w}×${hdr.h}（下限 1920×1080）`);
+    if (Math.abs(hdr.w / hdr.h - 16 / 9) > 0.02) warnings.push(`${rel}: 画幅比例 ${hdr.w}×${hdr.h} 非 16:9`);
+  } else {
+    if (!hdr.alpha) problems.push(`${rel}: 角色/道具位图缺 alpha 通道`);
+    if (Math.min(hdr.w, hdr.h) < 32) warnings.push(`${rel}: 位图尺寸过小 ${hdr.w}×${hdr.h}`);
+  }
+  return {problems, warnings};
+};
+
 export const lintSvg = (file: string, kind: 'character' | 'scene' | 'prop', palette: string[], strict: boolean): {problems: string[]; warnings: string[]} => {
   const problems: string[] = [];
   const warnings: string[] = [];
@@ -79,6 +103,10 @@ export const lintEpisodeArt = (epDir: string): {problems: string[]; warnings: st
       if (e.isDirectory()) walk(p, kind);
       else if (e.name.endsWith('.svg')) {
         const r = lintSvg(p, kind, palette, strict);
+        problems.push(...r.problems);
+        warnings.push(...r.warnings);
+      } else if (e.name.endsWith('.png')) {
+        const r = lintPng(p, kind);
         problems.push(...r.problems);
         warnings.push(...r.warnings);
       }

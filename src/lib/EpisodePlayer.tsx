@@ -1,6 +1,6 @@
 import React from 'react';
 import {Sequence, useVideoConfig} from 'remotion';
-import {Shot} from './Shot';
+import {Shot, ShotOverlay} from './Shot';
 import {useBundle} from './load';
 
 /** 颗粒层：手绘质感的轻微噪点。 */
@@ -21,7 +21,7 @@ export const EpisodePlayer: React.FC<{episodeId: string; bundle?: import('./load
     <div style={{position: 'absolute', inset: 0, background: '#000'}}>
       {bundle.timeline.map((tl) => (
         <Sequence key={tl.shot.id} from={tl.startFrame} durationInFrames={tl.durationFrames}>
-          <Shot episodeId={episodeId} tl={tl} manifest={bundle.manifest} names={bundle.ep.names} />
+          <Shot episodeId={episodeId} tl={tl} manifest={bundle.manifest} />
         </Sequence>
       ))}
       {bundle.ep.letterbox ? (
@@ -30,6 +30,11 @@ export const EpisodePlayer: React.FC<{episodeId: string; bundle?: import('./load
           <div style={{position: 'absolute', bottom: 0, width: '100%', height: bar, background: '#000'}} />
         </>
       ) : null}
+      {bundle.timeline.map((tl) => (
+        <Sequence key={`${tl.shot.id}-ov`} from={tl.startFrame} durationInFrames={tl.durationFrames}>
+          <ShotOverlay tl={tl} names={bundle.ep.names} bar={bar} />
+        </Sequence>
+      ))}
       {bundle.ep.grain ? <Grain /> : null}
     </div>
   );
