@@ -21,6 +21,6 @@ export const ambientMotion = (ambient: Ambient[], t: number, width: number, heig
     left: -nx * width, top: -ny * height,
     width: (2 * nx + 1) * width, height: (2 * ny + 1) * height,
     transformOrigin: `${nx * width + px}px ${ny * height + py}px`,
-    transform: `translate(${dx}px, ${dy}px) rotate(${((rotate?.degPerSec ?? 0) * t) % 360}deg)`,
+    transform: `rotate(${((rotate?.degPerSec ?? 0) * t) % 360}deg) translate(${dx}px, ${dy}px)`,
   };
 };

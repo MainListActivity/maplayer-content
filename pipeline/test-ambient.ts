@@ -24,9 +24,9 @@ for (const [w,h] of [[640,360],[360,640]]) for (const pivot of [{x:0,y:0},{x:.5,
     const plane=ambientMotion([a,drift],t,w,h)!;
     const angle=t*Math.PI/2,dx=(((t*.1+.5)%1+1)%1-.5)*w,dy=(((t*-.05+.5)%1+1)%1-.5)*h;
     for (const x of [0,w]) for (const y of [0,h]) {
-      const qx=x-dx-pivot.x*w,qy=y-dy-pivot.y*h;
-      const ix=Math.cos(angle)*qx+Math.sin(angle)*qy+pivot.x*w;
-      const iy=-Math.sin(angle)*qx+Math.cos(angle)*qy+pivot.y*h;
+      const qx=x-pivot.x*w,qy=y-pivot.y*h;
+      const ix=Math.cos(angle)*qx+Math.sin(angle)*qy+pivot.x*w-dx;
+      const iy=-Math.sin(angle)*qx+Math.cos(angle)*qy+pivot.y*h-dy;
       assert.ok(ix>=plane.left && ix<=plane.left+plane.width && iy>=plane.top && iy<=plane.top+plane.height,'rotated tile plane must cover corners');
     }
   }
@@ -35,7 +35,7 @@ console.log('PASS ambient schema, targets, periodic drift and all-angle corner c
 
 const serveUrl=await bundle({entryPoint:join(ROOT,'pipeline/fixtures/ambient/entry.tsx'),publicDir:join(ROOT,'pipeline/fixtures/ambient/public')});
 const out=process.env.AMBIENT_EVIDENCE_DIR ?? mkdtempSync(join(tmpdir(),'ambient-test-'));
-for (const mode of ['rotate','drift','both','global','static','pan']) {
+for (const mode of ['rotate','drift','both','global','static','pan','combined']) {
   const inputProps={mode};
   const composition=await selectComposition({serveUrl,id:'ambient',inputProps});
   const frames=[];

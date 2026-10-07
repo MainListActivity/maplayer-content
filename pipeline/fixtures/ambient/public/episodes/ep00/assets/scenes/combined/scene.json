@@ -1,0 +1,22 @@
+{
+  "layers": [
+    {
+      "id": "earth",
+      "file": "../rotate/earth.png",
+      "depth": 1
+    }
+  ],
+  "ambient": [
+    {
+      "type": "rotate",
+      "layer": "earth",
+      "degPerSec": 60
+    },
+    {
+      "type": "drift",
+      "layer": "earth",
+      "dx": 0.4,
+      "dy": -0.1
+    }
+  ]
+}
