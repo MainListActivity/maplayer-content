@@ -1,24 +1,23 @@
 import React from 'react';
-import {interpolate, useCurrentFrame, useVideoConfig} from 'remotion';
+import {useCurrentFrame, useVideoConfig} from 'remotion';
 import {ShotSpec} from '../spec';
+import {camPose, layerTransform} from './rig';
 
-const EASE = {linear: (t: number) => t, hold: () => 0, easeInOut: (t: number) => t * t * (3 - 2 * t)};
+/** 相机姿态 hook：取景中心 (fx,fy) + 变焦 z。Scene 分层视差也复用。 */
+export const useCamPose = (shot: ShotSpec, totalFrames: number) => {
+  const frame = useCurrentFrame();
+  return camPose(shot, totalFrames, frame);
+};
 
 /**
  * Ken Burns 机位：世界系坐标 (0..1) × 变焦。
  * 取景中心点投影到屏幕中心：translate(W/2 - z·fx·W, H/2 - z·fy·H) scale(z)。
  */
 export const CameraRig: React.FC<{shot: ShotSpec; totalFrames: number; children: React.ReactNode}> = ({shot, totalFrames, children}) => {
-  const frame = useCurrentFrame();
   const {width: W, height: H} = useVideoConfig();
-  const cam = shot.camera;
-  const to = cam.to ?? cam.from;
-  const t = EASE[cam.ease](totalFrames <= 1 ? 1 : Math.min(1, frame / (totalFrames - 1)));
-  const fx = interpolate(t, [0, 1], [cam.from.x, to.x]);
-  const fy = interpolate(t, [0, 1], [cam.from.y, to.y]);
-  const z = interpolate(t, [0, 1], [cam.from.zoom, to.zoom]);
+  const pose = useCamPose(shot, totalFrames);
   return (
-    <div style={{position: 'absolute', inset: 0, transformOrigin: '0 0', transform: `translate(${W / 2 - z * fx * W}px, ${H / 2 - z * fy * H}px) scale(${z})`}}>
+    <div style={{position: 'absolute', inset: 0, transformOrigin: '0 0', transform: layerTransform(pose, 1, W, H)}}>
       {children}
     </div>
   );

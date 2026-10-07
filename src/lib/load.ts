@@ -1,4 +1,4 @@
-import {continueRender, delayRender, staticFile} from 'remotion';
+import {cancelRender, continueRender, delayRender, staticFile} from 'remotion';
 import {useEffect, useState} from 'react';
 import {AudioManifestSchema, EpisodeSchema, EpisodeSpec, ShotsFileSchema, ShotSpec, AudioManifest, buildTimeline, ShotTimeline} from '../spec';
 
@@ -6,6 +6,34 @@ const cache = new Map<string, Promise<unknown>>();
 const fetchJson = <T>(path: string): Promise<T> => {
   if (!cache.has(path)) cache.set(path, fetch(staticFile(path)).then((r) => (r.ok ? r.json() : Promise.reject(new Error(`missing ${path}`)))));
   return cache.get(path) as Promise<T>;
+};
+
+const optCache = new Map<string, Promise<unknown>>();
+/** 可选 JSON：404 解析为 null（用于 parts/actions/scene 约定文件探测）。 */
+export const fetchJsonOpt = <T>(path: string): Promise<T | null> => {
+  if (!optCache.has(path)) optCache.set(path, fetch(staticFile(path)).then((r) => {
+    if (r.status === 404) return null;
+    if (!r.ok) throw new Error(`Cannot load ${path}: ${r.status}`);
+    return r.json();
+  }));
+  return optCache.get(path) as Promise<T | null>;
+};
+
+/** 组件内取可选 JSON。ready 区分「加载中」与「确实不存在」。 */
+export const useJsonOpt = <T>(path: string | null): {data: T | null; ready: boolean} => {
+  const [st, setSt] = useState<{data: T | null; ready: boolean}>({data: null, ready: !path});
+  useEffect(() => {
+    if (!path) {setSt({data: null, ready: true}); return;}
+    let live = true;
+    setSt({data: null, ready: false});
+    const h = delayRender(`json ${path}`);
+    fetchJsonOpt<T>(path)
+      .then((d) => {if (live) setSt({data: d, ready: true});})
+      .catch((error) => cancelRender(error))
+      .finally(() => continueRender(h));
+    return () => {live = false;};
+  }, [path]);
+  return st;
 };
 
 export interface EpisodeBundle {ep: EpisodeSpec; shots: ShotSpec[]; manifest?: AudioManifest; timeline: ShotTimeline[];}
@@ -48,6 +76,61 @@ const probePng = (path: string): Promise<boolean> => {
     }));
   }
   return pngCache.get(path)!;
+};
+
+/** 预载 PNG 列表（渲染前确保 decode 完成，部件/序列帧用）。 */
+export const usePngReady = (urls: string[]): boolean => {
+  const [ready, setReady] = useState(false);
+  const key = urls.join('|');
+  useEffect(() => {
+    if (!urls.length) {setReady(true); return;}
+    let live = true;
+    const h = delayRender('png preload');
+    Promise.all(urls.map(probePng))
+      .then((found) => {
+        if (found.some((ok) => !ok)) throw new Error('Missing PNG in preload list');
+        if (live) setReady(true);
+      })
+      .catch((error) => cancelRender(error))
+      .finally(() => continueRender(h));
+    return () => {live = false;};
+  }, [key]);
+  return ready;
+};
+
+/** 探测一组 PNG 的存在性映射（姿势覆写用）：返回 url→存在？；全部探测完才算就绪。 */
+export const usePngProbeMap = (urls: string[]): Record<string, boolean> | null => {
+  const [map, setMap] = useState<Record<string, boolean> | null>(null);
+  const key = urls.join('|');
+  useEffect(() => {
+    if (!urls.length) {setMap({}); return;}
+    let live = true;
+    setMap(null);
+    const h = delayRender('png probe');
+    Promise.all(urls.map(async (u) => [u, await probePng(u)] as const))
+      .then((entries) => {if (live) setMap(Object.fromEntries(entries));})
+      .catch((error) => cancelRender(error))
+      .finally(() => continueRender(h));
+    return () => {live = false;};
+  }, [key]);
+  return map;
+};
+
+/** 姿势帧预载：与 useAssetSrc 一样先 PNG 后 SVG，确保切帧前全序列就绪。 */
+export const useAssetsReady = (bases: string[]): boolean => {
+  const [ready, setReady] = useState(false);
+  const key = bases.join('|');
+  useEffect(() => {
+    setReady(false);
+    let live = true;
+    const h = delayRender('sequence preload');
+    Promise.all(bases.map(async (base) => {
+      if (!await probePng(`${base}.png`)) await fetchText(`${base}.svg`);
+    })).then(() => {if (live) setReady(true);})
+      .catch((error) => cancelRender(error)).finally(() => continueRender(h));
+    return () => {live = false;};
+  }, [key]);
+  return ready;
 };
 
 export type AssetSrc = {kind: 'png'; url: string} | {kind: 'svg'; svg: string} | null;

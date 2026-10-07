@@ -86,11 +86,16 @@ M6 依赖 M5；M7 依赖 M6。新增角色永远先走 P2 demo，禁止直接进
 
 `shots.json` 每镜头字段：
 
-- `scene`：场景名（无 `.svg`），`null` = 黑场
+- `scene`：场景名，`assets/scenes/<scene>.png|.svg` 或 `<scene>/scene.json` 分层场景；`null` = 黑场
 - `camera`：`{from:{x,y,zoom}, to:{...}, ease}`，x/y 为取景中心（0..1）、zoom≥1；
   取景范围约束 `x∈[0.5/z, 1-0.5/z]`，越界会露黑边（validate 会警告）
-- `characters`：`{id, variant, x, y, scale, flip, enter}`；y 是脚底锚点
-- `props`：`{file, x, y, scale, anim: none|blink|blink-fast|float}`
+- `characters`：`{id, variant, x, y, scale, flip, enter, exit, moves, action, depth}`；y 是脚底锚点。
+  `moves` 走位分段（gait/ease）、`enter/exit` 支持 `walk-left|right` 走场、`action` 引用
+  `characters/<id>/actions/<name>.json` 动作剪辑（姿势帧+部件轨道）、部件 rig 见
+  `characters/<id>/parts/`（rig 模式可纯部件无 default；frames 指 `parts/poses/<帧>/` 覆写图）；
+  详见 `docs/engine/ANIMATION.md`
+- `props`：`{file, x, y, scale, anim: none|blink|blink-fast|float, motion, attachTo, depth}`；
+  `motion` 位移关键帧，`attachTo` 跟随角色部件
 - `dialogue`：`[{speaker|null(旁白), text, voice?, gapSec?}]`
 - `caption`：顶部说明字幕（场景卡/旁白条）；`transitionIn`：cut|fade|fade-black
 - 镜头时长自动算：`padIn + Σ台词 + padOut`，无台词用 `holdSec`

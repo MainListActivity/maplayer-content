@@ -1,0 +1,73 @@
+{"shots": [
+  {"id": "walk", "scene": "demo-bridge", "holdSec": 7,
+   "camera": {"from": {"x": 0.5, "y": 0.53, "zoom": 1.1}, "ease": "easeInOut"},
+   "characters": [{"id": "bot", "x": 0.2, "y": 0.94, "enter": "walk-left",
+     "moves": [{"to": {"x": 0.58, "y": 0.96}, "durSec": 2.0, "gait": "walk"},
+               {"to": {"x": 0.3, "y": 0.9}, "durSec": 1.6, "gait": "walk", "at": 3.6}]}],
+   "caption": "走位：walk-left 入场 + 分段位移 + 自动转向"},
+  {"id": "gesture", "scene": "demo-bridge", "holdSec": 4.5,
+   "characters": [{"id": "bot", "x": 0.5, "y": 0.95, "action": {"name": "greet"}}],
+   "caption": "部件关节：抬手致意（肩/肘/头联动）"},
+  {"id": "bow", "scene": "demo-bridge", "holdSec": 4,
+   "characters": [{"id": "bot", "x": 0.5, "y": 0.95, "action": "bow"}],
+   "caption": "部件关节：鞠躬（躯干+头部）"},
+  {"id": "look", "scene": "demo-bridge", "holdSec": 3.5,
+   "characters": [{"id": "bot", "x": 0.42, "y": 0.95, "action": "look"},
+                  {"id": "rin", "x": 0.62, "y": 0.96, "scale": 0.9, "flip": true}],
+   "caption": "部件关节：转头"},
+  {"id": "seq", "scene": "demo-bridge", "holdSec": 5,
+   "characters": [{"id": "rin", "x": 0.5, "y": 0.96, "action": "emote"}],
+   "caption": "姿势序列：变体帧循环 default→worried→determined"},
+  {"id": "prop-follow", "scene": "demo-bridge", "holdSec": 4.5,
+   "characters": [{"id": "bot", "x": 0.5, "y": 0.95, "action": {"name": "greet", "speed": 0.8}}],
+   "props": [{"file": "tea-mug", "x": 0, "y": 0, "scale": 0.5, "attachTo": {"character": "bot", "part": "forearm-r"}},
+             {"file": "signal-pip", "x": 0.2, "y": 0.45, "scale": 0.8,
+              "motion": [{"t": 0, "x": 0.2, "y": 0.45, "rot": 0},
+                         {"t": 2.2, "x": 0.8, "y": 0.35, "rot": 180, "ease": "easeInOut"},
+                         {"t": 4, "x": 0.5, "y": 0.5, "rot": 360}]}],
+   "caption": "道具：attachTo 跟随手部 + motion 位移关键帧"},
+  {"id": "parallax", "scene": "demo-bridge", "holdSec": 5,
+   "camera": {"from": {"x": 0.42, "y": 0.55, "zoom": 1.3}, "to": {"x": 0.6, "y": 0.5, "zoom": 1.45}, "ease": "easeInOut"},
+   "characters": [{"id": "bot", "x": 0.5, "y": 0.95}],
+   "caption": "景深：远景 0.7 / 控台 1.0 / 前景条 1.35 视差"},
+  {"id": "ambient", "scene": "demo-bridge", "holdSec": 5,
+   "characters": [{"id": "rin", "x": 0.7, "y": 0.96, "scale": 0.9}],
+   "caption": "氛围：尘埃漂移 + 控台闪动 + 全息脉动"},
+  {"id": "rig-pose", "scene": null, "holdSec": 5,
+   "characters": [{"id": "bot", "x": 0.5, "y": 0.95, "action": "alert"}],
+   "caption": "rig×姿势帧：poses/alert 换装泛红 + 挥手关节叠加"},
+  {"id": "rig-only", "scene": null, "holdSec": 3.5,
+   "characters": [{"id": "bot2", "x": 0.5, "y": 0.95, "action": "look"}],
+   "caption": "纯部件角色：无 default 整幅资产，仅 parts/ 渲染"},
+  {"id": "combo", "scene": "demo-bridge", "holdSec": 7,
+   "characters": [{"id": "bot", "x": 0.3, "y": 0.94, "enter": "walk-left",
+     "moves": [{"to": {"x": 0.45, "y": 0.95}, "durSec": 1.5}],
+     "action": {"name": "greet", "speed": 0.7}}],
+   "dialogue": [{"speaker": "bot", "text": "演出引擎自检：走位、关节、序列、景深全部就位。"}],
+   "caption": "综合：走位 + 关节 + 字幕兼容"},
+{
+  "id": "svg-sequence",
+  "scene": "demo-bridge",
+  "holdSec": 4,
+  "characters": [
+    {
+      "id": "svg-fixture",
+      "x": 0.5,
+      "y": 0.9,
+      "scale": 0.8,
+      "action": {
+        "name": "gesture",
+        "speed": 2,
+        "loop": false
+      }
+    }
+  ],
+  "dialogue": [
+    {
+      "speaker": "svg-fixture",
+      "text": "关节与姿势序列测试。"
+    }
+  ],
+  "caption": "工程夹具：SVG 帧序列 + 关节叠加，speed=2 / loop=false"
+}
+]}
