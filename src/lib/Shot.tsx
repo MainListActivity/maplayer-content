@@ -1,5 +1,5 @@
 import React, {useMemo} from 'react';
-import {Audio, interpolate, Sequence, staticFile, useCurrentFrame, useVideoConfig} from 'remotion';
+import {Audio, Img, interpolate, Sequence, staticFile, useCurrentFrame, useVideoConfig} from 'remotion';
 import {useAssetSrc, useJsonOpt} from './load';
 import {CameraRig, useCamPose} from './CameraRig';
 import {Sprite} from './Sprite';
@@ -73,7 +73,7 @@ const SceneLayers: React.FC<{episodeId: string; scene: string; layers: SceneFile
         return (
           <div key={l.id ?? i} style={{position: 'absolute', left: 0, top: 0, width: W, height: H, transform: layerTransform(pose, l.depth, W, H), transformOrigin: '0 0'}}>
             <div style={{width: '100%', height: '100%', transform: extra || undefined, transformOrigin: '50% 50%', opacity: op}}>
-              <img src={staticFile(`episodes/${episodeId}/assets/scenes/${scene}/${l.file}`)} style={{width: '100%', height: '100%', objectFit: 'cover', display: 'block'}} />
+              <Img src={staticFile(`episodes/${episodeId}/assets/scenes/${scene}/${l.file}`)} style={{width: '100%', height: '100%', objectFit: 'cover', display: 'block'}} />
             </div>
           </div>
         );
