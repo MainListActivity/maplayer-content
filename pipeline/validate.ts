@@ -22,7 +22,7 @@ const hasScene = (name: string) => hasAsset('scenes', name) || existsSync(join(s
 const readJson = (p: string) => {try {return JSON.parse(readFileSync(p, 'utf8'));} catch {return null;}};
 
 // 部件 rig 元数据缓存：角色 id → parts.json（存在性 + 部件名集合 + 部件文件名集合）
-const partsCache = new Map<string, {ids: Set<string>; files: Set<string>} | null>();
+const partsCache = new Map<string, {ids: Set<string>; files: Set<string>; points: Map<string, Set<string>>} | null>();
 const partsOf = (c: string) => {
   if (!partsCache.has(c)) {
     const f = join(charsDir, c, 'parts', 'parts.json');
@@ -30,7 +30,11 @@ const partsOf = (c: string) => {
     const r = PartsFileSchema.safeParse(readJson(f));
     if (!r.success) {problems.push(`角色 ${c} parts/parts.json 不符合 PartsFileSchema`); partsCache.set(c, null); return null;}
     for (const d of r.data.parts) if (!existsSync(join(charsDir, c, 'parts', d.file))) problems.push(`角色 ${c} 部件图缺失 parts/${d.file}`);
-    partsCache.set(c, {ids: new Set(r.data.parts.map((d) => d.id)), files: new Set(r.data.parts.map((d) => d.file))});
+    partsCache.set(c, {
+      ids: new Set(r.data.parts.map((d) => d.id)),
+      files: new Set(r.data.parts.map((d) => d.file)),
+      points: new Map(r.data.parts.map((d) => [d.id, new Set(Object.keys(d.points))])),
+    });
   }
   return partsCache.get(c);
 };
@@ -59,6 +63,8 @@ for (const s of shots) {
         const pf = partsOf(t.id);
         if (!pf) warnings.push(`${s.id}: 道具 ${p.file} attachTo ${t.id}.${p.attachTo.part}，但该角色无 parts/（将退回静态摆位）`);
         else if (!pf.ids.has(p.attachTo.part)) problems.push(`${s.id}: 道具 ${p.file} attachTo 部件 ${t.id}.${p.attachTo.part} 不存在`);
+        else if (p.attachTo.anchor && !pf.points.get(p.attachTo.part)?.has(p.attachTo.anchor))
+          problems.push(`${s.id}: 道具 ${p.file} attachTo 锚点 ${t.id}.${p.attachTo.part}#${p.attachTo.anchor} 不在部件 points 表`);
       }
     }
   }

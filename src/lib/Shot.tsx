@@ -117,7 +117,7 @@ const Prop: React.FC<{episodeId: string; pr: PropSpec; shot: ShotSpec; shotDurSe
 
   let x = pr.x, y = pr.y, rot = 0, extraOp = 1;
   if (pr.attachTo && target && cw.partsFile && cw.worlds) {
-    const anchor = partAnchorWorld(cw.partsFile, cw.worlds, pr.attachTo.part);
+    const anchor = partAnchorWorld(cw.partsFile, cw.worlds, pr.attachTo.part, pr.attachTo.anchor);
     if (anchor) {
       const unit = cw.hPx / cw.partsFile.size[1];
       const dx = (anchor.x - cw.partsFile.size[0] / 2) * unit * (cw.flip ? -1 : 1);

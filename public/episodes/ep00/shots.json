@@ -129,7 +129,8 @@
      "scale": 0.5,
      "attachTo": {
       "character": "bot",
-      "part": "forearm-r"
+      "part": "forearm-r",
+      "anchor": "grip"
      }
     },
     {

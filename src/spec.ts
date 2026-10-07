@@ -59,7 +59,7 @@ export const PropSchema = z.object({
   y: z.number().min(0).max(1),
   scale: z.number().min(0.01).max(4).default(1),
   anim: z.enum(['none', 'blink', 'float', 'blink-fast']).default('none'),
-  attachTo: z.object({character: z.string(), part: z.string()}).optional(), // 跟随角色部件
+  attachTo: z.object({character: z.string(), part: z.string(), anchor: z.string().optional()}).optional(), // 跟随角色部件（anchor=部件命名锚点，缺省 pivot）
   motion: z.array(PropMotionSchema).default([]), // 位移关键帧（优先于静态 x/y）
   depth: z.number().min(-2).max(2).default(0),   // 世界系 z 序（与角色同排）
 });
@@ -75,12 +75,14 @@ export const DialogueSchema = z.object({
 
 /** 部件关节：characters/<id>/parts/parts.json。部件图为带 alpha PNG；
  *  at = 部件左上角在拼合坐标中的偏移(px)；pivot = 旋转关节点（拼合坐标 px）；
- *  parent = 父部件 id（子部件跟随父变换，如 forearm-l 跟随 arm-l）。 */
+ *  parent = 父部件 id（子部件跟随父变换，如 forearm-l 跟随 arm-l）；
+ *  points = 命名锚点表（拼合坐标 px），如 {"grip":[x,y]} 手端握持点 —— attachTo.anchor 引用。 */
 export const PartDefSchema = z.object({
   id: z.string(),
   file: z.string(),                            // 相对 parts/ 目录的 png
   at: z.tuple([z.number(), z.number()]),       // 拼合坐标偏移
   pivot: z.tuple([z.number(), z.number()]),    // 拼合坐标关节点
+  points: z.record(z.string(), z.tuple([z.number(), z.number()])).default({}), // 命名锚点（attachTo.anchor）
   parent: z.string().optional(),
   depth: z.number().default(0),                // 部件间叠放次序
 });
