@@ -8,7 +8,13 @@
   {
    "file": "console.png",
    "depth": 1.0,
-   "id": "console"
+   "id": "console",
+   "castShadow": {
+    "dx": 6,
+    "dy": 8,
+    "blur": 12,
+    "opacity": 0.22
+   }
   },
   {
    "file": "holo.png",
@@ -18,7 +24,13 @@
   {
    "file": "foreground.png",
    "depth": 1.35,
-   "id": "deck"
+   "id": "deck",
+   "castShadow": {
+    "dx": 10,
+    "dy": 14,
+    "blur": 18,
+    "opacity": 0.35
+   }
   }
  ],
  "ambient": [

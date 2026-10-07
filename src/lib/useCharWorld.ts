@@ -16,8 +16,12 @@ export interface CharWorld {
   partsFile: PartsFile | null;
   clip: ActionClip | null;
   cfg: {name: string; speed: number; loop?: boolean} | null;
-  /** 世界系归一化锚点（脚底中心）+ 自动朝向 + 步态倾斜。 */
+  /** 世界系归一化锚点（脚底中心，含步态起伏）+ 自动朝向 + 步态倾斜。 */
   pos: {x: number; y: number};
+  /** 地面锚点（不含 bob 起伏）：落地阴影钉在这里，脚下有影而影不随脚抬。 */
+  ground: {x: number; y: number};
+  /** 离地抬升量 px（步态腾空/浮动）；>0 时阴影衰减。 */
+  liftPx: number;
   flip: boolean;
   tilt: number;
   hPx: number;
@@ -58,5 +62,5 @@ export const useCharWorld = (episodeId: string, p: Placement | null, shotDurSec:
     [partsFile, clip, tSec, cfg?.speed],
   );
 
-  return {tSec, charBase, partsFile, clip, cfg, pos: {x, y: loco.y + bob.dy / H}, flip: loco.flip, tilt: bob.tilt, hPx, worlds};
+  return {tSec, charBase, partsFile, clip, cfg, pos: {x, y: loco.y + bob.dy / H}, ground: {x, y: loco.y}, liftPx: Math.max(0, -bob.dy), flip: loco.flip, tilt: bob.tilt, hPx, worlds};
 };

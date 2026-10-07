@@ -113,7 +113,24 @@ characters/<id>/
   flicker/pulse 省略 `layer` 时应用于全部场景层；指定时只作用于对应 id。
 - 角色/道具 `depth` 字段是世界内 z 序，与场景层 depth 正交。
 
-## 6. 兼容性
+
+## 6. 落地阴影与接触着色（治纸片感）
+
+`shot.shadow`（镜头级，默认开）：
+
+```jsonc
+"shadow": {"enabled": true, "opacity": 0.32, "size": 1, "blur": 16, "contact": 0.45}
+```
+
+- 自动在每个 `characters[]` 脚下渲染椭圆渐变投影：锚点钉在**地面位**
+  （loco 脚底锚点，不含 bob 起伏），随走位位移、随 scale 缩放；
+  步态腾空瞬间影缩小变淡（`evalShadow` 衰减），入画走场阴影随行。
+- `contact` 控制第二层更小的接触暗芯（脚底 AO），消除贴纸漂浮感。
+- `characters[].shadow: false` 单角色关闭——悬浮物/全息投影类角色用。
+- `scenes/<name>/scene.json` 层可加 `castShadow: {dx, dy, blur, opacity}`——
+  该层剪影向身后内容的软投影（前景层在中景/角色上投缘影）。
+
+## 7. 兼容性
 
 - 旧 `shots.json` 零迁移：新字段全可选；`enter:left/right`、静态角色、
   整幅场景行为逐帧不变。
@@ -122,5 +139,5 @@ characters/<id>/
   动作剪辑文件与序列帧、attachTo 目标存在性。
 - 存在但非法的 parts/动作 JSON 是错误，不会静默退回整幅资产；缺失的可选 parts 文件仍可回退。
 - `pnpm test` 运行确定性的走位接管、旧进出场、帧序列与父子关节回归测试。
-- 参考夹具：`public/episodes/ep00/`（演示集，10 镜头覆盖全部能力，最后一镜验证 SVG 帧序列与关节叠加）。
+- 参考夹具：`public/episodes/ep00/`（演示集，10 镜头覆盖全部能力，svg-sequence 验证 SVG 帧序列与关节叠加；末三镜验证落地阴影开关/单角色豁免）。
   `svg-fixture` 基于模板构造，只用于工程机制测试，不代表正式角色或美术风格验收。
