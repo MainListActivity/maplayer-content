@@ -1,0 +1,166 @@
+/* 演出引擎求值核心：纯函数，Sprite/Prop/validate 共用。
+ * 坐标口径：角色世界系 = 变焦1时画面归一化 (0..1)；部件拼合系 = parts.size px，锚点底中。 */
+import {z} from 'zod';
+import {KeyframeSchema, MoveSchema, PartsFile, PlacementSchema, ActionClip, ShotSpec, CameraSchema} from '../spec';
+
+type Placement = z.infer<typeof PlacementSchema>;
+type Move = z.infer<typeof MoveSchema>;
+type Kf = z.infer<typeof KeyframeSchema>;
+
+export const EASE = {linear: (t: number) => t, hold: () => 0, easeInOut: (t: number) => t * t * (3 - 2 * t)};
+
+/** 相机姿态（与 CameraRig 同式）：取景中心 (fx,fy) + 变焦 z。 */
+export const camPose = (shot: ShotSpec, totalFrames: number, frame: number): {fx: number; fy: number; z: number} => {
+  const cam = shot.camera;
+  const to = cam.to ?? cam.from;
+  const t = EASE[cam.ease](totalFrames <= 1 ? 1 : Math.min(1, frame / (totalFrames - 1)));
+  const lerp = (a: number, b: number) => a + (b - a) * t;
+  return {fx: lerp(cam.from.x, to.x), fy: lerp(cam.from.y, to.y), z: lerp(cam.from.zoom, to.zoom)};
+};
+
+/** 世界层变换：depth<1 远景动得少（视差），>1 前景动得多。d=1 与相机一致。 */
+export const layerTransform = (pose: {fx: number; fy: number; z: number}, depth: number, W: number, H: number): string => {
+  const z = 1 + (pose.z - 1) * depth;
+  return `translate(${W / 2 - z * pose.fx * W}px, ${H / 2 - z * pose.fy * H}px) scale(${z})`;
+};
+
+/* ---------- 走位 ---------- */
+
+export interface LocoSeg {from: {x: number; y: number}; to: {x: number; y: number}; at: number; dur: number; gait: string; ease: 'linear' | 'easeInOut' | 'hold'}
+
+const WALK_SEC = 1.1; // walk-in/out 用时
+
+/** 把 enter/moves/exit 展开为时间轴分段。 */
+export const buildLoco = (p: Placement, shotDurSec: number): LocoSeg[] => {
+  const segs: LocoSeg[] = [];
+  let home = {x: p.x, y: p.y};
+  if (p.enter === 'walk-left' || p.enter === 'walk-right') {
+    const from = {x: p.enter === 'walk-left' ? -0.12 : 1.12, y: p.y};
+    segs.push({from, to: home, at: 0, dur: WALK_SEC, gait: 'walk', ease: 'linear'});
+  }
+  let cursor = p.enter.startsWith('walk') ? WALK_SEC : 0;
+  for (const m of p.moves) {
+    const at = m.at ?? cursor;
+    const from = segs.length ? segs[segs.length - 1].to : home;
+    segs.push({from, to: m.to, at, dur: m.durSec, gait: m.gait, ease: m.ease});
+    cursor = at + m.durSec;
+  }
+  if (p.exit === 'walk-left' || p.exit === 'walk-right') {
+    const from = segs.length ? segs[segs.length - 1].to : home;
+    segs.push({from, to: {x: p.exit === 'walk-left' ? -0.12 : 1.12, y: from.y}, at: Math.max(0, shotDurSec - WALK_SEC), dur: WALK_SEC, gait: 'walk', ease: 'linear'});
+  }
+  return segs;
+};
+
+export interface LocoState {x: number; y: number; flip: boolean; gaiting: boolean}
+
+/** 走位求值：当前位置 + 是否处于步态段 + 自动朝向（右行 flip=false）。 */
+export const evalLoco = (p: Placement, segs: LocoSeg[], tSec: number): LocoState => {
+  if (!segs.length) return {x: p.x, y: p.y, flip: p.flip, gaiting: false};
+  let cur = {x: p.x, y: p.y}, flip = p.flip, gaiting = false;
+  for (const s of segs) {
+    if (tSec < s.at) break;
+    const k = Math.min(1, (tSec - s.at) / s.dur);
+    const e = EASE[s.ease](k);
+    cur = {x: s.from.x + (s.to.x - s.from.x) * e, y: s.from.y + (s.to.y - s.from.y) * e};
+    if (k < 1 && s.to.x !== s.from.x) flip = s.to.x < s.from.x; // 行进朝向（face left=flip）
+    if (k < 1 && s.gait === 'walk') gaiting = true;
+  }
+  return {x: cur.x, y: cur.y, flip, gaiting};
+};
+
+/** 步态起伏：步行周期内 |sin| 下压/抬升，单位像素。 */
+export const gaitBob = (tSec: number, gaiting: boolean, pxPerUnit: number): {dy: number; tilt: number} => {
+  if (!gaiting) return {dy: 0, tilt: 0};
+  const ph = tSec * Math.PI * 2.2; // ~2.2 半步/秒
+  return {dy: -Math.abs(Math.sin(ph)) * pxPerUnit * 0.012, tilt: Math.sin(ph) * 1.4};
+};
+
+/* ---------- 关键帧求值 ---------- */
+
+export interface PartPose {rot: number; dx: number; dy: number; scale: number; opacity: number}
+
+export const evalKf = (kfs: Kf[], tSec: number, clipDur: number, loop: boolean): PartPose => {
+  const t = loop ? tSec % clipDur : Math.min(tSec, clipDur);
+  let prev = kfs[0], next = kfs[kfs.length - 1];
+  for (let i = 0; i < kfs.length; i++) {
+    if (kfs[i].t <= t) prev = kfs[i];
+    if (kfs[i].t > t) {next = kfs[i]; break;}
+    next = kfs[i];
+  }
+  const span = next.t - prev.t;
+  const k = span > 0 ? Math.min(1, (t - prev.t) / span) : 0;
+  const e = EASE[prev.ease](k);
+  const L = (a: number, b: number) => a + (b - a) * e;
+  return {rot: L(prev.rot, next.rot), dx: L(prev.dx, next.dx), dy: L(prev.dy, next.dy), scale: L(prev.scale, next.scale), opacity: L(prev.opacity, next.opacity)};
+};
+
+/* ---------- 部件 2D 仿射矩阵 ---------- */
+
+type M = [number, number, number, number, number, number]; // a b c d e f
+const mIdent: M = [1, 0, 0, 1, 0, 0];
+const mMul = (A: M, B: M): M => [
+  A[0] * B[0] + A[2] * B[1], A[1] * B[0] + A[3] * B[1],
+  A[0] * B[2] + A[2] * B[3], A[1] * B[2] + A[3] * B[3],
+  A[0] * B[4] + A[2] * B[5] + A[4], A[1] * B[4] + A[3] * B[5] + A[5],
+];
+const mT = (x: number, y: number): M => [1, 0, 0, 1, x, y];
+const mR = (deg: number): M => {const r = (deg * Math.PI) / 180; const c = Math.cos(r), s = Math.sin(r); return [c, s, -s, c, 0, 0];};
+const mS = (s: number): M => [s, 0, 0, s, 0, 0];
+
+/** 部件局部矩阵：绕 pivot 旋转/缩放后平移 dx,dy。 */
+const localM = (pivot: [number, number], pose: PartPose): M =>
+  mMul(mT(pose.dx, pose.dy), mMul(mT(pivot[0], pivot[1]), mMul(mR(pose.rot), mMul(mS(pose.scale), mT(-pivot[0], -pivot[1])))));
+
+export interface PartWorld {m: M; opacity: number}
+
+/**
+ * 求每个部件的世界矩阵（拼合系 px）。父链递归：子部件 pivot 先被父变换。
+ * 返回 Map<partId, PartWorld>；DOM 用法：元素放在 at 偏移、transform=matrix(m·T(at))。
+ */
+export const evalParts = (parts: PartsFile, clip: ActionClip | null, tSec: number, speed = 1): Map<string, PartWorld> => {
+  const out = new Map<string, PartWorld>();
+  const byId = new Map(parts.parts.map((d) => [d.id, d]));
+  const world = (id: string, seen: Set<string>): PartWorld => {
+    const hit = out.get(id);
+    if (hit) return hit;
+    const def = byId.get(id);
+    if (!def || seen.has(id)) return {m: mIdent, opacity: 1};
+    seen.add(id);
+    const t = tSec * speed;
+    const kfs = clip?.tracks[def.id];
+    const pose = kfs ? evalKf(kfs, t, clip!.durationSec, clip!.loop) : {rot: 0, dx: 0, dy: 0, scale: 1, opacity: 1};
+    const lm = localM(def.pivot, pose);
+    const parent = def.parent ? world(def.parent, seen) : {m: mIdent, opacity: 1};
+    const w = {m: mMul(parent.m, lm), opacity: parent.opacity * pose.opacity};
+    out.set(id, w);
+    return w;
+  };
+  for (const d of parts.parts) world(d.id, new Set());
+  return out;
+};
+
+/** 道具位移关键帧求值（世界系归一化坐标 + 自转）。 */
+export const evalPropMotion = (kfs: {t: number; x: number; y: number; rot: number; ease: 'linear' | 'easeInOut' | 'hold'}[], tSec: number): {x: number; y: number; rot: number} => {
+  if (!kfs.length) return {x: 0, y: 0, rot: 0};
+  let prev = kfs[0], next = kfs[kfs.length - 1];
+  for (const kf of kfs) {
+    if (kf.t <= tSec) prev = kf;
+    if (kf.t > tSec) {next = kf; break;}
+    next = kf;
+  }
+  const span = next.t - prev.t;
+  const k = span > 0 ? Math.min(1, (tSec - prev.t) / span) : 0;
+  const e = EASE[prev.ease](k);
+  return {x: prev.x + (next.x - prev.x) * e, y: prev.y + (next.y - prev.y) * e, rot: prev.rot + (next.rot - prev.rot) * e};
+};
+
+/** 部件世界锚点（拼合系 px）：pivot 经世界矩阵后的位置 —— attachTo 用。 */
+export const partAnchorWorld = (parts: PartsFile, worlds: Map<string, PartWorld>, partId: string): {x: number; y: number; rot: number; opacity: number} | null => {
+  const def = parts.parts.find((d) => d.id === partId);
+  const w = worlds.get(partId);
+  if (!def || !w) return null;
+  const [a, b, c, d, e, f] = w.m;
+  const x = def.pivot[0], y = def.pivot[1];
+  return {x: a * x + c * y + e, y: b * x + d * y + f, rot: (Math.atan2(b, a) * 180) / Math.PI, opacity: w.opacity};
+};

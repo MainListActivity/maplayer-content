@@ -1,0 +1,47 @@
+{
+ "layers": [
+  {
+   "file": "background.png",
+   "depth": 0.7,
+   "id": "bg"
+  },
+  {
+   "file": "console.png",
+   "depth": 1.0,
+   "id": "console"
+  },
+  {
+   "file": "holo.png",
+   "depth": 1.05,
+   "id": "holo"
+  },
+  {
+   "file": "foreground.png",
+   "depth": 1.35,
+   "id": "deck"
+  }
+ ],
+ "ambient": [
+  {
+   "type": "dust",
+   "count": 36,
+   "depth": 1.1,
+   "hz": 0.5,
+   "size": 3,
+   "opacity": 0.35,
+   "color": "#dff6fb"
+  },
+  {
+   "type": "flicker",
+   "layer": "console",
+   "hz": 2.4,
+   "amp": 0.1
+  },
+  {
+   "type": "pulse",
+   "layer": "holo",
+   "hz": 0.9,
+   "amp": 0.05
+  }
+ ]
+}

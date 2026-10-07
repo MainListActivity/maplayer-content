@@ -1,0 +1,117 @@
+{
+ "size": [
+  400,
+  640
+ ],
+ "parts": [
+  {
+   "id": "leg-l",
+   "file": "leg-l.png",
+   "at": [
+    150,
+    380
+   ],
+   "pivot": [
+    182,
+    388
+   ],
+   "depth": 0
+  },
+  {
+   "id": "leg-r",
+   "file": "leg-r.png",
+   "at": [
+    214,
+    380
+   ],
+   "pivot": [
+    246,
+    388
+   ],
+   "depth": 1
+  },
+  {
+   "id": "arm-l",
+   "file": "arm-l.png",
+   "at": [
+    52,
+    182
+   ],
+   "pivot": [
+    100,
+    194
+   ],
+   "parent": "torso",
+   "depth": 2
+  },
+  {
+   "id": "forearm-l",
+   "file": "forearm-l.png",
+   "at": [
+    56,
+    372
+   ],
+   "pivot": [
+    88,
+    380
+   ],
+   "parent": "arm-l",
+   "depth": 3
+  },
+  {
+   "id": "torso",
+   "file": "torso.png",
+   "at": [
+    102,
+    168
+   ],
+   "pivot": [
+    200,
+    380
+   ],
+   "depth": 4
+  },
+  {
+   "id": "head",
+   "file": "head.png",
+   "at": [
+    128,
+    2
+   ],
+   "pivot": [
+    200,
+    160
+   ],
+   "parent": "torso",
+   "depth": 5
+  },
+  {
+   "id": "arm-r",
+   "file": "arm-r.png",
+   "at": [
+    282,
+    182
+   ],
+   "pivot": [
+    300,
+    194
+   ],
+   "parent": "torso",
+   "depth": 6
+  },
+  {
+   "id": "forearm-r",
+   "file": "forearm-r.png",
+   "at": [
+    284,
+    372
+   ],
+   "pivot": [
+    312,
+    380
+   ],
+   "parent": "arm-r",
+   "depth": 7
+  }
+ ]
+}

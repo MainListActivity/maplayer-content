@@ -1,0 +1,11 @@
+{
+ "durationSec": 2.5,
+ "loop": true,
+ "fps": 1.2,
+ "frames": [
+  "default",
+  "worried",
+  "determined"
+ ],
+ "tracks": {}
+}

@@ -8,6 +8,30 @@ const fetchJson = <T>(path: string): Promise<T> => {
   return cache.get(path) as Promise<T>;
 };
 
+const optCache = new Map<string, Promise<unknown>>();
+/** 可选 JSON：404 解析为 null（用于 parts/actions/scene 约定文件探测）。 */
+export const fetchJsonOpt = <T>(path: string): Promise<T | null> => {
+  if (!optCache.has(path)) optCache.set(path, fetch(staticFile(path)).then((r) => (r.ok ? r.json() : null)).catch(() => null));
+  return optCache.get(path) as Promise<T | null>;
+};
+
+/** 组件内取可选 JSON。ready 区分「加载中」与「确实不存在」。 */
+export const useJsonOpt = <T>(path: string | null): {data: T | null; ready: boolean} => {
+  const [st, setSt] = useState<{data: T | null; ready: boolean}>({data: null, ready: !path});
+  useEffect(() => {
+    if (!path) {setSt({data: null, ready: true}); return;}
+    let live = true;
+    setSt({data: null, ready: false});
+    const h = delayRender(`json ${path}`);
+    fetchJsonOpt<T>(path)
+      .then((d) => {if (live) setSt({data: d, ready: true});})
+      .catch(() => {if (live) setSt({data: null, ready: true});})
+      .finally(() => continueRender(h));
+    return () => {live = false;};
+  }, [path]);
+  return st;
+};
+
 export interface EpisodeBundle {ep: EpisodeSpec; shots: ShotSpec[]; manifest?: AudioManifest; timeline: ShotTimeline[];}
 
 export const loadEpisodeBundle = async (episodeId: string): Promise<EpisodeBundle> => {
@@ -48,6 +72,22 @@ const probePng = (path: string): Promise<boolean> => {
     }));
   }
   return pngCache.get(path)!;
+};
+
+/** 预载 PNG 列表（渲染前确保 decode 完成，部件/序列帧用）。 */
+export const usePngReady = (urls: string[]): boolean => {
+  const [ready, setReady] = useState(false);
+  const key = urls.join('|');
+  useEffect(() => {
+    if (!urls.length) {setReady(true); return;}
+    let live = true;
+    const h = delayRender('png preload');
+    Promise.all(urls.map(probePng))
+      .then(() => {if (live) setReady(true);})
+      .finally(() => continueRender(h));
+    return () => {live = false;};
+  }, [key]);
+  return ready;
 };
 
 export type AssetSrc = {kind: 'png'; url: string} | {kind: 'svg'; svg: string} | null;
