@@ -18,8 +18,12 @@ export const Sprite: React.FC<{episodeId: string; p: Placement; speaking: boolea
   const {tSec, charBase, partsReady: partsMetaReady, partsFile, clip, cfg, pos, flip, tilt, hPx, worlds} = useCharWorld(episodeId, p, shotDurSec);
   const rigMode = partsFile != null;
 
-  // 姿势序列帧（仅非 rig 模式：frames = 整幅变体名）：预载全帧
-  const frameUrls = useMemo(() => (!rigMode ? (clip?.frames ?? []).map((f) => `${charBase}/${f}`) : []), [clip, charBase, rigMode]);
+  // 姿势序列帧（仅非 rig 模式：frames = 整幅变体名）：预载全帧。
+  // 竞态防护：parts.json 未就绪时 frames 不得预载——否则 rig 姿势目录名会被当整幅图请求。
+  const frameUrls = useMemo(
+    () => (partsMetaReady && !rigMode ? (clip?.frames ?? []).map((f) => `${charBase}/${f}`) : []),
+    [clip, charBase, rigMode, partsMetaReady],
+  );
   const framesReady = useAssetsReady(frameUrls);
   const frameIdx = clip ? sequenceIndex(clip, tSec, cfg?.speed ?? 1) : 0;
   const seqFrame = rigMode ? undefined : clip?.frames?.[frameIdx];

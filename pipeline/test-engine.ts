@@ -95,4 +95,19 @@ const onlyA = await still('rig-only', 0.3, 'only-a.png');
 const onlyB = await still('rig-only', 1.0, 'only-b.png');
 assert.ok(!onlyA.equals(onlyB), 'rig-only: 纯部件角色未渲染或未应用关节轨道');
 console.log('PASS parts-only character renders and animates without default asset');
+
+// 加载竞态：延迟 parts.json 1.5s 让动作剪辑先返回——rig 姿势名不得被当整幅帧请求
+// （回归前此序会 cancelRender: missing .../bot/idle.svg）
+const delayedServe = await bundle(join(ROOT, 'pipeline', 'fixtures', 'delayed-entry.ts'), undefined, {publicDir: join(ROOT, 'public')});
+const delayedComp = await selectComposition({serveUrl: delayedServe, id: 'episode', inputProps: {episodeId: 'ep00'}});
+const delayedPath = join(outDir, 'pose-delayed.png');
+await renderStill({
+  composition: delayedComp,
+  serveUrl: delayedServe,
+  output: delayedPath,
+  frame: startOf('rig-pose') + Math.round(0.68 * ep.fps),
+  inputProps: {episodeId: 'ep00'},
+});
+assert.ok(!readFileSync(delayedPath).equals(poseA), '竞态渲染产物应与 idle 帧不同（alert 姿势）');
+console.log('PASS delayed parts.json (action resolves first) still renders rig pose frame');
 console.log(`  stills → ${outDir}`);
