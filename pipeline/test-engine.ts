@@ -61,3 +61,38 @@ console.log('PASS parent rig matrix and attached hand anchor');
 assert.equal(layerTransform({fx: .6, fy: .5, z: 1}, .5, 1000, 500), 'translate(-50px, 0px) scale(1)');
 assert.equal(layerTransform({fx: .6, fy: .5, z: 1}, 1, 1000, 500), 'translate(-100px, 0px) scale(1)');
 console.log('PASS depth parallax during fixed-zoom pan');
+
+// ---- renderStill 集成回归：纯部件角色渲染 + rig×姿势帧复合（黑场隔离环境噪声）----
+const {bundle} = await import('@remotion/bundler');
+const {renderStill, selectComposition} = await import('@remotion/renderer');
+const {readFileSync, mkdtempSync} = await import('node:fs');
+const {tmpdir} = await import('node:os');
+const {join} = await import('node:path');
+const {loadEp, ROOT} = await import('./common');
+const {buildTimeline} = await import('../src/spec');
+
+const {ep, shots, manifest} = loadEp('ep00');
+const tl = buildTimeline(ep, shots, manifest);
+const startOf = (id: string) => tl.find((s) => s.shot.id === id)!.startFrame;
+
+const serve = await bundle(join(ROOT, 'src', 'index.ts'), undefined, {publicDir: join(ROOT, 'public')});
+const comp = await selectComposition({serveUrl: serve, id: 'episode', inputProps: {episodeId: 'ep00'}});
+const outDir = mkdtempSync(join(tmpdir(), 'engine-stills-'));
+const still = async (shotId: string, tSec: number, name: string) => {
+  const p = join(outDir, name);
+  await renderStill({composition: comp, serveUrl: serve, output: p, frame: startOf(shotId) + Math.round(tSec * ep.fps), inputProps: {episodeId: 'ep00'}});
+  return readFileSync(p);
+};
+
+// rig-pose（黑场）：t=0.3 与 t=0.68 轨道姿态完全一致（arm -100° 平台段），仅姿势帧 idle→alert 不同
+const poseA = await still('rig-pose', 0.3, 'pose-idle.png');
+const poseB = await still('rig-pose', 0.68, 'pose-alert.png');
+assert.ok(!poseA.equals(poseB), 'rig-pose: 姿势帧覆写未改变部件 rig 渲染结果');
+console.log('PASS rig frames×tracks composite: pose override changes rig output');
+
+// rig-only（黑场）：bot2 无 default 整幅资产；look 轨道 t=0.3 vs t=1.0 头部角度不同
+const onlyA = await still('rig-only', 0.3, 'only-a.png');
+const onlyB = await still('rig-only', 1.0, 'only-b.png');
+assert.ok(!onlyA.equals(onlyB), 'rig-only: 纯部件角色未渲染或未应用关节轨道');
+console.log('PASS parts-only character renders and animates without default asset');
+console.log(`  stills → ${outDir}`);

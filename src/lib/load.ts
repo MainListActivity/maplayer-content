@@ -98,6 +98,24 @@ export const usePngReady = (urls: string[]): boolean => {
   return ready;
 };
 
+/** 探测一组 PNG 的存在性映射（姿势覆写用）：返回 url→存在？；全部探测完才算就绪。 */
+export const usePngProbeMap = (urls: string[]): Record<string, boolean> | null => {
+  const [map, setMap] = useState<Record<string, boolean> | null>(null);
+  const key = urls.join('|');
+  useEffect(() => {
+    if (!urls.length) {setMap({}); return;}
+    let live = true;
+    setMap(null);
+    const h = delayRender('png probe');
+    Promise.all(urls.map(async (u) => [u, await probePng(u)] as const))
+      .then((entries) => {if (live) setMap(Object.fromEntries(entries));})
+      .catch((error) => cancelRender(error))
+      .finally(() => continueRender(h));
+    return () => {live = false;};
+  }, [key]);
+  return map;
+};
+
 /** 姿势帧预载：与 useAssetSrc 一样先 PNG 后 SVG，确保切帧前全序列就绪。 */
 export const useAssetsReady = (bases: string[]): boolean => {
   const [ready, setReady] = useState(false);

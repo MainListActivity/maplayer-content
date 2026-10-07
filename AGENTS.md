@@ -92,7 +92,8 @@ M6 依赖 M5；M7 依赖 M6。新增角色永远先走 P2 demo，禁止直接进
 - `characters`：`{id, variant, x, y, scale, flip, enter, exit, moves, action, depth}`；y 是脚底锚点。
   `moves` 走位分段（gait/ease）、`enter/exit` 支持 `walk-left|right` 走场、`action` 引用
   `characters/<id>/actions/<name>.json` 动作剪辑（姿势帧+部件轨道）、部件 rig 见
-  `characters/<id>/parts/`；详见 `docs/engine/ANIMATION.md`
+  `characters/<id>/parts/`（rig 模式可纯部件无 default；frames 指 `parts/poses/<帧>/` 覆写图）；
+  详见 `docs/engine/ANIMATION.md`
 - `props`：`{file, x, y, scale, anim: none|blink|blink-fast|float, motion, attachTo, depth}`；
   `motion` 位移关键帧，`attachTo` 跟随角色部件
 - `dialogue`：`[{speaker|null(旁白), text, voice?, gapSec?}]`

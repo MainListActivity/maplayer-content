@@ -21,8 +21,8 @@ const hasScene = (name: string) => hasAsset('scenes', name) || existsSync(join(s
 
 const readJson = (p: string) => {try {return JSON.parse(readFileSync(p, 'utf8'));} catch {return null;}};
 
-// 部件 rig 元数据缓存：角色 id → parts.json（存在性 + 部件名集合）
-const partsCache = new Map<string, {ids: Set<string>} | null>();
+// 部件 rig 元数据缓存：角色 id → parts.json（存在性 + 部件名集合 + 部件文件名集合）
+const partsCache = new Map<string, {ids: Set<string>; files: Set<string>} | null>();
 const partsOf = (c: string) => {
   if (!partsCache.has(c)) {
     const f = join(charsDir, c, 'parts', 'parts.json');
@@ -30,7 +30,7 @@ const partsOf = (c: string) => {
     const r = PartsFileSchema.safeParse(readJson(f));
     if (!r.success) {problems.push(`角色 ${c} parts/parts.json 不符合 PartsFileSchema`); partsCache.set(c, null); return null;}
     for (const d of r.data.parts) if (!existsSync(join(charsDir, c, 'parts', d.file))) problems.push(`角色 ${c} 部件图缺失 parts/${d.file}`);
-    partsCache.set(c, {ids: new Set(r.data.parts.map((d) => d.id))});
+    partsCache.set(c, {ids: new Set(r.data.parts.map((d) => d.id)), files: new Set(r.data.parts.map((d) => d.file))});
   }
   return partsCache.get(c);
 };
@@ -71,10 +71,17 @@ for (const s of shots) {
       const name = typeof c.action === 'string' ? c.action : c.action.name;
       const clip = actionOf(c.id, name);
       if (clip) {
-        for (const f of clip.frames ?? [])
-          if (!existsSync(join(charsDir, c.id, `${f}.png`)) && !existsSync(join(charsDir, c.id, `${f}.svg`)))
-            problems.push(`${s.id}: 角色 ${c.id} 动作 ${name} 缺序列帧 ${f}`);
         const pf = partsOf(c.id);
+        for (const f of clip.frames ?? []) {
+          if (pf) {
+            // rig 模式：帧名 = parts/poses/<f>/ 姿势目录，目录内部件同名 PNG 稀疏覆写
+            const dir = join(charsDir, c.id, 'parts', 'poses', f);
+            const hits = existsSync(dir) ? readdirSync(dir).filter((fn) => pf.files.has(fn)) : [];
+            if (!hits.length) warnings.push(`${s.id}: 角色 ${c.id} 动作 ${name} 帧 ${f} 缺 parts/poses/${f}/ 覆写图（回退基底贴图，该帧无视觉效果）`);
+          } else if (!existsSync(join(charsDir, c.id, `${f}.png`)) && !existsSync(join(charsDir, c.id, `${f}.svg`))) {
+            problems.push(`${s.id}: 角色 ${c.id} 动作 ${name} 缺序列帧 ${f}`);
+          }
+        }
         for (const pid of Object.keys(clip.tracks))
           if (pf && !pf.ids.has(pid)) problems.push(`${s.id}: 角色 ${c.id} 动作 ${name} 轨道部件 ${pid} 不在 parts.json`);
       }
