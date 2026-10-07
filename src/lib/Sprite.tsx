@@ -69,7 +69,7 @@ export const Sprite: React.FC<{episodeId: string; p: Placement; speaking: boolea
       }
     }
   }
-  }, [src, tSec, fps, speaking, p.id, clip, cfg?.speed]);
+  }, [src, tSec, fps, speaking, p.id, clip, cfg?.speed, framesReady]);
 
   if (!src && !partsFile) return null;
 

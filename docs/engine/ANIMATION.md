@@ -20,6 +20,7 @@
 - `durSec` / `at` / `ease`（easeInOut|linear|hold）
 - 缺省 `at` 按声明顺序接前一段结束；解析后按起始时间稳定排序。
   重叠时后段接管，起点冻结为接管时刻的位置，停步后停止步态并保留行进朝向。
+  `walk-out` 在离场开始时接管；其后的 moves 不再执行。
 - `gait`：`walk` = 步态起伏+轻微倾摆；`glide`/`none` = 纯位移
 - **朝向自动**：行进方向左→自动 flip，右→取消 flip；`flip` 字段仍作默认朝向
 - `enter/exit` 新增 `walk-left`/`walk-right`：从画外走入/走出（固定约 1.1s）；
@@ -106,6 +107,7 @@ characters/<id>/
 
 - 层 `depth`：<1 远景（相机移动少）/ 1 随主体 / >1 前景（遮挡角色脚部）。
   depth≤1 的层渲染在角色后，>1 在前。
+  系数同时影响相机平移与缩放；固定 zoom 的摇移也产生视差。depth=1 保留旧相机公式。
 - `ambient`：`dust` 漂浮粒子（depth 决定它在角色前/后）、`flicker` 目标层
   透明度抖动、`pulse` 目标层缩放呼吸。数据驱动，不写死镜头。
   flicker/pulse 省略 `layer` 时应用于全部场景层；指定时只作用于对应 id。

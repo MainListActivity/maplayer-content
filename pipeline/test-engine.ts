@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {ActionClipSchema, PartsFileSchema, PlacementSchema} from '../src/spec';
-import {buildLoco, evalLoco, evalParts, legacyEnterSlide, partAnchorWorld, sequenceIndex} from '../src/lib/rig';
+import {buildLoco, evalLoco, evalParts, layerTransform, legacyEnterSlide, partAnchorWorld, sequenceIndex} from '../src/lib/rig';
 
 const p = PlacementSchema.parse({id: 'bot', x: .2, y: .9, moves: [
   {to: {x: .8, y: .9}, durSec: 4, ease: 'linear'},
@@ -58,3 +58,6 @@ const clip = ActionClipSchema.parse({durationSec: 1, loop: false, tracks: {arm: 
 const anchor = partAnchorWorld(parts, evalParts(parts, clip, 1), 'hand')!;
 assert.ok(Math.abs(anchor.x) < 1e-9 && Math.abs(anchor.y - 10) < 1e-9);
 console.log('PASS parent rig matrix and attached hand anchor');
+assert.equal(layerTransform({fx: .6, fy: .5, z: 1}, .5, 1000, 500), 'translate(-50px, 0px) scale(1)');
+assert.equal(layerTransform({fx: .6, fy: .5, z: 1}, 1, 1000, 500), 'translate(-100px, 0px) scale(1)');
+console.log('PASS depth parallax during fixed-zoom pan');

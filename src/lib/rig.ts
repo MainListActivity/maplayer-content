@@ -21,7 +21,9 @@ export const camPose = (shot: ShotSpec, totalFrames: number, frame: number): {fx
 /** 世界层变换：depth<1 远景动得少（视差），>1 前景动得多。d=1 与相机一致。 */
 export const layerTransform = (pose: {fx: number; fy: number; z: number}, depth: number, W: number, H: number): string => {
   const z = 1 + (pose.z - 1) * depth;
-  return `translate(${W / 2 - z * pose.fx * W}px, ${H / 2 - z * pose.fy * H}px) scale(${z})`;
+  const fx = depth === 1 ? pose.fx : .5 + (pose.fx - .5) * depth;
+  const fy = depth === 1 ? pose.fy : .5 + (pose.fy - .5) * depth;
+  return `translate(${W / 2 - z * fx * W}px, ${H / 2 - z * fy * H}px) scale(${z})`;
 };
 
 /* ---------- 走位 ---------- */
