@@ -58,6 +58,22 @@ const clip = ActionClipSchema.parse({durationSec: 1, loop: false, tracks: {arm: 
 const anchor = partAnchorWorld(parts, evalParts(parts, clip, 1), 'hand')!;
 assert.ok(Math.abs(anchor.x) < 1e-9 && Math.abs(anchor.y - 10) < 1e-9);
 console.log('PASS parent rig matrix and attached hand anchor');
+
+// 命名锚点：points 表里的挂点随同一世界矩阵变换（attachTo.anchor 用）
+const withPoints = PartsFileSchema.parse({size: [100, 200], parts: [
+  {id: 'forearm', file: 'f.png', at: [0, 0], pivot: [10, 10], points: {grip: [10, 60]}},
+]});
+const still0 = evalParts(withPoints, null, 0);
+const elbow = partAnchorWorld(withPoints, still0, 'forearm')!;
+const grip = partAnchorWorld(withPoints, still0, 'forearm', 'grip')!;
+assert.equal(elbow.x, 10); assert.equal(elbow.y, 10);
+assert.equal(grip.x, 10); assert.equal(grip.y, 60);
+assert.equal(partAnchorWorld(withPoints, still0, 'forearm', 'missing')!.y, 10, '未命中锚点退回 pivot');
+// 抬臂 90°：grip 相对 pivot 的偏移随世界矩阵旋转 → (10,60) 偏移 (0,50) 旋转后落 (-40,10)
+const raised = evalParts(withPoints, ActionClipSchema.parse({durationSec: 1, loop: false, tracks: {forearm: [{t: 0, rot: 0}, {t: 1, rot: 90}]}}), 1);
+const grip90 = partAnchorWorld(withPoints, raised, 'forearm', 'grip')!;
+assert.ok(Math.abs(grip90.x - -40) < 1e-6 && Math.abs(grip90.y - 10) < 1e-6, `rot90 grip=${grip90.x},${grip90.y}`);
+console.log('PASS named anchor (points) resolves, missing anchor falls back to pivot, rotates with part');
 assert.equal(layerTransform({fx: .6, fy: .5, z: 1}, .5, 1000, 500), 'translate(-50px, 0px) scale(1)');
 assert.equal(layerTransform({fx: .6, fy: .5, z: 1}, 1, 1000, 500), 'translate(-100px, 0px) scale(1)');
 console.log('PASS depth parallax during fixed-zoom pan');

@@ -20,7 +20,7 @@
    "caption": "姿势序列：变体帧循环 default→worried→determined"},
   {"id": "prop-follow", "scene": "demo-bridge", "holdSec": 4.5,
    "characters": [{"id": "bot", "x": 0.5, "y": 0.95, "action": {"name": "greet", "speed": 0.8}}],
-   "props": [{"file": "tea-mug", "x": 0, "y": 0, "scale": 0.5, "attachTo": {"character": "bot", "part": "forearm-r"}},
+   "props": [{"file": "tea-mug", "x": 0, "y": 0, "scale": 0.5, "attachTo": {"character": "bot", "part": "forearm-r", "anchor": "grip"}},
              {"file": "signal-pip", "x": 0.2, "y": 0.45, "scale": 0.8,
               "motion": [{"t": 0, "x": 0.2, "y": 0.45, "rot": 0},
                          {"t": 2.2, "x": 0.8, "y": 0.35, "rot": 180, "ease": "easeInOut"},

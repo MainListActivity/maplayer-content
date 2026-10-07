@@ -177,12 +177,14 @@ export const evalPropMotion = (kfs: {t: number; x: number; y: number; rot: numbe
   return {x: prev.x + (next.x - prev.x) * e, y: prev.y + (next.y - prev.y) * e, rot: prev.rot + (next.rot - prev.rot) * e};
 };
 
-/** 部件世界锚点（拼合系 px）：pivot 经世界矩阵后的位置 —— attachTo 用。 */
-export const partAnchorWorld = (parts: PartsFile, worlds: Map<string, PartWorld>, partId: string): {x: number; y: number; rot: number; opacity: number} | null => {
+/** 部件世界锚点（拼合系 px）：命名锚点（points 表，如 "grip" 手端）经世界矩阵后的位置；
+ *  anchor 缺省/未命中时退回 pivot —— attachTo 用。validate 负责锚点名存在性卡口。 */
+export const partAnchorWorld = (parts: PartsFile, worlds: Map<string, PartWorld>, partId: string, anchor?: string): {x: number; y: number; rot: number; opacity: number} | null => {
   const def = parts.parts.find((d) => d.id === partId);
   const w = worlds.get(partId);
   if (!def || !w) return null;
   const [a, b, c, d, e, f] = w.m;
-  const x = def.pivot[0], y = def.pivot[1];
+  const pt = (anchor && def.points[anchor]) || def.pivot;
+  const x = pt[0], y = pt[1];
   return {x: a * x + c * y + e, y: b * x + d * y + f, rot: (Math.atan2(b, a) * 180) / Math.PI, opacity: w.opacity};
 };

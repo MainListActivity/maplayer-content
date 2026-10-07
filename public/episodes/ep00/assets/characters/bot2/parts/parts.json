@@ -56,7 +56,13 @@
     380
    ],
    "parent": "arm-l",
-   "depth": 3
+   "depth": 3,
+   "points": {
+    "grip": [
+     86,
+     476
+    ]
+   }
   },
   {
    "id": "torso",
@@ -111,7 +117,13 @@
     380
    ],
    "parent": "arm-r",
-   "depth": 7
+   "depth": 7,
+   "points": {
+    "grip": [
+     314,
+     476
+    ]
+   }
   }
  ]
 }

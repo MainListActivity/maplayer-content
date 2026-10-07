@@ -91,15 +91,20 @@ characters/<id>/
 
 ```jsonc
 {"file": "tea-mug", "x": 0, "y": 0, "scale": 0.5,
- "attachTo": {"character": "bot", "part": "forearm-r"}}
+ "attachTo": {"character": "bot", "part": "forearm-r", "anchor": "grip"}}
 
 {"file": "signal-pip", "x": 0.2, "y": 0.45, "scale": 0.8,
  "motion": [{"t": 0, "x": 0.2, "y": 0.45, "rot": 0},
             {"t": 2.2, "x": 0.8, "y": 0.35, "rot": 180}]}
 ```
 
-- `attachTo`：道具中心锚在目标部件 pivot 上，随部件移动/旋转/透明度；
-  目标无 parts 时退回静态摆位（validate 警告）。
+- `attachTo`：`{character, part, anchor?}`——道具中心锚在部件的命名锚点上，
+  随部件移动/旋转/透明度。`anchor` 指 `parts.json` 部件 `points` 表里的键名
+  （如 `"grip"` 手端握持点），缺省/未命中退回 pivot（旋转关节点）。
+  部件 `points` 是资产属性：手端、指尖、面部朝向等挂点由美术在 parts.json
+  里声明（拼合坐标 px），姿势覆写目录不动几何所以锚点始终有效。
+  目标无 parts 时退回静态摆位（validate 警告）；anchor 名不存在是
+  validate 错误。
 - `motion`：镜头内位移+自转关键帧（优先于静态 x/y）。
 - `depth`：道具与角色统一 z 序混排（大者靠前）。
 
