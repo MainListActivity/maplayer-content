@@ -200,8 +200,8 @@ export const Shot: React.FC<{episodeId: string; tl: ShotTimeline; manifest?: Aud
 
   // 世界系混排：角色与道具按 depth 升序（同级保持声明顺序）
   const actors = [
-    ...shot.characters.map((p) => ({d: p.depth, k: `c:${p.id}`, node: <Sprite key={p.id} episodeId={episodeId} p={p} speaking={speakingAt(p.id)} shotDurSec={shotDurSec} />})),
     ...shot.props.map((pr, i) => ({d: pr.depth, k: `p:${i}`, node: <Prop key={i} episodeId={episodeId} pr={pr} shot={shot} shotDurSec={shotDurSec} />})),
+    ...shot.characters.map((p) => ({d: p.depth, k: `c:${p.id}`, node: <Sprite key={p.id} episodeId={episodeId} p={p} speaking={speakingAt(p.id)} shotDurSec={shotDurSec} />})),
   ].sort((a, b) => a.d - b.d);
 
   const back = sceneDef?.layers.filter((l) => l.depth <= 1) ?? [];

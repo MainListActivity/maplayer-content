@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 520">
+  <!-- 角色模板：在骨架上画，别改定位线。完成后删除 guide 层。
+       比例：头:身=1:4（头心 y152，下巴 y196，脚底 y500 为锚点）
+       图层顺序：后发→腿→躯干→臂→颈→头脸→五官组→前发→耳机/饰品 -->
+  <defs>
+    <filter id="rq"><feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="2" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="4"/></filter>
+  </defs>
+
+  <!-- ===== 画好的成品层（示例骨架，替换为正式绘制） ===== -->
+  <g id="body" filter="url(#rq)" stroke="#1d1826" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+    <!-- 腿 y380-500 / 躯干 y210-392 / 臂 / 颈 / 头 r46 心(127,152) -->
+    <path d="M96 380 L92 500 L114 500 L118 380Z" fill="#2b3245"/>
+    <path d="M146 380 L142 500 L164 500 L168 380Z" fill="#2b3245"/>
+    <path d="M80 212 Q68 300 82 392 L172 392 Q186 300 174 212 Q128 190 80 212Z" fill="#26545a"/>
+    <!-- 阴影阶：同形收窄、偏右下、色 -20% 明度 -->
+    <path d="M150 216 Q168 260 160 380 L172 392 Q186 300 174 212Z" fill="#26545a" stroke="none"/>
+    <circle cx="127" cy="152" r="46" fill="#f0d9c8"/>
+    <path d="M127 196 Q145 192 152 178 Q158 190 146 198 Q134 202 127 196Z" fill="#e0bfa8" stroke="none"/>
+    <!-- 后发+前发 -->
+    <path d="M81 150 Q73 92 127 86 Q181 92 173 150 L169 118 Q152 98 127 98 Q102 98 87 120Z" fill="#26303e"/>
+  </g>
+  <g id="eyes" filter="url(#rq)">
+    <g id="eye-l"><ellipse cx="110" cy="152" rx="6.5" ry="8.5" fill="#1d1826"/></g>
+    <g id="eye-r"><ellipse cx="144" cy="152" rx="6.5" ry="8.5" fill="#1d1826"/></g>
+    <circle cx="112" cy="149" r="2" fill="#f5f2ec"/>
+    <circle cx="146" cy="149" r="2" fill="#f5f2ec"/>
+  </g>
+  <g id="mouth" filter="url(#rq)">
+    <path d="M118 180 q9 6 18 0" stroke="#1d1826" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+  </g>
+  <ellipse id="mouth-open" cx="127" cy="182" rx="7" ry="9" fill="#6b3333" style="display:none"/>
+
+  <!-- ===== 定位参考线（交付前删除此层） ===== -->
+
+<g id="arm-r" data-pivot="174 220" stroke="#1d1826" stroke-width="4"><path d="M174 212 Q204 244 204 300 L185 300 Q183 250 164 228Z" fill="#26545a"/><circle cx="193" cy="304" r="11" fill="#f0d9c8"/></g><rect x="92" y="244" width="10" height="12" rx="3" fill="#26545a"/><rect x="110" y="244" width="10" height="12" rx="3" fill="#26545a"/><rect x="128" y="244" width="10" height="12" rx="3" fill="#26545a"/><rect x="146" y="244" width="10" height="12" rx="3" fill="#26545a"/><rect x="92" y="266" width="10" height="12" rx="3" fill="#26545a"/><rect x="110" y="266" width="10" height="12" rx="3" fill="#26545a"/><rect x="128" y="266" width="10" height="12" rx="3" fill="#26545a"/><rect x="146" y="266" width="10" height="12" rx="3" fill="#26545a"/><rect x="92" y="288" width="10" height="12" rx="3" fill="#26545a"/><rect x="110" y="288" width="10" height="12" rx="3" fill="#26545a"/><rect x="128" y="288" width="10" height="12" rx="3" fill="#26545a"/><rect x="146" y="288" width="10" height="12" rx="3" fill="#26545a"/><rect x="92" y="310" width="10" height="12" rx="3" fill="#26545a"/><rect x="110" y="310" width="10" height="12" rx="3" fill="#26545a"/><rect x="128" y="310" width="10" height="12" rx="3" fill="#26545a"/><rect x="146" y="310" width="10" height="12" rx="3" fill="#26545a"/></svg>

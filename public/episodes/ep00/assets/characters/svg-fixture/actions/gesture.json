@@ -1,0 +1,1 @@
+{"durationSec": 2, "fps": 2, "loop": true, "frames": ["default", "point"], "tracks": {"arm-r": [{"t": 0, "rot": 0}, {"t": 1, "rot": -110}, {"t": 2, "rot": 0}]}}

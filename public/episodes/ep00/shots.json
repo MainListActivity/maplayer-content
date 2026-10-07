@@ -38,5 +38,30 @@
      "moves": [{"to": {"x": 0.45, "y": 0.95}, "durSec": 1.5}],
      "action": {"name": "greet", "speed": 0.7}}],
    "dialogue": [{"speaker": "bot", "text": "演出引擎自检：走位、关节、序列、景深全部就位。"}],
-   "caption": "综合：走位 + 关节 + 字幕兼容"}
+   "caption": "综合：走位 + 关节 + 字幕兼容"},
+{
+  "id": "svg-sequence",
+  "scene": "demo-bridge",
+  "holdSec": 4,
+  "characters": [
+    {
+      "id": "svg-fixture",
+      "x": 0.5,
+      "y": 0.9,
+      "scale": 0.8,
+      "action": {
+        "name": "gesture",
+        "speed": 2,
+        "loop": false
+      }
+    }
+  ],
+  "dialogue": [
+    {
+      "speaker": "svg-fixture",
+      "text": "关节与姿势序列测试。"
+    }
+  ],
+  "caption": "工程夹具：SVG 帧序列 + 关节叠加，speed=2 / loop=false"
+}
 ]}
