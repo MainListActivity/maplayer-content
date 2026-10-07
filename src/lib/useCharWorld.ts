@@ -3,7 +3,7 @@ import {useCurrentFrame, useVideoConfig} from 'remotion';
 import {z} from 'zod';
 import {ActionClip, ActionClipSchema, PartsFile, PartsFileSchema, PlacementSchema} from '../spec';
 import {useJsonOpt} from './load';
-import {buildLoco, evalLoco, evalParts, gaitBob, legacyEnterSlide, PartWorld} from './rig';
+import {buildLoco, evalLoco, evalParts, gaitBob, idleBob, legacyEnterSlide, PartWorld} from './rig';
 
 export type Placement = z.infer<typeof PlacementSchema>;
 
@@ -62,5 +62,9 @@ export const useCharWorld = (episodeId: string, p: Placement | null, shotDurSec:
     [partsFile, clip, tSec, cfg?.speed],
   );
 
-  return {tSec, charBase, partsFile, clip, cfg, pos: {x, y: loco.y + bob.dy / H}, ground: {x, y: loco.y}, liftPx: Math.max(0, -bob.dy), flip: loco.flip, tilt: bob.tilt, hPx, worlds};
+  // 与 Sprite 同款 legacy 判定：常驻闲置 bob 也计入抬升量，阴影随其衰减。
+  const legacy = !!p && !partsFile && !clip && !p.moves.length && !p.enter.startsWith('walk') && !p.exit.startsWith('walk');
+  const idleDy = legacy ? idleBob(tSec, p.id) : 0;
+
+  return {tSec, charBase, partsFile, clip, cfg, pos: {x, y: loco.y + bob.dy / H}, ground: {x, y: loco.y}, liftPx: Math.max(0, -(bob.dy + idleDy)), flip: loco.flip, tilt: bob.tilt, hPx, worlds};
 };

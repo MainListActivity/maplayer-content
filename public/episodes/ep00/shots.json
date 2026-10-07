@@ -262,64 +262,134 @@
   },
   {
    "id": "shadow-on",
-   "scene": "demo-bridge",
-   "holdSec": 3,
+   "scene": "yard",
+   "holdSec": 3.5,
+   "camera": {
+    "from": {
+     "x": 0.5,
+     "y": 0.5,
+     "zoom": 1
+    }
+   },
    "characters": [
     {
      "id": "bot",
-     "x": 0.42,
-     "y": 0.95
+     "x": 0.3,
+     "y": 0.8
     },
     {
      "id": "rin",
-     "x": 0.66,
-     "y": 0.96,
+     "x": 0.56,
+     "y": 0.81,
      "scale": 0.9
+    },
+    {
+     "id": "svg-fixture",
+     "x": 0.78,
+     "y": 0.8,
+     "scale": 0.7
     }
    ],
-   "caption": "落地阴影：默认开（椭圆投影+脚底接触暗芯）"
+   "caption": "落地阴影：默认开（部件 rig / 位图 / SVG 同口径投影）"
   },
   {
    "id": "shadow-off",
-   "scene": "demo-bridge",
-   "holdSec": 3,
+   "scene": "yard",
+   "holdSec": 3.5,
+   "camera": {
+    "from": {
+     "x": 0.5,
+     "y": 0.5,
+     "zoom": 1
+    }
+   },
    "shadow": {
     "enabled": false
    },
    "characters": [
     {
      "id": "bot",
-     "x": 0.42,
-     "y": 0.95
+     "x": 0.3,
+     "y": 0.8
     },
     {
      "id": "rin",
-     "x": 0.66,
-     "y": 0.96,
+     "x": 0.56,
+     "y": 0.81,
      "scale": 0.9
+    },
+    {
+     "id": "svg-fixture",
+     "x": 0.78,
+     "y": 0.8,
+     "scale": 0.7
     }
    ],
-   "caption": "对照：shot.shadow.enabled=false"
+   "caption": "对照：shot.shadow.enabled=false（纸片漂浮）"
   },
   {
    "id": "shadow-partial",
-   "scene": "demo-bridge",
-   "holdSec": 3,
+   "scene": "yard",
+   "holdSec": 3.5,
+   "camera": {
+    "from": {
+     "x": 0.5,
+     "y": 0.5,
+     "zoom": 1
+    }
+   },
    "characters": [
     {
      "id": "bot",
-     "x": 0.4,
-     "y": 0.95,
+     "x": 0.3,
+     "y": 0.8,
      "shadow": false
     },
     {
      "id": "rin",
-     "x": 0.66,
-     "y": 0.96,
+     "x": 0.56,
+     "y": 0.81,
      "scale": 0.9
+    },
+    {
+     "id": "svg-fixture",
+     "x": 0.78,
+     "y": 0.8,
+     "scale": 0.7
     }
    ],
-   "caption": "单角色 shadow=false：悬浮物不投影（bot 无影 / rin 有影）"
+   "caption": "单角色豁免：bot shadow=false 无影，rin/svg-fixture 有影"
+  },
+  {
+   "id": "shadow-walk",
+   "scene": "yard",
+   "holdSec": 4.5,
+   "camera": {
+    "from": {
+     "x": 0.5,
+     "y": 0.5,
+     "zoom": 1
+    }
+   },
+   "characters": [
+    {
+     "id": "bot",
+     "x": 0.16,
+     "y": 0.8,
+     "enter": "walk-left",
+     "moves": [
+      {
+       "to": {
+        "x": 0.62,
+        "y": 0.8
+       },
+       "durSec": 2.2,
+       "gait": "walk"
+      }
+     ]
+    }
+   ],
+   "caption": "走位中阴影跟随：walk-left 入场 + move 位移"
   }
  ]
 }

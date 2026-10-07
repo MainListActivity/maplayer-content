@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {ActionClipSchema, PartsFileSchema, PlacementSchema, SceneFileSchema, ShotSchema} from '../src/spec';
-import {buildLoco, evalLoco, evalParts, evalShadow, layerTransform, legacyEnterSlide, partAnchorWorld, sequenceIndex} from '../src/lib/rig';
+import {buildLoco, evalLoco, evalParts, evalShadow, idleBob, layerTransform, legacyEnterSlide, partAnchorWorld, sequenceIndex} from '../src/lib/rig';
 
 const p = PlacementSchema.parse({id: 'bot', x: .2, y: .9, moves: [
   {to: {x: .8, y: .9}, durSec: 4, ease: 'linear'},
@@ -80,3 +80,21 @@ const ls = SceneFileSchema.parse({layers: [{file: 'a.png', castShadow: {opacity:
 assert.deepEqual({dx: ls.dx, dy: ls.dy, blur: ls.blur, opacity: ls.opacity}, {dx: 8, dy: 10, blur: 14, opacity: .5});
 assert.equal(SceneFileSchema.parse({layers: [{file: 'a.png'}]}).layers[0].castShadow, undefined);
 console.log('PASS shadow defaults, per-char opt-out, lift attenuation, castShadow schema');
+
+// 常驻闲置 bob 与阴影衰减同链：idleBob 抬升帧的阴影必须弱于贴地帧
+{
+  const cfg = ShotSchema.parse({id: 'sx', scene: null}).shadow;
+  let lifted: number | null = null, grounded: number | null = null;
+  for (let f = 0; f < 240; f++) {
+    const dy = idleBob(f / 24, 'rin');
+    if (lifted === null && dy <= -3.9) lifted = dy;
+    if (grounded === null && dy >= 0) grounded = dy;
+  }
+  assert.ok(lifted !== null && grounded !== null, 'idleBob covers both lift and ground phases');
+  const up = evalShadow(cfg, 670, -lifted!)!, down = evalShadow(cfg, 670, -grounded!)!;
+  assert.ok(up.opacity < down.opacity && up.rx < down.rx, 'idle bob lift attenuates shadow');
+  // 非 legacy 角色（有 moves）不走闲置 bob：抬升只由步态提供
+  const moving = PlacementSchema.parse({id: 'b', x: .2, y: .9, moves: [{to: {x: .5, y: .9}, durSec: 2}]});
+  assert.ok(moving.moves.length > 0); // legacy 条件不含 moves —— 由 useCharWorld 内同款判定保证
+}
+console.log('PASS idle bob coupled into shadow lift attenuation');

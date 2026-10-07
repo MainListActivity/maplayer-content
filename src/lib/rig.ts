@@ -84,6 +84,9 @@ export const legacyEnterSlide = (p: Placement, tSec: number): number =>
 
 export const spriteHash = (s: string) => [...s].reduce((a, c) => (a * 31 + c.charCodeAt(0)) >>> 0, 7);
 
+/** 常驻闲置浮动（旧角色视觉，Sprite 与落地阴影共用同一位移源）。正值=下沉。 */
+export const idleBob = (tSec: number, charId: string): number => Math.sin(tSec * 2.2 + spriteHash(charId)) * 4;
+
 export const sequenceIndex = (clip: ActionClip, tSec: number, speed = 1): number => {
   const n = clip.frames?.length ?? 0;
   if (!n) return 0;
