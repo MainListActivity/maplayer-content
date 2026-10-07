@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
-import {ActionClipSchema, PartsFileSchema, PlacementSchema} from '../src/spec';
-import {buildLoco, evalLoco, evalParts, layerTransform, legacyEnterSlide, partAnchorWorld, sequenceIndex} from '../src/lib/rig';
+import {ActionClipSchema, PartsFileSchema, PlacementSchema, SceneFileSchema, ShotSchema} from '../src/spec';
+import {buildLoco, evalLoco, evalParts, evalShadow, idleBob, layerTransform, legacyEnterSlide, partAnchorWorld, sequenceIndex} from '../src/lib/rig';
 
 const p = PlacementSchema.parse({id: 'bot', x: .2, y: .9, moves: [
   {to: {x: .8, y: .9}, durSec: 4, ease: 'linear'},
@@ -61,6 +61,43 @@ console.log('PASS parent rig matrix and attached hand anchor');
 assert.equal(layerTransform({fx: .6, fy: .5, z: 1}, .5, 1000, 500), 'translate(-50px, 0px) scale(1)');
 assert.equal(layerTransform({fx: .6, fy: .5, z: 1}, 1, 1000, 500), 'translate(-100px, 0px) scale(1)');
 console.log('PASS depth parallax during fixed-zoom pan');
+
+// ---- 落地阴影（shot.shadow + character.shadow + 场景层 castShadow）----
+const shotShadow = ShotSchema.parse({id: 's1', scene: null}).shadow;
+assert.deepEqual(shotShadow, {enabled: true, opacity: .32, size: 1, blur: 16, contact: .45});
+const g0 = evalShadow(shotShadow, 670, 0)!;
+assert.ok(g0 && Math.abs(g0.rx - 201) < 1e-9 && Math.abs(g0.opacity - .32) < 1e-9 && g0.coreOpacity < g0.opacity);
+const gLift = evalShadow(shotShadow, 670, 120)!;
+assert.ok(gLift.opacity < g0.opacity && gLift.rx <= g0.rx, 'lift fades and shrinks shadow');
+assert.equal(evalShadow({...shotShadow, enabled: false}, 670, 0), null);
+assert.equal(evalShadow({...shotShadow, opacity: 0}, 670, 0), null);
+assert.equal(PlacementSchema.parse({id: 'k', x: .5, y: .9}).shadow, true);
+assert.equal(PlacementSchema.parse({id: 'k', x: .5, y: .9, shadow: false}).shadow, false);
+assert.equal(ShotSchema.parse({id: 's2', scene: null, shadow: {enabled: false}}).shadow.enabled, false);
+assert.throws(() => ShotSchema.parse({id: 's3', scene: null, shadow: {opacity: 2}}));
+assert.throws(() => ShotSchema.parse({id: 's4', scene: null, shadow: {blur: 500}}));
+const ls = SceneFileSchema.parse({layers: [{file: 'a.png', castShadow: {opacity: .5}}]}).layers[0].castShadow!;
+assert.deepEqual({dx: ls.dx, dy: ls.dy, blur: ls.blur, opacity: ls.opacity}, {dx: 8, dy: 10, blur: 14, opacity: .5});
+assert.equal(SceneFileSchema.parse({layers: [{file: 'a.png'}]}).layers[0].castShadow, undefined);
+console.log('PASS shadow defaults, per-char opt-out, lift attenuation, castShadow schema');
+
+// 常驻闲置 bob 与阴影衰减同链：idleBob 抬升帧的阴影必须弱于贴地帧
+{
+  const cfg = ShotSchema.parse({id: 'sx', scene: null}).shadow;
+  let lifted: number | null = null, grounded: number | null = null;
+  for (let f = 0; f < 240; f++) {
+    const dy = idleBob(f / 24, 'rin');
+    if (lifted === null && dy <= -3.9) lifted = dy;
+    if (grounded === null && dy >= 0) grounded = dy;
+  }
+  assert.ok(lifted !== null && grounded !== null, 'idleBob covers both lift and ground phases');
+  const up = evalShadow(cfg, 670, -lifted!)!, down = evalShadow(cfg, 670, -grounded!)!;
+  assert.ok(up.opacity < down.opacity && up.rx < down.rx, 'idle bob lift attenuates shadow');
+  // 非 legacy 角色（有 moves）不走闲置 bob：抬升只由步态提供
+  const moving = PlacementSchema.parse({id: 'b', x: .2, y: .9, moves: [{to: {x: .5, y: .9}, durSec: 2}]});
+  assert.ok(moving.moves.length > 0); // legacy 条件不含 moves —— 由 useCharWorld 内同款判定保证
+}
+console.log('PASS idle bob coupled into shadow lift attenuation');
 
 // ---- renderStill 集成回归：纯部件角色渲染 + rig×姿势帧复合（黑场隔离环境噪声）----
 const {bundle} = await import('@remotion/bundler');

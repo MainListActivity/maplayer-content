@@ -3,7 +3,7 @@ import {useCurrentFrame, useVideoConfig} from 'remotion';
 import {z} from 'zod';
 import {ActionClip, ActionClipSchema, PartsFile, PartsFileSchema, PlacementSchema} from '../spec';
 import {useJsonOpt} from './load';
-import {buildLoco, evalLoco, evalParts, gaitBob, legacyEnterSlide, PartWorld} from './rig';
+import {buildLoco, evalLoco, evalParts, gaitBob, idleBob, legacyEnterSlide, PartWorld} from './rig';
 
 export type Placement = z.infer<typeof PlacementSchema>;
 
@@ -18,8 +18,12 @@ export interface CharWorld {
   partsFile: PartsFile | null;
   clip: ActionClip | null;
   cfg: {name: string; speed: number; loop?: boolean} | null;
-  /** 世界系归一化锚点（脚底中心）+ 自动朝向 + 步态倾斜。 */
+  /** 世界系归一化锚点（脚底中心，含步态起伏）+ 自动朝向 + 步态倾斜。 */
   pos: {x: number; y: number};
+  /** 地面锚点（不含 bob 起伏）：落地阴影钉在这里，脚下有影而影不随脚抬。 */
+  ground: {x: number; y: number};
+  /** 离地抬升量 px（步态腾空/浮动）；>0 时阴影衰减。 */
+  liftPx: number;
   flip: boolean;
   tilt: number;
   hPx: number;
@@ -60,5 +64,9 @@ export const useCharWorld = (episodeId: string, p: Placement | null, shotDurSec:
     [partsFile, clip, tSec, cfg?.speed],
   );
 
-  return {tSec, charBase, partsReady: partsRaw.ready, partsFile, clip, cfg, pos: {x, y: loco.y + bob.dy / H}, flip: loco.flip, tilt: bob.tilt, hPx, worlds};
+  // 与 Sprite 同款 legacy 判定：常驻闲置 bob 也计入抬升量，阴影随其衰减。
+  const legacy = !!p && !partsFile && !clip && !p.moves.length && !p.enter.startsWith('walk') && !p.exit.startsWith('walk');
+  const idleDy = legacy ? idleBob(tSec, p.id) : 0;
+
+  return {tSec, charBase, partsReady: partsRaw.ready, partsFile, clip, cfg, pos: {x, y: loco.y + bob.dy / H}, ground: {x, y: loco.y}, liftPx: Math.max(0, -(bob.dy + idleDy)), flip: loco.flip, tilt: bob.tilt, hPx, worlds};
 };

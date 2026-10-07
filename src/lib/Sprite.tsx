@@ -1,7 +1,7 @@
 import React, {useEffect, useMemo, useRef} from 'react';
 import {staticFile, useVideoConfig} from 'remotion';
 import {useAssetSrc, useAssetsReady, usePngProbeMap, usePngReady} from './load';
-import {evalKf, sequenceIndex, spriteHash} from './rig';
+import {evalKf, idleBob, sequenceIndex, spriteHash} from './rig';
 import {Placement, useCharWorld} from './useCharWorld';
 
 /**
@@ -95,7 +95,7 @@ export const Sprite: React.FC<{episodeId: string; p: Placement; speaking: boolea
   if (!src && !partsFile) return null;
 
   const legacy = !partsFile && !clip && !p.moves.length && !p.enter.startsWith('walk') && !p.exit.startsWith('walk');
-  const bob = legacy ? Math.sin(tSec * 2.2 + spriteHash(p.id)) * 4 : 0;
+  const bob = legacy ? idleBob(tSec, p.id) : 0; // 与 useCharWorld.liftPx 同一位移源：阴影随其衰减
   const talkPulse = src?.kind === 'png' && speaking && Math.floor(Math.round(tSec * fps) / (fps / 6)) % 2 === 0 ? 1.015 : 1;
   const innerStyle: React.CSSProperties = {height: '100%', transformOrigin: '50% 100%', transform: `translateY(${bob}px) scaleY(${talkPulse})`};
   const outerStyle: React.CSSProperties = {
