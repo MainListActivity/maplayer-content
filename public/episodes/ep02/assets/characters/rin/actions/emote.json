@@ -1,0 +1,13 @@
+{
+ "durationSec": 3.6,
+ "loop": false,
+ "hold": true,
+ "fps": 1.2,
+ "frames": [
+  "calm",
+  "determined",
+  "surprised",
+  "smile"
+ ],
+ "tracks": {}
+}

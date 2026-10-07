@@ -1,0 +1,13 @@
+{
+ "id": "ep02",
+ "title": "凛 动作资产 demo",
+ "fps": 24,
+ "width": 1920,
+ "height": 1080,
+ "letterbox": true,
+ "grain": false,
+ "voices": {},
+ "names": {
+  "rin": "凛"
+ }
+}

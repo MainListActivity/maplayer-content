@@ -1,0 +1,168 @@
+{
+ "shots": [
+  {
+   "id": "walk-in",
+   "scene": "bridge",
+   "holdSec": 4.2,
+   "padInSec": 0.15,
+   "padOutSec": 0.25,
+   "camera": {
+    "from": {
+     "x": 0.5,
+     "y": 0.52,
+     "zoom": 1.08
+    },
+    "to": {
+     "x": 0.5,
+     "y": 0.52,
+     "zoom": 1.18
+    },
+    "ease": "easeInOut"
+   },
+   "characters": [
+    {
+     "id": "rin",
+     "x": 0.5,
+     "y": 0.95,
+     "enter": "walk-left",
+     "moves": [
+      {
+       "to": {
+        "x": 0.58,
+        "y": 0.96
+       },
+       "durSec": 2.6,
+       "gait": "walk"
+      }
+     ],
+     "action": "walk"
+    }
+   ],
+   "caption": "凛·动作demo：walk-left入场 + 走路循环序列帧（4帧@7fps）+ gait步态起伏"
+  },
+  {
+   "id": "point",
+   "scene": "bridge",
+   "holdSec": 2.4,
+   "padInSec": 0.15,
+   "padOutSec": 0.25,
+   "camera": {
+    "from": {
+     "x": 0.52,
+     "y": 0.5,
+     "zoom": 1.28
+    }
+   },
+   "characters": [
+    {
+     "id": "rin",
+     "x": 0.52,
+     "y": 0.96,
+     "action": "point"
+    }
+   ],
+   "caption": "手势：抬手指向前方（2帧过渡→hold）"
+  },
+  {
+   "id": "offer",
+   "scene": "bridge",
+   "holdSec": 2.4,
+   "padInSec": 0.15,
+   "padOutSec": 0.25,
+   "camera": {
+    "from": {
+     "x": 0.52,
+     "y": 0.5,
+     "zoom": 1.28
+    }
+   },
+   "characters": [
+    {
+     "id": "rin",
+     "x": 0.5,
+     "y": 0.96,
+     "action": "offer"
+    }
+   ],
+   "props": [
+    {
+     "file": "tea-mug",
+     "x": 0.572,
+     "y": 0.645,
+     "scale": 0.55,
+     "anim": "float"
+    }
+   ],
+   "caption": "手势：托起道具（杯悬浮于手位上方）"
+  },
+  {
+   "id": "emote",
+   "scene": "bridge",
+   "holdSec": 4.0,
+   "padInSec": 0.15,
+   "padOutSec": 0.25,
+   "camera": {
+    "from": {
+     "x": 0.5,
+     "y": 0.42,
+     "zoom": 1.45
+    }
+   },
+   "characters": [
+    {
+     "id": "rin",
+     "x": 0.5,
+     "y": 0.96,
+     "action": "emote"
+    }
+   ],
+   "caption": "表情切换：平静→坚定→惊讶→微笑（1.2fps 序列）"
+  },
+  {
+   "id": "sit",
+   "scene": "bridge",
+   "holdSec": 2.6,
+   "padInSec": 0.15,
+   "padOutSec": 0.25,
+   "camera": {
+    "from": {
+     "x": 0.5,
+     "y": 0.55,
+     "zoom": 1.15
+    }
+   },
+   "characters": [
+    {
+     "id": "rin",
+     "x": 0.5,
+     "y": 0.96,
+     "action": "sit"
+    }
+   ],
+   "caption": "姿态：俯身坐下（大腿外展+小腿内折+躯干下沉）"
+  },
+  {
+   "id": "look-back",
+   "scene": "bridge",
+   "holdSec": 2.2,
+   "padInSec": 0.15,
+   "padOutSec": 0.25,
+   "camera": {
+    "from": {
+     "x": 0.5,
+     "y": 0.5,
+     "zoom": 1.2
+    }
+   },
+   "characters": [
+    {
+     "id": "rin",
+     "x": 0.5,
+     "y": 0.96,
+     "action": "lookback"
+    }
+   ],
+   "caption": "姿态：转身回眸（头部镜像+侧倾）"
+  }
+ ]
+}

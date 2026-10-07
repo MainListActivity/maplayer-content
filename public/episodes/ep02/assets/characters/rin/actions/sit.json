@@ -1,0 +1,11 @@
+{
+ "durationSec": 0.5,
+ "loop": false,
+ "hold": true,
+ "fps": 8,
+ "frames": [
+  "pose/sit-mid",
+  "pose/sit"
+ ],
+ "tracks": {}
+}

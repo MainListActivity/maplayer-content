@@ -1,0 +1,11 @@
+{
+ "durationSec": 0.375,
+ "loop": false,
+ "hold": true,
+ "fps": 8,
+ "frames": [
+  "pose/offer-mid",
+  "pose/offer"
+ ],
+ "tracks": {}
+}
