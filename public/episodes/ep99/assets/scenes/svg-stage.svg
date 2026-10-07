@@ -1,0 +1,78 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid slice">
+  <!-- svg-stage 测试场景：夜航甲板平台 -->
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0b1022"/><stop offset="0.7" stop-color="#1b2440"/><stop offset="1" stop-color="#2a3350"/>
+    </linearGradient>
+    <linearGradient id="deck" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2b3245"/><stop offset="1" stop-color="#171c2a"/>
+    </linearGradient>
+    <filter id="rq-bg"><feTurbulence type="fractalNoise" baseFrequency="0.012" numOctaves="2" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="5"/></filter>
+    <filter id="glow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="8" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <rect width="1920" height="1080" fill="url(#sky)"/>
+  <g fill="#f5f2ec" opacity="0.8">
+    <circle cx="200" cy="140" r="3"/><circle cx="480" cy="90" r="2"/><circle cx="760" cy="170" r="2.5"/>
+    <circle cx="1120" cy="80" r="2"/><circle cx="1420" cy="160" r="3"/><circle cx="1700" cy="110" r="2"/>
+    <circle cx="330" cy="260" r="2"/><circle cx="980" cy="230" r="2.5"/><circle cx="1560" cy="300" r="2"/>
+    <circle cx="90" cy="220" r="2"/><circle cx="620" cy="130" r="2"/><circle cx="880" cy="60" r="3"/>
+    <circle cx="1290" cy="230" r="2"/><circle cx="1640" cy="210" r="2"/><circle cx="1850" cy="180" r="2.5"/>
+    <circle cx="240" cy="60" r="2"/><circle cx="540" cy="220" r="2"/><circle cx="700" cy="300" r="2"/>
+    <circle cx="1050" cy="150" r="2"/><circle cx="1360" cy="60" r="2.5"/><circle cx="1500" cy="340" r="2"/>
+    <circle cx="410" cy="170" r="2.5"/><circle cx="840" cy="270" r="2"/><circle cx="1780" cy="60" r="2"/>
+    <circle cx="60" cy="90" r="2"/><circle cx="1180" cy="300" r="2"/><circle cx="930" cy="110" r="2"/>
+  </g>
+  <!-- 高空云带 -->
+  <g fill="#2a3350" opacity="0.55">
+    <ellipse cx="400" cy="330" rx="300" ry="26"/>
+    <ellipse cx="1300" cy="380" rx="360" ry="30"/>
+    <ellipse cx="880" cy="300" rx="200" ry="18"/>
+  </g>
+  <circle cx="1560" cy="220" r="90" fill="#e8ddc8" opacity="0.9"/>
+  <circle cx="1530" cy="200" r="84" fill="#d8cbb0" opacity="0.5" stroke="none"/>
+  <g filter="url(#rq-bg)">
+    <!-- 远山剪影 -->
+    <path d="M0 700 L300 560 L560 690 L820 580 L1100 700 L1360 600 L1620 710 L1920 640 L1920 1080 L0 1080Z" fill="#141a2c"/>
+    <!-- 甲板地面 -->
+    <path d="M0 780 L1920 780 L1920 1080 L0 1080Z" fill="url(#deck)"/>
+    <path d="M0 782 L1920 782" stroke="#3d4a5e" stroke-width="6" fill="none"/>
+    <!-- 甲板标线 -->
+    <path d="M200 860 L620 860 M760 860 L1180 860 M1320 860 L1720 860" stroke="#ffd27a" stroke-width="5" stroke-dasharray="60 40" fill="none" opacity="0.7"/>
+    <ellipse cx="960" cy="960" rx="360" ry="60" fill="none" stroke="#3d4a5e" stroke-width="6"/>
+    <ellipse cx="960" cy="960" rx="240" ry="38" fill="none" stroke="#3d4a5e" stroke-width="4"/>
+    <!-- 立柱 -->
+    <rect x="120" y="330" width="46" height="460" fill="#1d2438"/>
+    <rect x="1740" y="300" width="46" height="490" fill="#1d2438"/>
+    <rect x="110" y="320" width="66" height="24" rx="6" fill="#26303e"/>
+    <rect x="1730" y="290" width="66" height="24" rx="6" fill="#26303e"/>
+    <!-- 航行灯 -->
+    <circle cx="143" cy="316" r="8" fill="#e04a4a" filter="url(#glow)"/>
+    <circle cx="1763" cy="286" r="8" fill="#5ce08a" filter="url(#glow)"/>
+    <!-- 远处信标柱 -->
+    <rect x="700" y="470" width="18" height="320" fill="#1d2438"/>
+    <circle cx="709" cy="464" r="7" fill="#7fd8e8" filter="url(#glow)"/>
+    <rect x="1240" y="500" width="14" height="290" fill="#1d2438"/>
+    <circle cx="1247" cy="494" r="6" fill="#7fd8e8" filter="url(#glow)"/>
+    <!-- 甲板焊缝与铆钉 -->
+    <path d="M420 782 L400 1080" stroke="#242c40" stroke-width="4" fill="none"/>
+    <path d="M860 782 L880 1080" stroke="#242c40" stroke-width="4" fill="none"/>
+    <path d="M1300 782 L1340 1080" stroke="#242c40" stroke-width="4" fill="none"/>
+    <path d="M0 920 L1920 920" stroke="#242c40" stroke-width="3" fill="none"/>
+    <circle cx="360" cy="820" r="4" fill="#3d4a5e" stroke="none"/>
+    <circle cx="620" cy="830" r="4" fill="#3d4a5e" stroke="none"/>
+    <circle cx="1080" cy="818" r="4" fill="#3d4a5e" stroke="none"/>
+    <circle cx="1520" cy="826" r="4" fill="#3d4a5e" stroke="none"/>
+    <!-- 立柱检修窗 -->
+    <rect x="128" y="420" width="30" height="60" rx="4" fill="#10222c"/>
+    <rect x="1748" y="400" width="30" height="60" rx="4" fill="#10222c"/>
+    <circle cx="143" cy="448" r="5" fill="#7fd8e8" stroke="none"/>
+    <circle cx="1763" cy="428" r="5" fill="#7fd8e8" stroke="none"/>
+    <!-- 系留桩 -->
+    <rect x="300" y="740" width="26" height="44" rx="6" fill="#26303e"/>
+    <rect x="1620" y="736" width="26" height="48" rx="6" fill="#26303e"/>
+    <rect x="296" y="732" width="34" height="12" rx="5" fill="#35506b"/>
+    <rect x="1616" y="728" width="34" height="12" rx="5" fill="#35506b"/>
+  </g>
+</svg>

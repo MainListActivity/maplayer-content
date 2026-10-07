@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 160">
+  <!-- 手提信号灯 · 中心锚点 (60,80) -->
+  <defs>
+    <filter id="rq-sm"><feTurbulence type="fractalNoise" baseFrequency="0.03" numOctaves="2" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2.5"/></filter>
+    <filter id="glow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <g filter="url(#rq-sm)" stroke="#1d1826" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M48 22 Q60 6 72 22" fill="none"/>
+    <rect x="50" y="20" width="20" height="10" rx="4" fill="#2a4157"/>
+    <path d="M38 34 L82 34 L88 96 L32 96Z" fill="#35506b"/>
+    <path d="M44 42 L76 42 L80 88 L40 88Z" fill="#10222c"/>
+    <ellipse cx="60" cy="66" rx="12" ry="18" fill="#ffd27a" filter="url(#glow)" stroke="none"/>
+    <path d="M52 42 L50 88 M68 42 L70 88" fill="none"/>
+    <rect x="30" y="96" width="60" height="12" rx="5" fill="#26303e"/>
+    <path d="M60 108 L60 126" fill="none"/>
+    <circle cx="60" cy="132" r="6" fill="#e04a4a" stroke="none"/>
+  </g>
+</svg>

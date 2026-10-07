@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 520">
+  <!-- svgbot 巡检机器人 · point：右臂举起指向（手势变体）。底部中心 (120,500) 为站位锚点。 -->
+  <defs>
+    <filter id="rq"><feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="2" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="4"/></filter>
+    <filter id="glow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <g id="body" filter="url(#rq)" stroke="#1d1826" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+    <!-- 履带脚 -->
+    <rect x="70" y="452" width="44" height="48" rx="14" fill="#26303e"/>
+    <rect x="126" y="452" width="44" height="48" rx="14" fill="#26303e"/>
+    <circle cx="86" cy="476" r="7" fill="#3d4a5e" stroke="none"/>
+    <circle cx="98" cy="476" r="7" fill="#3d4a5e" stroke="none"/>
+    <circle cx="142" cy="476" r="7" fill="#3d4a5e" stroke="none"/>
+    <circle cx="154" cy="476" r="7" fill="#3d4a5e" stroke="none"/>
+    <!-- 躯干 -->
+    <path d="M72 300 Q66 420 84 452 L156 452 Q174 420 168 300 Q120 284 72 300Z" fill="#35506b"/>
+    <path d="M140 296 Q158 380 150 452 L156 452 Q174 420 168 300Z" fill="#2a4157" stroke="none"/>
+    <!-- 胸灯（警戒色） -->
+    <circle cx="112" cy="356" r="16" fill="#0f2530"/>
+    <circle cx="112" cy="356" r="9" fill="#ffd27a" filter="url(#glow)" stroke="none"/>
+    <!-- 腰缝 -->
+    <path d="M84 420 Q120 430 156 420" fill="none"/>
+    <!-- 左臂垂放 -->
+    <path d="M76 312 Q58 348 62 392" fill="none"/>
+    <circle cx="63" cy="396" r="10" fill="#2a4157"/>
+    <!-- 右臂举起指向 -->
+    <path d="M164 312 Q200 270 208 222" fill="none"/>
+    <circle cx="208" cy="218" r="10" fill="#2a4157"/>
+    <path d="M210 214 L216 188" fill="none"/>
+    <circle cx="217" cy="184" r="5" fill="#ffd27a" filter="url(#glow)" stroke="none"/>
+    <!-- 颈 -->
+    <rect x="108" y="262" width="24" height="34" rx="8" fill="#2a4157"/>
+    <!-- 头：圆顶+面甲 -->
+    <path d="M66 176 Q62 100 120 94 Q178 100 174 176 L174 210 Q120 232 66 210Z" fill="#3d5a75"/>
+    <path d="M78 168 Q76 112 120 108 Q164 112 162 168 L162 196 Q120 212 78 196Z" fill="#10222c"/>
+    <path d="M150 108 Q166 120 163 160 L162 196 Q150 204 140 208 Q156 160 150 108Z" fill="#33506a" stroke="none"/>
+    <!-- 天线（警戒闪烁态画成亮黄） -->
+    <path d="M120 94 Q118 66 126 52" fill="none"/>
+    <circle cx="127" cy="48" r="8" fill="#ff9d5c" filter="url(#glow)" stroke="none"/>
+    <!-- 耳侧螺栓 -->
+    <rect x="58" y="176" width="10" height="22" rx="4" fill="#2a4157"/>
+    <rect x="172" y="176" width="10" height="22" rx="4" fill="#2a4157"/>
+    <!-- 背板与散热缝 -->
+    <rect x="96" y="316" width="48" height="30" rx="6" fill="#2a4157"/>
+    <path d="M102 324 L138 324 M102 332 L138 332 M102 340 L130 340" stroke="#1d1826" fill="none"/>
+  </g>
+  <g id="eyes" filter="url(#rq)">
+    <ellipse cx="100" cy="158" rx="9" ry="11" fill="#ffd27a" filter="url(#glow)"/>
+    <ellipse cx="140" cy="158" rx="9" ry="11" fill="#ffd27a" filter="url(#glow)"/>
+    <circle cx="97" cy="155" r="3" fill="#fff3da" stroke="none"/>
+    <circle cx="137" cy="155" r="3" fill="#fff3da" stroke="none"/>
+  </g>
+  <g id="mouth" filter="url(#rq)">
+    <path d="M108 188 q12 -4 24 0" stroke="#ffd27a" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+  </g>
+  <ellipse id="mouth-open" cx="120" cy="192" rx="9" ry="10" fill="#1a3a44" stroke="#ffd27a" stroke-width="3" style="display:none"/>
+</svg>

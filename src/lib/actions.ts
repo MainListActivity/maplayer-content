@@ -2,7 +2,8 @@ import {Placement, ShotSpec} from '../spec';
 
 /**
  * 动作求值：把分镜 actions 在任意帧折叠成角色/道具的瞬时状态。
- * 纯函数，Shot.tsx 每帧调用；无 actions 时产出与旧版完全一致的状态。
+ * 纯函数，Shot.tsx 每帧调用；无 actions 时产出与旧版完全一致的状态
+ * （含历史死字段 exit：未声明 actions 时 exit 不生效，保持逐帧一致）。
  */
 
 export interface CharState {
@@ -27,48 +28,71 @@ const EASE = {
 const ENTER_SLIDE_SEC = 0.6; // 与旧版 Sprite 入/出场滑移时长一致
 const SLIDE_DIST = 0.12;     // 世界系滑移距离
 
-/** 求角色在镜头本地帧 frame 的姿态状态。动作按 atSec 排序顺序应用，后到动作在当前状态上继续。 */
+/** 求角色在镜头本地帧 frame 的姿态状态。动作按 atSec 排序顺序应用，后到动作接管。 */
 export const evalCharState = (p: Placement, frame: number, fps: number, durationFrames: number): CharState => {
-  const st: CharState = {x: p.x, y: p.y, scale: p.scale, flip: p.flip, variant: p.variant, turnScale: 1, moving: false};
   const acts = [...p.actions].sort((a, b) => a.atSec - b.atSec);
-  for (const a of acts) {
-    const s = a.atSec * fps;
-    if (frame < s) continue;
-    if (a.type === 'move') {
-      const u = Math.min(1, (frame - s) / (a.durSec * fps));
-      const from = {x: st.x, y: st.y, scale: st.scale};
-      const face = a.face === 'keep' ? null
-        : a.face === 'auto'
-          ? (Math.abs(a.to.x - from.x) > 0.01 ? (a.to.x > from.x ? 'right' : 'left') : null)
-          : a.face;
-      if (face) st.flip = face === 'right';
-      if (u < 1) {
-        const e = EASE[a.ease](u);
-        st.x = from.x + (a.to.x - from.x) * e;
-        st.y = from.y + (a.to.y - from.y) * e;
-        if (a.to.scale != null) st.scale = from.scale + (a.to.scale - from.scale) * e;
-        st.moving = true;
-      } else {
-        st.x = a.to.x;
-        st.y = a.to.y;
-        if (a.to.scale != null) st.scale = a.to.scale;
+  const hasActs = acts.length > 0;
+
+  // 折叠 acts[0..n) 在帧 f 的状态（不含出入场滑移与行走颠簸——它们只叠加在最终结果上，
+  // 不进走位基准，否则基准会被重复计入）。
+  const bases: Array<{x: number; y: number; scale: number} | undefined> = [];
+  const fold = (n: number, f: number): CharState => {
+    const st: CharState = {x: p.x, y: p.y, scale: p.scale, flip: p.flip, variant: p.variant, turnScale: 1, moving: false};
+    for (let i = 0; i < n; i++) {
+      const a = acts[i];
+      const s = a.atSec * fps;
+      if (f < s) continue;
+      if (a.type === 'move') {
+        // 起点冻结：只由更早动作在该 move 开始帧决定，前序 move 不再随当前帧漂移
+        const from = bases[i]!;
+        const u = Math.min(1, (f - s) / (a.durSec * fps));
+        const face = a.face === 'keep' ? null
+          : a.face === 'auto'
+            ? (Math.abs(a.to.x - from.x) > 0.01 ? (a.to.x > from.x ? 'right' : 'left') : null)
+            : a.face;
+        if (face) st.flip = face === 'right';
+        if (u < 1) {
+          const e = EASE[a.ease](u);
+          st.x = from.x + (a.to.x - from.x) * e;
+          st.y = from.y + (a.to.y - from.y) * e;
+          if (a.to.scale != null) st.scale = from.scale + (a.to.scale - from.scale) * e;
+          st.moving = true;
+        } else {
+          st.x = a.to.x;
+          st.y = a.to.y;
+          if (a.to.scale != null) st.scale = a.to.scale;
+        }
+      } else if (a.type === 'pose') {
+        st.variant = a.variant;
+      } else if (a.type === 'turn') {
+        const target = a.face === 'toggle' ? !st.flip : a.face === 'right';
+        const u = Math.min(1, (f - s) / (a.durSec * fps));
+        if (u >= 0.5) {
+          st.flip = target;
+          if (a.variant) st.variant = a.variant;
+        }
+        st.turnScale = u >= 1 ? 1 : Math.abs(Math.cos(Math.PI * u));
       }
-    } else if (a.type === 'pose') {
-      st.variant = a.variant;
-    } else if (a.type === 'turn') {
-      const target = a.face === 'toggle' ? !st.flip : a.face === 'right';
-      const u = Math.min(1, (frame - s) / (a.durSec * fps));
-      if (u >= 0.5) {
-        st.flip = target;
-        if (a.variant) st.variant = a.variant;
-      }
-      st.turnScale = u >= 1 ? 1 : Math.abs(Math.cos(Math.PI * u));
+      // prop 动作不影响角色自身状态，见 evalPropPos
     }
-    // prop 动作不影响角色自身状态，见 evalPropPos
+    return st;
+  };
+
+  // 每个 move 的基准 = 更早动作在其开始帧的折叠结果；按下标顺序构造，bases[j<i] 先于 fold(i,·) 就绪
+  for (let i = 0; i < acts.length; i++) {
+    const a = acts[i];
+    if (a.type === 'move') {
+      const b = fold(i, a.atSec * fps);
+      bases[i] = {x: b.x, y: b.y, scale: b.scale};
+    }
   }
+
+  const st = fold(acts.length, frame);
+  // 出入场滑移：叠加在动作求值结果上，与走位自然组合（prop 跟随同帧视觉位置）。
+  // exit 是历史死字段——仅在声明了 actions 的角色上启用，无 actions 的镜头与旧版逐帧一致。
   const slide = ENTER_SLIDE_SEC * fps;
   if (p.enter !== 'none' && frame < slide) st.x += (1 - frame / slide) * (p.enter === 'left' ? -1 : 1) * SLIDE_DIST;
-  if (p.exit !== 'none' && frame > durationFrames - slide) st.x += ((frame - (durationFrames - slide)) / slide) * (p.exit === 'left' ? -1 : 1) * SLIDE_DIST;
+  if (hasActs && p.exit !== 'none' && frame > durationFrames - slide) st.x += ((frame - (durationFrames - slide)) / slide) * (p.exit === 'left' ? -1 : 1) * SLIDE_DIST;
   if (st.moving) st.y -= Math.abs(Math.sin((frame / fps) * 9)) * 0.008;
   return st;
 };

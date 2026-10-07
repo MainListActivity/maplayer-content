@@ -38,6 +38,29 @@
         {"speaker": "rin", "text": "凯恩，你听——走廊里有动静。"},
         {"speaker": "kai", "text": "我去看看。"}
       ]
+    },
+    {
+      "id": "act-svg",
+      "scene": "svg-stage",
+      "holdSec": 9,
+      "camera": {"from": {"x": 0.5, "y": 0.55, "zoom": 1.2}, "to": {"x": 0.48, "y": 0.55, "zoom": 1.3}},
+      "characters": [
+        {"id": "svgbot", "x": 0.15, "y": 0.94, "scale": 0.9, "enter": "left", "exit": "right",
+         "actions": [
+           {"type": "move", "atSec": 0.5, "durSec": 2.0, "to": {"x": 0.4, "y": 0.94}},
+           {"type": "prop", "mode": "attach", "atSec": 2.8, "prop": "lantern", "dx": 0.05, "dy": -0.14},
+           {"type": "move", "atSec": 3.2, "durSec": 2.0, "to": {"x": 0.65, "y": 0.95}},
+           {"type": "pose", "atSec": 4.0, "variant": "point"},
+           {"type": "turn", "atSec": 6.4, "durSec": 0.5, "face": "toggle"},
+           {"type": "move", "atSec": 7.0, "durSec": 1.2, "to": {"x": 0.5, "y": 0.94}},
+           {"type": "prop", "mode": "detach", "atSec": 8.5, "prop": "lantern"}
+         ]}
+      ],
+      "props": [{"file": "lantern", "x": 0.34, "y": 0.8, "scale": 1.0, "anim": "none"}],
+      "dialogue": [
+        {"speaker": "svgbot", "text": "哔——发现异常信标，方位幺洞拐。"},
+        {"speaker": "svgbot", "text": "持续跟踪。"}
+      ]
     }
   ]
 }

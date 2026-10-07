@@ -100,6 +100,7 @@ M6 依赖 M5；M7 依赖 M6。新增角色永远先走 P2 demo，禁止直接进
     `file=prop` 的道具绑到角色脚底锚点偏移 `(dx,dy)`（dy<0 向上）并随走位/转身跟随
     （`mirrorDx` 默认 true，角色翻转时偏移镜像、道具保持在身体同侧）；`detach` 在释放帧就地放下；
     绑定期间道具渲染在角色前层（手持）
+  - 兼容说明：`exit` 是历史死字段，仅在声明了 `actions` 的角色上启用滑移（无 actions 的镜头逐帧同旧版）
 - `props`：`{file, x, y, scale, anim: none|blink|blink-fast|float}`
 - `dialogue`：`[{speaker|null(旁白), text, voice?, gapSec?}]`
 - `caption`：顶部说明字幕（场景卡/旁白条）；`transitionIn`：cut|fade|fade-black
