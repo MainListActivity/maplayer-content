@@ -89,7 +89,17 @@ M6 依赖 M5；M7 依赖 M6。新增角色永远先走 P2 demo，禁止直接进
 - `scene`：场景名（无 `.svg`），`null` = 黑场
 - `camera`：`{from:{x,y,zoom}, to:{...}, ease}`，x/y 为取景中心（0..1）、zoom≥1；
   取景范围约束 `x∈[0.5/z, 1-0.5/z]`，越界会露黑边（validate 会警告）
-- `characters`：`{id, variant, x, y, scale, flip, enter}`；y 是脚底锚点
+- `characters`：`{id, variant, x, y, scale, flip, enter, exit, actions}`；y 是脚底锚点
+- `characters[].actions`：动作时间线（可选；不写则与旧版行为一致），按 `atSec`（镜头内秒）排序求值，可叠加：
+  - `{type:"move", atSec, durSec, to:{x,y,scale?}, ease?, face?}`：走位——从当前位置缓动到 `to`；
+    `face=auto`（默认）按水平位移自动转身，`left/right/keep` 显式控制；走位中带轻微颠簸
+  - `{type:"pose", atSec, variant}`：姿态/手势切换——到帧换变体（如 default→point），台词中也可用
+  - `{type:"turn", atSec, durSec?, face?, variant?}`：转身——压扁-翻转过渡；`face=toggle`（默认）/left/right；
+    可选 `variant` 在翻转中点换装（如背对造型）
+  - `{type:"prop", atSec, mode, prop, dx?, dy?, mirrorDx?}`：道具互动——`attach` 把同镜头 `props` 里
+    `file=prop` 的道具绑到角色脚底锚点偏移 `(dx,dy)`（dy<0 向上）并随走位/转身跟随
+    （`mirrorDx` 默认 true，角色翻转时偏移镜像、道具保持在身体同侧）；`detach` 在释放帧就地放下；
+    绑定期间道具渲染在角色前层（手持）
 - `props`：`{file, x, y, scale, anim: none|blink|blink-fast|float}`
 - `dialogue`：`[{speaker|null(旁白), text, voice?, gapSec?}]`
 - `caption`：顶部说明字幕（场景卡/旁白条）；`transitionIn`：cut|fade|fade-black

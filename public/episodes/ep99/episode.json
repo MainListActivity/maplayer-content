@@ -1,0 +1,11 @@
+{
+  "id": "ep99",
+  "title": "动作系统 demo",
+  "fps": 24,
+  "width": 1920,
+  "height": 1080,
+  "letterbox": true,
+  "grain": true,
+  "voices": {"rin": "zh-CN-XiaoxiaoNeural", "kai": "zh-CN-YunxiNeural"},
+  "names": {"rin": "凛", "kai": "凯恩"}
+}

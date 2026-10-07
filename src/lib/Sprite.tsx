@@ -1,10 +1,8 @@
 import React, {useEffect, useRef} from 'react';
 import {staticFile, useCurrentFrame, useVideoConfig} from 'remotion';
 import {useAssetSrc} from './load';
-import {PlacementSchema} from '../spec';
-import {z} from 'zod';
-
-type Placement = z.infer<typeof PlacementSchema>;
+import {CharState, variantsUsed} from './actions';
+import {Placement} from '../spec';
 
 const hash = (s: string) => [...s].reduce((a, c) => (a * 31 + c.charCodeAt(0)) >>> 0, 7);
 
@@ -15,13 +13,17 @@ const hash = (s: string) => [...s].reduce((a, c) => (a * 31 + c.charCodeAt(0)) >
  *   #eye-l/#eye-r 眨眼（周期性压扁）
  *   #prop-*      道具挂件
  * 位图无挂点：说话期间做轻微纵向脉动代替口型。
- * 呼吸浮动 + 入/出场滑移由外层 transform 负责。
+ * state 由 actions.ts 求值：走位/姿态/转身/出入场滑移已折叠进 x,y,flip,variant,turnScale；
+ * 呼吸浮动保留在渲染层。镜头内用到的变体在挂载时一次性预载，pose/turn 切换不闪载。
  */
-export const Sprite: React.FC<{episodeId: string; p: Placement; speaking: boolean}> = ({episodeId, p, speaking}) => {
+export const Sprite: React.FC<{episodeId: string; p: Placement; state: CharState; speaking: boolean}> = ({episodeId, p, state, speaking}) => {
   const frame = useCurrentFrame();
   const {height: H, fps} = useVideoConfig();
   const host = useRef<HTMLDivElement>(null);
-  const src = useAssetSrc(`episodes/${episodeId}/assets/characters/${p.id}/${p.variant}`);
+  const variants = variantsUsed(p);
+  const srcs = variants.map((v) => useAssetSrc(`episodes/${episodeId}/assets/characters/${p.id}/${v}`));
+  const idx = Math.max(0, variants.indexOf(state.variant));
+  const src = srcs[idx];
 
   useEffect(() => {
     const root = host.current;
@@ -41,16 +43,15 @@ export const Sprite: React.FC<{episodeId: string; p: Placement; speaking: boolea
 
   const bob = Math.sin((frame / fps) * 2.2 + hash(p.id)) * 4;
   const talkPulse = src?.kind === 'png' && speaking && Math.floor(frame / (fps / 6)) % 2 === 0 ? 1.015 : 1;
-  const slide = p.enter !== 'none' && frame < fps * 0.6 ? (1 - frame / (fps * 0.6)) * (p.enter === 'left' ? -1 : 1) * 0.12 : 0;
 
   return (
     <div
       style={{
         position: 'absolute',
-        left: `${(p.x + slide) * 100}%`,
-        top: `${p.y * 100}%`,
-        transform: `translate(-50%, -100%) scaleX(${p.flip ? -1 : 1})`,
-        height: H * 0.62 * p.scale,
+        left: `${state.x * 100}%`,
+        top: `${state.y * 100}%`,
+        transform: `translate(-50%, -100%) scaleX(${(state.flip ? -1 : 1) * state.turnScale})`,
+        height: H * 0.62 * state.scale,
       }}
     >
       <div ref={host} style={{height: '100%', transformOrigin: '50% 100%', transform: `translateY(${bob}px) scaleY(${talkPulse})`}}>

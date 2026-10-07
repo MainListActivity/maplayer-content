@@ -3,6 +3,7 @@ import {Audio, interpolate, Sequence, staticFile, useCurrentFrame, useVideoConfi
 import {useAssetSrc} from './load';
 import {CameraRig} from './CameraRig';
 import {Sprite} from './Sprite';
+import {evalCharState, evalPropPos} from './actions';
 import {AudioManifest, ShotTimeline, lineKey} from '../spec';
 
 const FONT = '"PingFang SC", "Hiragino Sans GB", "Source Han Serif SC", serif';
@@ -102,6 +103,10 @@ export const Shot: React.FC<{episodeId: string; tl: ShotTimeline; manifest?: Aud
     return shot.dialogue[i].speaker === charId && frame >= s && frame < end;
   });
 
+  // 动作求值：角色姿态逐帧折叠；道具绑定时取宿主角色同帧位置（attach 期间渲染到角色前层=手持）
+  const charStates = shot.characters.map((p) => evalCharState(p, frame, fps, durationFrames));
+  const propPoses = shot.props.map((pr) => evalPropPos(shot, pr.file, pr.x, pr.y, frame, fps, durationFrames));
+
   const fade = Math.min(
     interpolate(frame, [0, fps * 0.5], [shot.transitionIn === 'cut' ? 1 : 0, 1], {extrapolateRight: 'clamp'}),
     interpolate(frame, [durationFrames - fps * 0.4, durationFrames - 1], [1, shot.transitionIn === 'fade' || shot.transitionIn === 'fade-black' ? 0.15 : 1], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'}),
@@ -111,8 +116,9 @@ export const Shot: React.FC<{episodeId: string; tl: ShotTimeline; manifest?: Aud
     <div style={{position: 'absolute', inset: 0, background: '#06070c', opacity: fade}}>
       <CameraRig shot={shot} totalFrames={durationFrames}>
         <Scene episodeId={episodeId} scene={shot.scene} />
-        {shot.props.map((pr, i) => <Prop key={i} episodeId={episodeId} {...pr} />)}
-        {shot.characters.map((p) => <Sprite key={p.id} episodeId={episodeId} p={p} speaking={speakingAt(p.id)} />)}
+        {shot.props.map((pr, i) => (propPoses[i].bound ? null : <Prop key={i} episodeId={episodeId} {...pr} x={propPoses[i].x} y={propPoses[i].y} />))}
+        {shot.characters.map((p, i) => <Sprite key={p.id} episodeId={episodeId} p={p} state={charStates[i]} speaking={speakingAt(p.id)} />)}
+        {shot.props.map((pr, i) => (propPoses[i].bound ? <Prop key={`held-${i}`} episodeId={episodeId} {...pr} x={propPoses[i].x} y={propPoses[i].y} /> : null))}
       </CameraRig>
       {shot.dialogue.map((d, i) => {
         const line = manifest?.lines[lineKey(shot.id, i)];

@@ -1,0 +1,43 @@
+{
+  "shots": [
+    {
+      "id": "act-walk",
+      "scene": "corridor",
+      "holdSec": 9,
+      "camera": {"from": {"x": 0.5, "y": 0.55, "zoom": 1.25}, "to": {"x": 0.52, "y": 0.55, "zoom": 1.35}},
+      "characters": [
+        {"id": "rin", "x": 0.15, "y": 0.97, "scale": 0.8, "enter": "left", "exit": "right",
+         "actions": [
+           {"type": "move", "atSec": 0.4, "durSec": 2.2, "to": {"x": 0.42, "y": 0.95}, "ease": "easeInOut"},
+           {"type": "prop", "mode": "attach", "atSec": 3.0, "prop": "tea-mug", "dx": 0.05, "dy": -0.16},
+           {"type": "move", "atSec": 3.4, "durSec": 2.2, "to": {"x": 0.7, "y": 0.97}},
+           {"type": "turn", "atSec": 6.0, "durSec": 0.4, "face": "toggle"},
+           {"type": "move", "atSec": 6.6, "durSec": 1.4, "to": {"x": 0.5, "y": 0.96}},
+           {"type": "prop", "mode": "detach", "atSec": 8.4, "prop": "tea-mug"}
+         ]}
+      ],
+      "props": [{"file": "tea-mug", "x": 0.36, "y": 0.82, "scale": 1.0, "anim": "none"}],
+      "dialogue": []
+    },
+    {
+      "id": "act-pose-turn",
+      "scene": "corridor",
+      "holdSec": 7,
+      "camera": {"from": {"x": 0.5, "y": 0.55, "zoom": 1.4}},
+      "characters": [
+        {"id": "rin", "variant": "default", "x": 0.38, "y": 0.97, "scale": 0.9,
+         "actions": [
+           {"type": "pose", "atSec": 1.2, "variant": "worried"},
+           {"type": "turn", "atSec": 3.5, "durSec": 0.5, "face": "toggle"},
+           {"type": "pose", "atSec": 5.0, "variant": "determined"},
+           {"type": "turn", "atSec": 6.0, "durSec": 0.5, "face": "toggle"}
+         ]},
+        {"id": "kai", "x": 0.7, "y": 0.96, "scale": 0.9}
+      ],
+      "dialogue": [
+        {"speaker": "rin", "text": "凯恩，你听——走廊里有动静。"},
+        {"speaker": "kai", "text": "我去看看。"}
+      ]
+    }
+  ]
+}

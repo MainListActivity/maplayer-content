@@ -12,6 +12,50 @@ export const CameraSchema = z.object({
   ease: z.enum(['easeInOut', 'linear', 'hold']).default('easeInOut'),
 });
 
+/** 动作缓动曲线（走位用）。 */
+export const ActionEaseSchema = z.enum(['linear', 'easeIn', 'easeOut', 'easeInOut']);
+
+/**
+ * 角色动作：镜头内按 atSec（秒，镜头本地时间）触发的戏剧动作，可叠加、按时刻排序求值。
+ * 四类：move 走位 / pose 姿态切换 / turn 转身 / prop 道具互动。
+ */
+export const ActionSchema = z.discriminatedUnion('type', [
+  z.object({
+    type: z.literal('move'),
+    atSec: z.number().min(0),
+    durSec: z.number().min(0.05).max(60).default(0.8),
+    to: z.object({
+      x: z.number().min(0).max(1),
+      y: z.number().min(0).max(1),
+      scale: z.number().min(0.05).max(4).optional(),
+    }),
+    ease: ActionEaseSchema.default('easeInOut'),
+    face: z.enum(['auto', 'left', 'right', 'keep']).default('auto'), // auto=按水平位移方向转身
+  }),
+  z.object({
+    type: z.literal('pose'),                   // 姿态/手势切换：到帧换 variant（如 default→point）
+    atSec: z.number().min(0),
+    variant: z.string(),
+  }),
+  z.object({
+    type: z.literal('turn'),                   // 转身：压扁-翻转过渡；variant 在翻转中点换装（如背对）
+    atSec: z.number().min(0),
+    durSec: z.number().min(0.05).max(10).default(0.4),
+    face: z.enum(['left', 'right', 'toggle']).default('toggle'),
+    variant: z.string().optional(),
+  }),
+  z.object({
+    type: z.literal('prop'),                   // 道具互动：attach 绑定同镜头 prop 跟随角色；detach 就地放下
+    atSec: z.number().min(0),
+    mode: z.enum(['attach', 'detach']),
+    prop: z.string(),                          // 引用同镜头 props[].file
+    dx: z.number().min(-1).max(1).optional(),  // 相对角色脚底锚点的世界系偏移（缺省 attach=0.05，detach=沿用绑定位移）
+    dy: z.number().min(-1).max(1).optional(),  // dy<0 向上（缺省 attach=-0.16）
+    mirrorDx: z.boolean().default(true),       // 角色翻转时 dx 镜像（道具保持在身体同侧）
+  }),
+]);
+export type ActionSpec = z.infer<typeof ActionSchema>;
+
 /** 角色站位：x,y 为「变焦 1 时的画面」归一化坐标（与背景同一世界系），随镜头运动。 */
 export const PlacementSchema = z.object({
   id: z.string(),                              // 角色登记名 = assets/characters/<id>/ 目录名
@@ -22,7 +66,9 @@ export const PlacementSchema = z.object({
   flip: z.boolean().default(false),            // 面向右侧时用 true 镜像
   enter: z.enum(['none', 'left', 'right']).default('none'),
   exit: z.enum(['none', 'left', 'right']).default('none'),
+  actions: z.array(ActionSchema).default([]),  // 动作时间线；缺省行为与旧版一致
 });
+export type Placement = z.infer<typeof PlacementSchema>;
 
 /** 道具/服化道挂件：assets/props/<file>.svg，世界系坐标，中心锚点。 */
 export const PropSchema = z.object({
