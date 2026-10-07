@@ -18,10 +18,13 @@
 
 - `to`：目标锚点（脚底，世界系 0..1，允许 -0.2~1.2 出画）
 - `durSec` / `at` / `ease`（easeInOut|linear|hold）
+- 缺省 `at` 按声明顺序接前一段结束；解析后按起始时间稳定排序。
+  重叠时后段接管，起点冻结为接管时刻的位置，停步后停止步态并保留行进朝向。
 - `gait`：`walk` = 步态起伏+轻微倾摆；`glide`/`none` = 纯位移
 - **朝向自动**：行进方向左→自动 flip，右→取消 flip；`flip` 字段仍作默认朝向
 - `enter/exit` 新增 `walk-left`/`walk-right`：从画外走入/走出（固定约 1.1s）；
-  旧值 `left`/`right` 仍是 0.6s 滑动，零迁移。
+  旧 `enter:left/right` 仍是 0.6s 线性滑动；旧 `exit:left/right` 是历史死字段，
+  继续不生效以保持零迁移。离场必须用新增的 `exit:walk-left/walk-right`。
 
 ## 2. 部件关节 rig（可选）
 
@@ -64,8 +67,9 @@ characters/<id>/
              {"t": 1.6, "rot": -110}]}}
 ```
 
-- `frames`：`characters/<id>/<name>.png` 逐帧切换（变体名/子目录均可），
+- `frames`：`characters/<id>/<name>.png|.svg` 逐帧切换（PNG 优先，变体名/子目录均可），
   `fps` 控制节奏、`loop:false`/`hold` 播完停末帧。大动作（换姿势/换表情）用它。
+  引用中的 `speed` 同时影响 frames 与 tracks，`loop` 覆盖剪辑默认值。
 - `tracks`：部件关键帧，`t` 秒处 `{rot,dx,dy,scale,opacity,ease}`，
   相邻关键帧间按 ease 插值。小动作（抬手/转头/鞠躬）用它。
 - 两者可并存：frames 切整幅、tracks 同时驱动部件或 SVG 组。
@@ -104,6 +108,7 @@ characters/<id>/
   depth≤1 的层渲染在角色后，>1 在前。
 - `ambient`：`dust` 漂浮粒子（depth 决定它在角色前/后）、`flicker` 目标层
   透明度抖动、`pulse` 目标层缩放呼吸。数据驱动，不写死镜头。
+  flicker/pulse 省略 `layer` 时应用于全部场景层；指定时只作用于对应 id。
 - 角色/道具 `depth` 字段是世界内 z 序，与场景层 depth 正交。
 
 ## 6. 兼容性
@@ -113,4 +118,6 @@ characters/<id>/
 - 相机/转场/字幕/口型/眨眼/音轨路径不变；letterbox 字幕仍压黑边。
 - `pnpm validate` 卡口新增：scene.json 层文件、parts.json 部件图、
   动作剪辑文件与序列帧、attachTo 目标存在性。
+- 存在但非法的 parts/动作 JSON 是错误，不会静默退回整幅资产；缺失的可选 parts 文件仍可回退。
+- `pnpm test` 运行确定性的走位接管、旧进出场、帧序列与父子关节回归测试。
 - 参考夹具：`public/episodes/ep00/`（演示集，9 镜头覆盖全部能力）。

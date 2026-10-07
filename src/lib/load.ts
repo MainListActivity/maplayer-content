@@ -1,4 +1,4 @@
-import {continueRender, delayRender, staticFile} from 'remotion';
+import {cancelRender, continueRender, delayRender, staticFile} from 'remotion';
 import {useEffect, useState} from 'react';
 import {AudioManifestSchema, EpisodeSchema, EpisodeSpec, ShotsFileSchema, ShotSpec, AudioManifest, buildTimeline, ShotTimeline} from '../spec';
 
@@ -11,7 +11,11 @@ const fetchJson = <T>(path: string): Promise<T> => {
 const optCache = new Map<string, Promise<unknown>>();
 /** 可选 JSON：404 解析为 null（用于 parts/actions/scene 约定文件探测）。 */
 export const fetchJsonOpt = <T>(path: string): Promise<T | null> => {
-  if (!optCache.has(path)) optCache.set(path, fetch(staticFile(path)).then((r) => (r.ok ? r.json() : null)).catch(() => null));
+  if (!optCache.has(path)) optCache.set(path, fetch(staticFile(path)).then((r) => {
+    if (r.status === 404) return null;
+    if (!r.ok) throw new Error(`Cannot load ${path}: ${r.status}`);
+    return r.json();
+  }));
   return optCache.get(path) as Promise<T | null>;
 };
 
@@ -25,7 +29,7 @@ export const useJsonOpt = <T>(path: string | null): {data: T | null; ready: bool
     const h = delayRender(`json ${path}`);
     fetchJsonOpt<T>(path)
       .then((d) => {if (live) setSt({data: d, ready: true});})
-      .catch(() => {if (live) setSt({data: null, ready: true});})
+      .catch((error) => cancelRender(error))
       .finally(() => continueRender(h));
     return () => {live = false;};
   }, [path]);
@@ -83,8 +87,29 @@ export const usePngReady = (urls: string[]): boolean => {
     let live = true;
     const h = delayRender('png preload');
     Promise.all(urls.map(probePng))
-      .then(() => {if (live) setReady(true);})
+      .then((found) => {
+        if (found.some((ok) => !ok)) throw new Error('Missing PNG in preload list');
+        if (live) setReady(true);
+      })
+      .catch((error) => cancelRender(error))
       .finally(() => continueRender(h));
+    return () => {live = false;};
+  }, [key]);
+  return ready;
+};
+
+/** 姿势帧预载：与 useAssetSrc 一样先 PNG 后 SVG，确保切帧前全序列就绪。 */
+export const useAssetsReady = (bases: string[]): boolean => {
+  const [ready, setReady] = useState(false);
+  const key = bases.join('|');
+  useEffect(() => {
+    setReady(false);
+    let live = true;
+    const h = delayRender('sequence preload');
+    Promise.all(bases.map(async (base) => {
+      if (!await probePng(`${base}.png`)) await fetchText(`${base}.svg`);
+    })).then(() => {if (live) setReady(true);})
+      .catch((error) => cancelRender(error)).finally(() => continueRender(h));
     return () => {live = false;};
   }, [key]);
   return ready;

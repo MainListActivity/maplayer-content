@@ -33,21 +33,27 @@ const WALK_SEC = 1.1; // walk-in/out 用时
 /** 把 enter/moves/exit 展开为时间轴分段。 */
 export const buildLoco = (p: Placement, shotDurSec: number): LocoSeg[] => {
   const segs: LocoSeg[] = [];
-  let home = {x: p.x, y: p.y};
+  const home = {x: p.x, y: p.y};
   if (p.enter === 'walk-left' || p.enter === 'walk-right') {
     const from = {x: p.enter === 'walk-left' ? -0.12 : 1.12, y: p.y};
     segs.push({from, to: home, at: 0, dur: WALK_SEC, gait: 'walk', ease: 'linear'});
   }
   let cursor = p.enter.startsWith('walk') ? WALK_SEC : 0;
-  for (const m of p.moves) {
+  const moves = p.moves.map((m) => {
     const at = m.at ?? cursor;
-    const from = segs.length ? segs[segs.length - 1].to : home;
-    segs.push({from, to: m.to, at, dur: m.durSec, gait: m.gait, ease: m.ease});
     cursor = at + m.durSec;
+    return {...m, at};
+  }).sort((a, b) => a.at - b.at);
+  for (const m of moves) {
+    const {x, y} = evalLoco(p, segs, m.at);
+    segs.push({from: {x, y}, to: m.to, at: m.at, dur: m.durSec, gait: m.gait, ease: m.ease});
   }
   if (p.exit === 'walk-left' || p.exit === 'walk-right') {
-    const from = segs.length ? segs[segs.length - 1].to : home;
-    segs.push({from, to: {x: p.exit === 'walk-left' ? -0.12 : 1.12, y: from.y}, at: Math.max(0, shotDurSec - WALK_SEC), dur: WALK_SEC, gait: 'walk', ease: 'linear'});
+    const at = Math.max(0, shotDurSec - WALK_SEC);
+    const {x, y} = evalLoco(p, segs, at);
+    // walk-out 接管之后的时间线，避免更晚 moves 覆盖离场。
+    const prior = segs.filter((s) => s.at <= at);
+    segs.splice(0, segs.length, ...prior, {from: {x, y}, to: {x: p.exit === 'walk-left' ? -0.12 : 1.12, y}, at, dur: Math.min(WALK_SEC, shotDurSec), gait: 'walk', ease: 'linear'});
   }
   return segs;
 };
@@ -61,12 +67,26 @@ export const evalLoco = (p: Placement, segs: LocoSeg[], tSec: number): LocoState
   for (const s of segs) {
     if (tSec < s.at) break;
     const k = Math.min(1, (tSec - s.at) / s.dur);
-    const e = EASE[s.ease](k);
+    const e = k >= 1 ? 1 : EASE[s.ease](k);
     cur = {x: s.from.x + (s.to.x - s.from.x) * e, y: s.from.y + (s.to.y - s.from.y) * e};
-    if (k < 1 && s.to.x !== s.from.x) flip = s.to.x < s.from.x; // 行进朝向（face left=flip）
-    if (k < 1 && s.gait === 'walk') gaiting = true;
+    if (s.to.x !== s.from.x) flip = s.to.x < s.from.x; // 停步后保留最后行进朝向
+    gaiting = k < 1 && s.gait === 'walk';
   }
   return {x: cur.x, y: cur.y, flip, gaiting};
+};
+
+/** 旧 enter 为线性滑动，旧 exit 是死字段；新走场由 buildLoco 处理。 */
+export const legacyEnterSlide = (p: Placement, tSec: number): number =>
+  (p.enter === 'left' || p.enter === 'right') && tSec < .6
+    ? (1 - tSec / .6) * (p.enter === 'left' ? -1 : 1) * .12 : 0;
+
+export const spriteHash = (s: string) => [...s].reduce((a, c) => (a * 31 + c.charCodeAt(0)) >>> 0, 7);
+
+export const sequenceIndex = (clip: ActionClip, tSec: number, speed = 1): number => {
+  const n = clip.frames?.length ?? 0;
+  if (!n) return 0;
+  const index = Math.floor(tSec * speed * clip.fps);
+  return !clip.loop || clip.hold ? Math.min(n - 1, index) : index % n;
 };
 
 /** 步态起伏：步行周期内 |sin| 下压/抬升，单位像素。 */

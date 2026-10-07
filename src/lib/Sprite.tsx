@@ -1,14 +1,8 @@
-import React, {useMemo, useRef} from 'react';
+import React, {useEffect, useMemo, useRef} from 'react';
 import {staticFile, useVideoConfig} from 'remotion';
-import {useAssetSrc, usePngReady} from './load';
-import {evalKf} from './rig';
+import {useAssetSrc, useAssetsReady, usePngReady} from './load';
+import {evalKf, sequenceIndex, spriteHash} from './rig';
 import {Placement, useCharWorld} from './useCharWorld';
-
-const talkFreq = (charId: string): number => {
-  let h = 0;
-  for (const ch of charId) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
-  return 5 + (h % 5);
-};
 
 /**
  * 角色精灵。渲染模式按资产自动选择：
@@ -22,13 +16,9 @@ export const Sprite: React.FC<{episodeId: string; p: Placement; speaking: boolea
   const {tSec, charBase, partsFile, clip, cfg, pos, flip, tilt, hPx, worlds} = useCharWorld(episodeId, p, shotDurSec);
 
   // 姿势序列帧（frames 模式）：预载全帧
-  const frameUrls = useMemo(() => (clip?.frames ?? []).map((f) => `${charBase}/${f}.png`), [clip, charBase]);
-  const framesReady = usePngReady(frameUrls);
-  const frameIdx = clip?.frames?.length
-    ? clip.loop === false || clip.hold
-      ? Math.min(clip.frames.length - 1, Math.floor(tSec * clip.fps))
-      : Math.floor(tSec * clip.fps) % clip.frames.length
-    : 0;
+  const frameUrls = useMemo(() => (clip?.frames ?? []).map((f) => `${charBase}/${f}`), [clip, charBase]);
+  const framesReady = useAssetsReady(frameUrls);
+  const frameIdx = clip ? sequenceIndex(clip, tSec, cfg?.speed ?? 1) : 0;
   const seqFrame = clip?.frames?.[frameIdx];
 
   // 默认整幅（序列帧时以当前帧为变体名 —— 仍走 useAssetSrc 让 svg 兜底生效）
@@ -41,19 +31,24 @@ export const Sprite: React.FC<{episodeId: string; p: Placement; speaking: boolea
 
   // ---- SVG 命名组变换 + 口型/眨眼（DOM 副作用，沿用既有 hook 约定）----
   const host = useRef<HTMLDivElement>(null);
+  useEffect(() => {
   if (src?.kind === 'svg' && host.current && src.svg) {
     const root = host.current.querySelector('svg');
     if (root) {
       const open = root.querySelector('#mouth-open');
       const closed = root.querySelector('#mouth');
-      if (open && closed) {
-        const on = speaking && Math.floor(tSec * talkFreq(p.id)) % 2 === 0;
-        (open as SVGElement).style.display = on ? 'inline' : 'none';
-        (closed as SVGElement).style.display = on ? 'none' : 'inline';
+      const frame = Math.round(tSec * fps);
+      const on = speaking && Math.floor(frame / (fps / 6)) % 2 === 0;
+      if (open) (open as SVGElement).style.display = on ? '' : 'none';
+      if (closed) (closed as SVGElement).style.display = open && on ? 'none' : '';
+      const blink = (frame + spriteHash(p.id) % 120) % 160 < 5;
+      for (const sel of ['#eyes', '#eye-l', '#eye-r']) {
+        const eyes = root.querySelector(sel) as SVGElement | null;
+        if (eyes) {
+          eyes.style.transformBox = 'fill-box'; eyes.style.transformOrigin = 'center';
+          eyes.style.transform = blink ? 'scaleY(0.1)' : '';
+        }
       }
-      const blink = Math.floor(tSec * fps) % (fps * 3) < fps * 0.12;
-      const eyes = root.querySelector('#eyes');
-      if (eyes) (eyes as SVGElement).style.opacity = speaking || !blink ? '1' : '0.05';
       // 部件轨道 → SVG 命名组（data-pivot="x y" = viewBox 坐标关节点，缺省取包围盒中心）
       if (clip) {
         for (const [pid, kfs] of Object.entries(clip.tracks)) {
@@ -74,10 +69,14 @@ export const Sprite: React.FC<{episodeId: string; p: Placement; speaking: boolea
       }
     }
   }
+  }, [src, tSec, fps, speaking, p.id, clip, cfg?.speed]);
 
   if (!src && !partsFile) return null;
 
-  const talkPulse = speaking && !partsFile && !seqFrame ? {transform: `scaleY(${1 + 0.015 * Math.abs(Math.sin(tSec * talkFreq(p.id) * Math.PI))})`, transformOrigin: 'bottom center'} : {};
+  const legacy = !partsFile && !clip && !p.moves.length && !p.enter.startsWith('walk') && !p.exit.startsWith('walk');
+  const bob = legacy ? Math.sin(tSec * 2.2 + spriteHash(p.id)) * 4 : 0;
+  const talkPulse = src?.kind === 'png' && speaking && Math.floor(Math.round(tSec * fps) / (fps / 6)) % 2 === 0 ? 1.015 : 1;
+  const innerStyle: React.CSSProperties = {height: '100%', transformOrigin: '50% 100%', transform: `translateY(${bob}px) scaleY(${talkPulse})`};
   const outerStyle: React.CSSProperties = {
     position: 'absolute',
     left: `${pos.x * 100}%`,
@@ -85,7 +84,6 @@ export const Sprite: React.FC<{episodeId: string; p: Placement; speaking: boolea
     transform: `translate(-50%, -100%) scaleX(${flip ? -1 : 1}) rotate(${tilt}deg)`,
     transformOrigin: '50% 100%',
     height: hPx,
-    ...talkPulse,
   };
 
   // 模式 1：部件 rig —— 每部件按世界矩阵贴图（拼合系 px → 屏 px 缩放 unit）
@@ -127,19 +125,22 @@ export const Sprite: React.FC<{episodeId: string; p: Placement; speaking: boolea
   const style: React.CSSProperties = {height: '100%', width: 'auto', display: 'block'};
 
   // 模式 2/3：序列帧或整幅
-  if (src?.kind === 'png' || seqFrame) {
-    const url = seqFrame ? staticFile(`${charBase}/${seqFrame}.png`) : src!.kind === 'png' ? staticFile(src!.url) : '';
+  if (src?.kind === 'png') {
+    const url = staticFile(src.url);
     if (!url || (seqFrame && !framesReady)) return null;
     return (
       <div style={outerStyle}>
-        <img src={url} style={style} />
+        <div style={innerStyle}><img src={url} style={style} /></div>
       </div>
     );
   }
   if (src?.kind === 'svg') {
+    if (seqFrame && !framesReady) return null;
     return (
       <div style={outerStyle}>
-        <div ref={host} style={{height: '100%'}} dangerouslySetInnerHTML={{__html: src.svg}} />
+        <div style={innerStyle}>
+          <div ref={host} style={{height: '100%'}} dangerouslySetInnerHTML={{__html: src.svg.replace('<svg', '<svg style="height:100%;width:auto;display:block;overflow:visible" preserveAspectRatio="xMidYMax meet"')}} />
+        </div>
       </div>
     );
   }

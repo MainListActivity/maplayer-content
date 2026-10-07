@@ -28,7 +28,7 @@ const partsOf = (c: string) => {
     const f = join(charsDir, c, 'parts', 'parts.json');
     if (!existsSync(f)) {partsCache.set(c, null); return null;}
     const r = PartsFileSchema.safeParse(readJson(f));
-    if (!r.success) {partsCache.set(c, null); return null;}
+    if (!r.success) {problems.push(`角色 ${c} parts/parts.json 不符合 PartsFileSchema`); partsCache.set(c, null); return null;}
     for (const d of r.data.parts) if (!existsSync(join(charsDir, c, 'parts', d.file))) problems.push(`角色 ${c} 部件图缺失 parts/${d.file}`);
     partsCache.set(c, {ids: new Set(r.data.parts.map((d) => d.id))});
   }
@@ -63,6 +63,7 @@ for (const s of shots) {
     }
   }
   for (const c of s.characters) {
+    partsOf(c.id); // 即使有 default 变体，也必须校验存在的 parts 元数据。
     const variants = variantsOf(c.id);
     if (!variants.length && !partsOf(c.id)) {problems.push(`${s.id}: 缺角色目录 ${c.id}`); continue;}
     if (!variants.includes(c.variant) && !partsOf(c.id)) problems.push(`${s.id}: 角色 ${c.id} 无变体 ${c.variant}（现有 ${variants.join(',')}）`);

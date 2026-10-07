@@ -63,7 +63,7 @@ const SceneLayers: React.FC<{episodeId: string; scene: string; layers: SceneFile
   return (
     <>
       {layers.map((l, i) => {
-        const amb = ambient.filter((x) => x.layer === l.id);
+        const amb = ambient.filter((x) => !x.layer || x.layer === l.id);
         let extra = '';
         let op = 1;
         for (const x of amb) {
