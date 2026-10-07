@@ -1,0 +1,20 @@
+{
+  "layers": [
+    {
+      "file": "earth.png",
+      "id": "earth",
+      "depth": 0.7
+    },
+    {
+      "file": "clouds.png",
+      "id": "clouds",
+      "depth": 0.7
+    },
+    {
+      "file": "mask.png",
+      "id": "window",
+      "depth": 1.4
+    }
+  ],
+  "ambient": []
+}

@@ -10,7 +10,7 @@
     "audio": "tsx pipeline/audio.ts",
     "storyboard": "tsx pipeline/storyboard.ts",
     "typecheck": "tsc --noEmit",
-    "test": "tsx pipeline/test-engine.ts",
+    "test": "tsx pipeline/test-engine.ts && tsx pipeline/test-ambient.ts",
     "frames": "tsx pipeline/frames.ts"
   },
   "dependencies": {

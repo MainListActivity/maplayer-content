@@ -1,0 +1,15 @@
+{
+  "layers": [
+    {
+      "file": "earth.png",
+      "id": "earth",
+      "depth": 0.7
+    }
+  ],
+  "ambient": [
+    {
+      "type": "drift",
+      "dx": 0.05
+    }
+  ]
+}
