@@ -51,7 +51,7 @@ for (const s of shots) {
   if (s.scene && !hasScene(s.scene)) problems.push(`${s.id}: 缺场景 ${s.scene}（.png/.svg/scene.json 均无）`);
   else if (s.scene && existsSync(join(scenesDir, s.scene, 'scene.json'))) {
     const r = SceneFileSchema.safeParse(readJson(join(scenesDir, s.scene, 'scene.json')));
-    if (!r.success) problems.push(`${s.id}: scenes/${s.scene}/scene.json 不符合 SceneFileSchema`);
+    if (!r.success) problems.push(`${s.id}: scenes/${s.scene}/scene.json 不符合 SceneFileSchema: ${r.error.issues.map(i => `${i.path.join('.')}: ${i.message}`).join('; ')}`);
     else for (const l of r.data.layers) if (!existsSync(join(scenesDir, s.scene, l.file))) problems.push(`${s.id}: 场景 ${s.scene} 缺层 ${l.file}`);
   }
   for (const p of s.props) {

@@ -129,7 +129,7 @@ export const SceneLayerSchema = z.object({
   }).optional(),
 });
 export const AmbientSchema = z.object({
-  type: z.enum(['dust', 'flicker', 'pulse']),
+  type: z.enum(['dust', 'flicker', 'pulse', 'rotate', 'drift']),
   layer: z.string().optional(),                // 目标层 id；缺省=场景级覆盖层
   count: z.number().int().min(1).max(200).default(24),   // dust 粒子数
   depth: z.number().min(0.2).max(2).default(1),          // dust 层视差系数
@@ -138,10 +138,31 @@ export const AmbientSchema = z.object({
   size: z.number().min(1).max(40).default(3),            // dust 粒径 px@1080p
   opacity: z.number().min(0).max(1).default(0.35),       // dust 透明度
   color: z.string().default('#dff6fb'),
+  degPerSec: z.number().min(-360).max(360).optional(), // rotate：正=顺时针
+  pivot: z.object({x: z.number().min(0).max(1), y: z.number().min(0).max(1)}).default({x: 0.5, y: 0.5}),
+  dx: z.number().min(-1).max(1).optional(), // drift：画幅宽/秒
+  dy: z.number().min(-1).max(1).optional(), // drift：画幅高/秒
+}).superRefine((a, ctx) => {
+  if (a.type === 'rotate' && a.degPerSec == null)
+    ctx.addIssue({code: 'custom', path: ['degPerSec'], message: 'rotate 必须声明 degPerSec'});
+  if (a.type === 'drift' && a.dx == null && a.dy == null)
+    ctx.addIssue({code: 'custom', path: ['dx'], message: 'drift 必须声明 dx 或 dy'});
 });
 export const SceneFileSchema = z.object({
   layers: z.array(SceneLayerSchema).min(1),
   ambient: z.array(AmbientSchema).default([]),
+}).superRefine((scene, ctx) => {
+  const ids = scene.layers.map(l => l.id).filter((id): id is string => id != null);
+  if (new Set(ids).size !== ids.length)
+    ctx.addIssue({code: 'custom', path: ['layers'], message: '场景层 id 不得重复'});
+  scene.ambient.forEach((a, i) => {
+    if (a.layer != null && !ids.includes(a.layer))
+      ctx.addIssue({code: 'custom', path: ['ambient', i, 'layer'], message: `目标层 ${a.layer} 不存在`});
+  });
+  scene.layers.forEach(l => {
+    if (scene.ambient.filter(a => a.type === 'rotate' && (a.layer == null || a.layer === l.id)).length > 1)
+      ctx.addIssue({code: 'custom', path: ['ambient'], message: `层 ${l.id ?? l.file} 最多一个 rotate（包括全场景配置）`});
+  });
 });
 export type SceneFile = z.infer<typeof SceneFileSchema>;
 

@@ -2,6 +2,7 @@ import React, {useMemo} from 'react';
 import {Audio, Img, interpolate, Sequence, staticFile, useCurrentFrame, useVideoConfig} from 'remotion';
 import {useAssetSrc, useJsonOpt} from './load';
 import {CameraRig, useCamPose} from './CameraRig';
+import {ambientMotion} from './ambient';
 import {Sprite} from './Sprite';
 import {Placement, useCharWorld} from './useCharWorld';
 import {evalPropMotion, evalShadow, layerTransform, partAnchorWorld} from './rig';
@@ -64,6 +65,8 @@ const SceneLayers: React.FC<{episodeId: string; scene: string; layers: SceneFile
     <>
       {layers.map((l, i) => {
         const amb = ambient.filter((x) => !x.layer || x.layer === l.id);
+        const motion = ambientMotion(amb, t, W, H);
+        const url = staticFile(`episodes/${episodeId}/assets/scenes/${scene}/${l.file}`);
         let extra = '';
         let op = 1;
         for (const x of amb) {
@@ -76,7 +79,13 @@ const SceneLayers: React.FC<{episodeId: string; scene: string; layers: SceneFile
               width: '100%', height: '100%', transform: extra || undefined, transformOrigin: '50% 50%', opacity: op,
               filter: l.castShadow ? `drop-shadow(${l.castShadow.dx}px ${l.castShadow.dy}px ${l.castShadow.blur}px rgba(0,0,0,${l.castShadow.opacity}))` : undefined,
             }}>
-              <Img src={staticFile(`episodes/${episodeId}/assets/scenes/${scene}/${l.file}`)} style={{width: '100%', height: '100%', objectFit: 'cover', display: 'block'}} />
+              {motion ? (
+                <div style={{position: 'relative', width: '100%', height: '100%', overflow: 'hidden'}}>
+                  {/* Remotion Img 等待贴图加载，CSS 平铺面复用同一 URL。 */}
+                  <Img src={url} style={{position: 'absolute', width: 1, height: 1, opacity: 0}} />
+                  <div style={{position: 'absolute', ...motion, backgroundImage: `url(${JSON.stringify(url)})`, backgroundSize: `${W}px ${H}px`, backgroundRepeat: 'repeat'}} />
+                </div>
+              ) : <Img src={url} style={{width: '100%', height: '100%', objectFit: 'cover', display: 'block'}} />}
             </div>
           </div>
         );
@@ -205,8 +214,7 @@ export const Shot: React.FC<{episodeId: string; tl: ShotTimeline; manifest?: Aud
 
   const sceneRaw = useJsonOpt<SceneFile>(shot.scene ? `episodes/${episodeId}/assets/scenes/${shot.scene}/scene.json` : null);
   const sceneDef = useMemo(() => {
-    const r = sceneRaw.data ? SceneFileSchema.safeParse(sceneRaw.data) : null;
-    return r?.success ? r.data : null;
+    return sceneRaw.data ? SceneFileSchema.parse(sceneRaw.data) : null;
   }, [sceneRaw]);
 
   const speakingAt = (charId: string) => lineFrames.some((s, i) => {
