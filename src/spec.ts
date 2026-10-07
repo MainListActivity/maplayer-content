@@ -40,6 +40,7 @@ export const PlacementSchema = z.object({
   moves: z.array(MoveSchema).default([]),      // 走位分段（时间轴按序/可 at 指定）
   action: ActionRefSchema.optional(),          // 动作剪辑名（部件轨道 / 姿势帧序列）
   depth: z.number().min(-2).max(2).default(0), // 世界系 z 序：越大越靠前
+  shadow: z.boolean().default(true),           // 落地阴影开关：false = 悬浮/全息类角色不投影
 });
 
 /** 道具运动关键帧（世界系归一化坐标）。 */
@@ -120,6 +121,12 @@ export const SceneLayerSchema = z.object({
   file: z.string(),                            // 相对 scenes/<name>/ 的 png
   depth: z.number().min(0.2).max(2).default(1),// <1 远景(动得少) >1 前景(动得多)
   id: z.string().optional(),                   // ambient 目标名
+  castShadow: z.object({                       // 该层向身后内容的软投影（drop-shadow，可选）
+    dx: z.number().min(-60).max(60).default(8),
+    dy: z.number().min(-60).max(60).default(10),
+    blur: z.number().min(0).max(80).default(14),
+    opacity: z.number().min(0).max(1).default(0.3),
+  }).optional(),
 });
 export const AmbientSchema = z.object({
   type: z.enum(['dust', 'flicker', 'pulse']),
@@ -138,6 +145,17 @@ export const SceneFileSchema = z.object({
 });
 export type SceneFile = z.infer<typeof SceneFileSchema>;
 
+/** 落地阴影（shot 级）：characters[] 脚下椭圆渐变投影 + 脚底接触暗芯，默认开。
+ *  shadow=false 单角色关闭（悬浮物/全息）；整镜关闭用 {enabled:false}。 */
+export const ShadowSchema = z.object({
+  enabled: z.boolean().default(true),
+  opacity: z.number().min(0).max(1).default(0.32),   // 主影强度
+  size: z.number().min(0.2).max(3).default(1),       // 影宽系数（相对角色身高比例）
+  blur: z.number().min(0).max(80).default(16),       // 边缘虚化 px（变焦 1 口径）
+  contact: z.number().min(0).max(1).default(0.45),   // 接触着色：脚底暗芯强度
+});
+export type ShadowSpec = z.infer<typeof ShadowSchema>;
+
 export const ShotSchema = z.object({
   id: z.string().regex(/^[a-z0-9_-]+$/),
   scene: z.string().nullable(),                // assets/scenes/<scene>.png|.svg 或 <scene>/scene.json 分层；null = 黑场
@@ -150,6 +168,7 @@ export const ShotSchema = z.object({
   dialogue: z.array(DialogueSchema).default([]),
   caption: z.string().nullable().default(null), // 顶部说明字幕（场景卡/旁白条）
   transitionIn: z.enum(['cut', 'fade', 'fade-black']).default('cut'),
+  shadow: ShadowSchema.default({enabled: true, opacity: 0.32, size: 1, blur: 16, contact: 0.45}), // 落地阴影（默认开）
 });
 export type ShotSpec = z.infer<typeof ShotSchema>;
 

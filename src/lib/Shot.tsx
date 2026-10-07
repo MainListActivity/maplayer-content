@@ -3,8 +3,8 @@ import {Audio, Img, interpolate, Sequence, staticFile, useCurrentFrame, useVideo
 import {useAssetSrc, useJsonOpt} from './load';
 import {CameraRig, useCamPose} from './CameraRig';
 import {Sprite} from './Sprite';
-import {useCharWorld} from './useCharWorld';
-import {evalPropMotion, layerTransform, partAnchorWorld} from './rig';
+import {Placement, useCharWorld} from './useCharWorld';
+import {evalPropMotion, evalShadow, layerTransform, partAnchorWorld} from './rig';
 import {AmbientSchema, AudioManifest, PropSchema, SceneFile, SceneFileSchema, ShotSpec, ShotTimeline, lineKey} from '../spec';
 import {z} from 'zod';
 
@@ -72,7 +72,10 @@ const SceneLayers: React.FC<{episodeId: string; scene: string; layers: SceneFile
         }
         return (
           <div key={l.id ?? i} style={{position: 'absolute', left: 0, top: 0, width: W, height: H, transform: layerTransform(pose, l.depth, W, H), transformOrigin: '0 0'}}>
-            <div style={{width: '100%', height: '100%', transform: extra || undefined, transformOrigin: '50% 50%', opacity: op}}>
+            <div style={{
+              width: '100%', height: '100%', transform: extra || undefined, transformOrigin: '50% 50%', opacity: op,
+              filter: l.castShadow ? `drop-shadow(${l.castShadow.dx}px ${l.castShadow.dy}px ${l.castShadow.blur}px rgba(0,0,0,${l.castShadow.opacity}))` : undefined,
+            }}>
               <Img src={staticFile(`episodes/${episodeId}/assets/scenes/${scene}/${l.file}`)} style={{width: '100%', height: '100%', objectFit: 'cover', display: 'block'}} />
             </div>
           </div>
@@ -81,6 +84,24 @@ const SceneLayers: React.FC<{episodeId: string; scene: string; layers: SceneFile
       {ambient.filter((a) => a.type === 'dust' && (back ? a.depth <= 1 : a.depth > 1)).map((a, i) => <DustLayer key={`d${i}`} a={a} pose={pose} />)}
     </>
   );
+};
+
+/** 角色落地阴影：钉在地面锚点（不随步态腾空），抬升时影缩小变淡（AO 接触暗芯第二层）。 */
+const CharShadow: React.FC<{episodeId: string; p: Placement; shot: ShotSpec; shotDurSec: number}> = ({episodeId, p, shot, shotDurSec}) => {
+  const {width: W, height: H} = useVideoConfig();
+  const cw = useCharWorld(episodeId, p, shotDurSec);
+  if (!p.shadow) return null;
+  const g = evalShadow(shot.shadow, cw.hPx, cw.liftPx);
+  if (!g) return null;
+  const bx = cw.ground.x * W, by = cw.ground.y * H;
+  const blob = (rx: number, ry: number, blur: number, op: number, key: number) => (
+    <div key={key} style={{
+      position: 'absolute', left: bx, top: by, width: rx * 2, height: ry * 2,
+      transform: 'translate(-50%,-50%)', borderRadius: '50%',
+      background: '#05070d', filter: `blur(${blur}px)`, opacity: op,
+    }} />
+  );
+  return <>{blob(g.rx, g.ry, shot.shadow.blur, g.opacity, 0)}{blob(g.coreRx, g.coreRy, shot.shadow.blur * 0.35, g.coreOpacity, 1)}</>;
 };
 
 /** 道具层：静态摆位 / motion 位移关键帧 / attachTo 跟随角色部件（世界系）。 */
@@ -201,7 +222,10 @@ export const Shot: React.FC<{episodeId: string; tl: ShotTimeline; manifest?: Aud
   // 世界系混排：角色与道具按 depth 升序（同级保持声明顺序）
   const actors = [
     ...shot.props.map((pr, i) => ({d: pr.depth, k: `p:${i}`, node: <Prop key={i} episodeId={episodeId} pr={pr} shot={shot} shotDurSec={shotDurSec} />})),
-    ...shot.characters.map((p) => ({d: p.depth, k: `c:${p.id}`, node: <Sprite key={p.id} episodeId={episodeId} p={p} speaking={speakingAt(p.id)} shotDurSec={shotDurSec} />})),
+    ...shot.characters.flatMap((p) => [
+      {d: p.depth - 0.001, k: `s:${p.id}`, node: <CharShadow key={`s:${p.id}`} episodeId={episodeId} p={p} shot={shot} shotDurSec={shotDurSec} />},
+      {d: p.depth, k: `c:${p.id}`, node: <Sprite key={p.id} episodeId={episodeId} p={p} speaking={speakingAt(p.id)} shotDurSec={shotDurSec} />},
+    ]),
   ].sort((a, b) => a.d - b.d);
 
   const back = sceneDef?.layers.filter((l) => l.depth <= 1) ?? [];

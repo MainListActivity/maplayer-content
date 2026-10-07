@@ -1,7 +1,7 @@
 /* 演出引擎求值核心：纯函数，Sprite/Prop/validate 共用。
  * 坐标口径：角色世界系 = 变焦1时画面归一化 (0..1)；部件拼合系 = parts.size px，锚点底中。 */
 import {z} from 'zod';
-import {KeyframeSchema, MoveSchema, PartsFile, PlacementSchema, ActionClip, ShotSpec, CameraSchema} from '../spec';
+import {KeyframeSchema, MoveSchema, PartsFile, PlacementSchema, ActionClip, ShadowSpec, ShotSpec, CameraSchema} from '../spec';
 
 type Placement = z.infer<typeof PlacementSchema>;
 type Move = z.infer<typeof MoveSchema>;
@@ -83,6 +83,9 @@ export const legacyEnterSlide = (p: Placement, tSec: number): number =>
     ? (1 - tSec / .6) * (p.enter === 'left' ? -1 : 1) * .12 : 0;
 
 export const spriteHash = (s: string) => [...s].reduce((a, c) => (a * 31 + c.charCodeAt(0)) >>> 0, 7);
+
+/** 常驻闲置浮动（旧角色视觉，Sprite 与落地阴影共用同一位移源）。正值=下沉。 */
+export const idleBob = (tSec: number, charId: string): number => Math.sin(tSec * 2.2 + spriteHash(charId)) * 4;
 
 export const sequenceIndex = (clip: ActionClip, tSec: number, speed = 1): number => {
   const n = clip.frames?.length ?? 0;
@@ -187,4 +190,24 @@ export const partAnchorWorld = (parts: PartsFile, worlds: Map<string, PartWorld>
   const pt = (anchor && def.points[anchor]) || def.pivot;
   const x = pt[0], y = pt[1];
   return {x: a * x + c * y + e, y: b * x + d * y + f, rot: (Math.atan2(b, a) * 180) / Math.PI, opacity: w.opacity};
+};
+
+/* ---------- 落地阴影 ---------- */
+
+export interface ShadowGeom {
+  rx: number;         // 主影半宽（变焦1屏 px，随角色身高 hPx 与 size 缩放）
+  ry: number;         // 主影半高（透视压扁）
+  opacity: number;    // 主影不透明度（抬升衰减后）
+  coreRx: number;     // 接触暗芯半宽（AO 贴底）
+  coreRy: number;
+  coreOpacity: number;
+}
+
+/** 落地阴影几何：锚点=角色脚底世界位；liftPx≥0 抬升/步态腾空 → 影缩小变淡。
+ *  返回 null = 不画（enabled=false 或强度为 0）。 */
+export const evalShadow = (cfg: ShadowSpec, hPx: number, liftPx: number): ShadowGeom | null => {
+  if (!cfg.enabled || cfg.opacity <= 0) return null;
+  const fade = Math.max(0.25, Math.min(1, 1 - Math.max(0, liftPx) / (hPx * 0.35)));
+  const rx = hPx * 0.3 * cfg.size * (0.9 + 0.1 * fade);
+  return {rx, ry: rx * 0.26, opacity: cfg.opacity * fade, coreRx: rx * 0.52, coreRy: rx * 0.16, coreOpacity: cfg.opacity * cfg.contact * fade};
 };
