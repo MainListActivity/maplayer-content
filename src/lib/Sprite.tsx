@@ -1,31 +1,52 @@
 import React, {useEffect, useMemo, useRef} from 'react';
 import {staticFile, useVideoConfig} from 'remotion';
-import {useAssetSrc, useAssetsReady, usePngReady} from './load';
+import {useAssetSrc, useAssetsReady, usePngProbeMap, usePngReady} from './load';
 import {evalKf, idleBob, sequenceIndex, spriteHash} from './rig';
 import {Placement, useCharWorld} from './useCharWorld';
 
 /**
  * 角色精灵。渲染模式按资产自动选择：
- *  1. parts/parts.json 存在 → 部件 rig（tracks 关节动画，含父子链矩阵）
- *  2. action 剪辑有 frames → 姿势序列帧（characters/<id>/<frame>.png 逐帧切换）
+ *  1. parts/parts.json 存在 → 部件 rig（tracks 关节动画，含父子链矩阵）；此模式下 action.frames
+ *     指 parts/poses/<frame>/ 目录 —— 目录内与部件同名的 PNG 覆写该部件贴图（稀疏覆写，缺的用基底），
+ *     纯部件角色无需 default 整幅资产。
+ *  2. 无 parts 时 action 剪辑有 frames → 姿势序列帧（characters/<id>/<frame>.png|.svg 逐帧切换整幅）
  *  3. 默认 → 整幅 PNG/SVG；SVG 上 tracks 应用到 #id 命名组（data-pivot="x y" 指定关节点）
  * 走位 = placement.moves 分段插值 + gait:walk 步态起伏 + 自动朝向；walk-left/right 走场替换旧滑动。
  */
 export const Sprite: React.FC<{episodeId: string; p: Placement; speaking: boolean; shotDurSec: number}> = ({episodeId, p, speaking, shotDurSec}) => {
   const {height: H, fps} = useVideoConfig();
-  const {tSec, charBase, partsFile, clip, cfg, pos, flip, tilt, hPx, worlds} = useCharWorld(episodeId, p, shotDurSec);
+  const {tSec, charBase, partsReady: partsMetaReady, partsFile, clip, cfg, pos, flip, tilt, hPx, worlds} = useCharWorld(episodeId, p, shotDurSec);
+  const rigMode = partsFile != null;
 
-  // 姿势序列帧（frames 模式）：预载全帧
-  const frameUrls = useMemo(() => (clip?.frames ?? []).map((f) => `${charBase}/${f}`), [clip, charBase]);
+  // 姿势序列帧（仅非 rig 模式：frames = 整幅变体名）：预载全帧。
+  // 竞态防护：parts.json 未就绪时 frames 不得预载——否则 rig 姿势目录名会被当整幅图请求。
+  const frameUrls = useMemo(
+    () => (partsMetaReady && !rigMode ? (clip?.frames ?? []).map((f) => `${charBase}/${f}`) : []),
+    [clip, charBase, rigMode, partsMetaReady],
+  );
   const framesReady = useAssetsReady(frameUrls);
   const frameIdx = clip ? sequenceIndex(clip, tSec, cfg?.speed ?? 1) : 0;
-  const seqFrame = clip?.frames?.[frameIdx];
+  const seqFrame = rigMode ? undefined : clip?.frames?.[frameIdx];
 
-  // 默认整幅（序列帧时以当前帧为变体名 —— 仍走 useAssetSrc 让 svg 兜底生效）
+  // rig 模式姿势帧：探测所有候选覆写图 parts/poses/<frame>/<partFile>（404→基底贴图）
+  const poseFrame = rigMode ? clip?.frames?.[frameIdx] : undefined;
+  const poseUrls = useMemo(
+    () => (partsFile && clip?.frames
+      ? clip.frames.flatMap((f) => partsFile.parts.map((d) => `${charBase}/parts/poses/${f}/${d.file}`))
+      : []),
+    [partsFile, clip, charBase],
+  );
+  const poseMap = usePngProbeMap(poseUrls);
+  const partSrc = (d: {file: string}) => {
+    const override = poseFrame ? `${charBase}/parts/poses/${poseFrame}/${d.file}` : null;
+    return override && poseMap?.[override] ? override : `${charBase}/parts/${d.file}`;
+  };
+
+  // 整幅资产仅在非 rig 模式下请求（parts-only 角色无 default 也可渲染）
   const variant = seqFrame ?? p.variant ?? 'default';
-  const src = useAssetSrc(`${charBase}/${variant}`);
+  const src = useAssetSrc(partsMetaReady && !partsFile ? `${charBase}/${variant}` : null);
 
-  // 部件 PNG 预载
+  // 部件基底 PNG 预载（覆写图经 probe 已入缓存）
   const partUrls = useMemo(() => (partsFile?.parts ?? []).map((d) => `${charBase}/parts/${d.file}`), [partsFile, charBase]);
   const partsReady = usePngReady(partUrls);
 
@@ -94,7 +115,7 @@ export const Sprite: React.FC<{episodeId: string; p: Placement; speaking: boolea
     return (
       <div style={outerStyle}>
         <div style={{position: 'relative', width: cw * unit, height: hPx, margin: '0 auto'}}>
-          {partsReady &&
+          {partsReady && poseMap &&
             ordered.map((d) => {
               const w = worlds?.get(d.id);
               if (!w) return null;
@@ -106,7 +127,7 @@ export const Sprite: React.FC<{episodeId: string; p: Placement; speaking: boolea
               return (
                 <img
                   key={d.id}
-                  src={staticFile(`${charBase}/parts/${d.file}`)}
+                  src={staticFile(partSrc(d))}
                   data-part={d.id}
                   style={{
                     position: 'absolute', left: 0, top: 0,

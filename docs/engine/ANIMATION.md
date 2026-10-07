@@ -50,6 +50,9 @@ characters/<id>/
 - `parent`：父部件 id，子部件继承父变换（前臂跟上臂）
 - `depth`：部件叠放次序（小→后）
 
+部件 rig 即完整渲染模式：**纯部件角色可不带 `default` 整幅资产**（rig 模式下
+整幅变体根本不加载）。`variant` 字段仅作用于无 parts 的整幅模式。
+
 **SVG 角色同样可用**：无需 parts.json，动作轨道直接作用于 SVG 内
 `id="<part>"` 的命名组；关节点用 `data-pivot="x y"`（viewBox 坐标）声明，
 缺省取包围盒中心。`#eyes`/`#mouth`/`#mouth-open` 行为不变。
@@ -68,12 +71,20 @@ characters/<id>/
              {"t": 1.6, "rot": -110}]}}
 ```
 
-- `frames`：`characters/<id>/<name>.png|.svg` 逐帧切换（PNG 优先，变体名/子目录均可），
-  `fps` 控制节奏、`loop:false`/`hold` 播完停末帧。大动作（换姿势/换表情）用它。
+- `frames` 的语义随渲染模式分流：
+  - **整幅模式**（无 parts）：`characters/<id>/<name>.png|.svg` 逐帧切换
+    （PNG 优先，变体名/子目录均可）。大动作（换姿势/换表情）用它。
+  - **部件 rig 模式**：`frames[i]` 指姿势目录 `parts/poses/<frame>/`，
+    目录内与部件同名的 PNG **稀疏覆写**该部件贴图（缺哪个部件就用基底贴图，
+    目录不存在则整帧退回基底，validate 会警告该帧无视觉效果）。
+    部件的 at/pivot/parent 几何不变 —— 姿势目录只换贴图。
+  - **SVG 整幅**：同上按整幅变体切换；tracks 同时作用于 `#id` 命名组。
+  `fps` 控制节奏、`loop:false`/`hold` 播完停末帧。
   引用中的 `speed` 同时影响 frames 与 tracks，`loop` 覆盖剪辑默认值。
 - `tracks`：部件关键帧，`t` 秒处 `{rot,dx,dy,scale,opacity,ease}`，
   相邻关键帧间按 ease 插值。小动作（抬手/转头/鞠躬）用它。
-- 两者可并存：frames 切整幅、tracks 同时驱动部件或 SVG 组。
+- 两者可并存：整幅模式下 frames 切整幅；rig 模式下 frames 换部件贴图，
+  tracks 同时驱动关节 —— 换装与运动叠加互不干扰。
 - 剪辑时长 `durationSec`：轨道求值的循环周期；`loop:false` 播完保持。
 
 ## 4. 道具（attachTo / motion / depth）
@@ -136,8 +147,14 @@ characters/<id>/
   整幅场景行为逐帧不变。
 - 相机/转场/字幕/口型/眨眼/音轨路径不变；letterbox 字幕仍压黑边。
 - `pnpm validate` 卡口新增：scene.json 层文件、parts.json 部件图、
-  动作剪辑文件与序列帧、attachTo 目标存在性。
+  动作剪辑文件与序列帧（rig 模式下为姿势目录覆写图）、attachTo 目标存在性。
 - 存在但非法的 parts/动作 JSON 是错误，不会静默退回整幅资产；缺失的可选 parts 文件仍可回退。
-- `pnpm test` 运行确定性的走位接管、旧进出场、帧序列与父子关节回归测试。
-- 参考夹具：`public/episodes/ep00/`（演示集，10 镜头覆盖全部能力，svg-sequence 验证 SVG 帧序列与关节叠加；末三镜验证落地阴影开关/单角色豁免）。
-  `svg-fixture` 基于模板构造，只用于工程机制测试，不代表正式角色或美术风格验收。
+
+- `pnpm test` 运行确定性的走位接管、旧进出场、帧序列与父子关节回归测试，
+  以及两条 renderStill 集成断言（黑场隔离）：
+  `rig-pose` 同关节姿态下 idle↔alert 姿势帧渲染不同；`rig-only` 纯部件角色
+  （无 default 资产）正常渲染且关节轨道生效。
+- 参考夹具：`public/episodes/ep00/`（演示集，12 镜头覆盖全部能力：
+  `rig-pose` 验证 rig 模式姿势覆写×关节叠加、`rig-only` 验证纯部件渲染、
+  末镜 `svg-sequence` 验证 SVG 帧序列与关节叠加；末四镜 `shadow-*` 验证落地阴影开关/单角色豁免/走位跟随）。
+  `bot2`/`svg-fixture` 为工程机制夹具，不代表正式角色或美术风格验收。

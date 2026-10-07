@@ -98,3 +98,53 @@ console.log('PASS shadow defaults, per-char opt-out, lift attenuation, castShado
   assert.ok(moving.moves.length > 0); // legacy 条件不含 moves —— 由 useCharWorld 内同款判定保证
 }
 console.log('PASS idle bob coupled into shadow lift attenuation');
+
+// ---- renderStill 集成回归：纯部件角色渲染 + rig×姿势帧复合（黑场隔离环境噪声）----
+const {bundle} = await import('@remotion/bundler');
+const {renderStill, selectComposition} = await import('@remotion/renderer');
+const {readFileSync, mkdtempSync} = await import('node:fs');
+const {tmpdir} = await import('node:os');
+const {join} = await import('node:path');
+const {loadEp, ROOT} = await import('./common');
+const {buildTimeline} = await import('../src/spec');
+
+const {ep, shots, manifest} = loadEp('ep00');
+const tl = buildTimeline(ep, shots, manifest);
+const startOf = (id: string) => tl.find((s) => s.shot.id === id)!.startFrame;
+
+const serve = await bundle(join(ROOT, 'src', 'index.ts'), undefined, {publicDir: join(ROOT, 'public')});
+const comp = await selectComposition({serveUrl: serve, id: 'episode', inputProps: {episodeId: 'ep00'}});
+const outDir = mkdtempSync(join(tmpdir(), 'engine-stills-'));
+const still = async (shotId: string, tSec: number, name: string) => {
+  const p = join(outDir, name);
+  await renderStill({composition: comp, serveUrl: serve, output: p, frame: startOf(shotId) + Math.round(tSec * ep.fps), inputProps: {episodeId: 'ep00'}});
+  return readFileSync(p);
+};
+
+// rig-pose（黑场）：t=0.3 与 t=0.68 轨道姿态完全一致（arm -100° 平台段），仅姿势帧 idle→alert 不同
+const poseA = await still('rig-pose', 0.3, 'pose-idle.png');
+const poseB = await still('rig-pose', 0.68, 'pose-alert.png');
+assert.ok(!poseA.equals(poseB), 'rig-pose: 姿势帧覆写未改变部件 rig 渲染结果');
+console.log('PASS rig frames×tracks composite: pose override changes rig output');
+
+// rig-only（黑场）：bot2 无 default 整幅资产；look 轨道 t=0.3 vs t=1.0 头部角度不同
+const onlyA = await still('rig-only', 0.3, 'only-a.png');
+const onlyB = await still('rig-only', 1.0, 'only-b.png');
+assert.ok(!onlyA.equals(onlyB), 'rig-only: 纯部件角色未渲染或未应用关节轨道');
+console.log('PASS parts-only character renders and animates without default asset');
+
+// 加载竞态：延迟 parts.json 1.5s 让动作剪辑先返回——rig 姿势名不得被当整幅帧请求
+// （回归前此序会 cancelRender: missing .../bot/idle.svg）
+const delayedServe = await bundle(join(ROOT, 'pipeline', 'fixtures', 'delayed-entry.ts'), undefined, {publicDir: join(ROOT, 'public')});
+const delayedComp = await selectComposition({serveUrl: delayedServe, id: 'episode', inputProps: {episodeId: 'ep00'}});
+const delayedPath = join(outDir, 'pose-delayed.png');
+await renderStill({
+  composition: delayedComp,
+  serveUrl: delayedServe,
+  output: delayedPath,
+  frame: startOf('rig-pose') + Math.round(0.68 * ep.fps),
+  inputProps: {episodeId: 'ep00'},
+});
+assert.ok(!readFileSync(delayedPath).equals(poseA), '竞态渲染产物应与 idle 帧不同（alert 姿势）');
+console.log('PASS delayed parts.json (action resolves first) still renders rig pose frame');
+console.log(`  stills → ${outDir}`);

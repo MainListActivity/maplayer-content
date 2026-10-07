@@ -13,6 +13,8 @@ const actionCfg = (a: Placement['action']): {name: string; speed: number; loop?:
 export interface CharWorld {
   tSec: number;
   charBase: string;
+  /** parts.json 探测是否完成（区分加载中与不存在）；rigMode=ready&&partsFile!=null。 */
+  partsReady: boolean;
   partsFile: PartsFile | null;
   clip: ActionClip | null;
   cfg: {name: string; speed: number; loop?: boolean} | null;
@@ -66,5 +68,5 @@ export const useCharWorld = (episodeId: string, p: Placement | null, shotDurSec:
   const legacy = !!p && !partsFile && !clip && !p.moves.length && !p.enter.startsWith('walk') && !p.exit.startsWith('walk');
   const idleDy = legacy ? idleBob(tSec, p.id) : 0;
 
-  return {tSec, charBase, partsFile, clip, cfg, pos: {x, y: loco.y + bob.dy / H}, ground: {x, y: loco.y}, liftPx: Math.max(0, -(bob.dy + idleDy)), flip: loco.flip, tilt: bob.tilt, hPx, worlds};
+  return {tSec, charBase, partsReady: partsRaw.ready, partsFile, clip, cfg, pos: {x, y: loco.y + bob.dy / H}, ground: {x, y: loco.y}, liftPx: Math.max(0, -(bob.dy + idleDy)), flip: loco.flip, tilt: bob.tilt, hPx, worlds};
 };

@@ -203,6 +203,34 @@
    "caption": "氛围：尘埃漂移 + 控台闪动 + 全息脉动"
   },
   {
+   "id": "rig-pose",
+   "scene": null,
+   "holdSec": 5,
+   "characters": [
+    {
+     "id": "bot",
+     "x": 0.5,
+     "y": 0.95,
+     "action": "alert"
+    }
+   ],
+   "caption": "rig×姿势帧：poses/alert 换装泛红 + 挥手关节叠加"
+  },
+  {
+   "id": "rig-only",
+   "scene": null,
+   "holdSec": 3.5,
+   "characters": [
+    {
+     "id": "bot2",
+     "x": 0.5,
+     "y": 0.95,
+     "action": "look"
+    }
+   ],
+   "caption": "纯部件角色：无 default 整幅资产，仅 parts/ 渲染"
+  },
+  {
    "id": "combo",
    "scene": "demo-bridge",
    "holdSec": 7,
@@ -263,133 +291,84 @@
   {
    "id": "shadow-on",
    "scene": "yard",
-   "holdSec": 3.5,
-   "camera": {
-    "from": {
-     "x": 0.5,
-     "y": 0.5,
-     "zoom": 1
-    }
-   },
+   "holdSec": 3,
    "characters": [
     {
      "id": "bot",
-     "x": 0.3,
+     "x": 0.45,
      "y": 0.8
-    },
-    {
-     "id": "rin",
-     "x": 0.56,
-     "y": 0.81,
-     "scale": 0.9
-    },
-    {
-     "id": "svg-fixture",
-     "x": 0.78,
-     "y": 0.8,
-     "scale": 0.7
     }
    ],
-   "caption": "落地阴影：默认开（部件 rig / 位图 / SVG 同口径投影）"
+   "caption": "阴影：默认开启（脚下椭圆投影+接触暗芯）"
   },
   {
    "id": "shadow-off",
    "scene": "yard",
-   "holdSec": 3.5,
-   "camera": {
-    "from": {
-     "x": 0.5,
-     "y": 0.5,
-     "zoom": 1
-    }
-   },
+   "holdSec": 3,
    "shadow": {
     "enabled": false
    },
    "characters": [
     {
      "id": "bot",
-     "x": 0.3,
+     "x": 0.45,
      "y": 0.8
-    },
-    {
-     "id": "rin",
-     "x": 0.56,
-     "y": 0.81,
-     "scale": 0.9
-    },
-    {
-     "id": "svg-fixture",
-     "x": 0.78,
-     "y": 0.8,
-     "scale": 0.7
     }
    ],
-   "caption": "对照：shot.shadow.enabled=false（纸片漂浮）"
+   "caption": "对照：shot.shadow.enabled=false 完全关闭"
   },
   {
    "id": "shadow-partial",
    "scene": "yard",
-   "holdSec": 3.5,
-   "camera": {
-    "from": {
-     "x": 0.5,
-     "y": 0.5,
-     "zoom": 1
-    }
-   },
+   "holdSec": 3,
    "characters": [
     {
      "id": "bot",
-     "x": 0.3,
-     "y": 0.8,
+     "x": 0.4,
+     "y": 0.8
+    },
+    {
+     "id": "bot2",
+     "x": 0.66,
+     "y": 0.82,
+     "scale": 0.9,
      "shadow": false
-    },
-    {
-     "id": "rin",
-     "x": 0.56,
-     "y": 0.81,
-     "scale": 0.9
-    },
-    {
-     "id": "svg-fixture",
-     "x": 0.78,
-     "y": 0.8,
-     "scale": 0.7
     }
    ],
-   "caption": "单角色豁免：bot shadow=false 无影，rin/svg-fixture 有影"
+   "caption": "对照：bot 有影，bot2 shadow=false 豁免（全息悬浮角色）"
   },
   {
    "id": "shadow-walk",
    "scene": "yard",
-   "holdSec": 4.5,
-   "camera": {
-    "from": {
-     "x": 0.5,
-     "y": 0.5,
-     "zoom": 1
-    }
-   },
+   "holdSec": 5,
    "characters": [
     {
      "id": "bot",
-     "x": 0.16,
+     "x": 0.15,
      "y": 0.8,
      "enter": "walk-left",
      "moves": [
       {
        "to": {
-        "x": 0.62,
-        "y": 0.8
+        "x": 0.55,
+        "y": 0.82
        },
-       "durSec": 2.2,
+       "durSec": 2.6,
        "gait": "walk"
+      },
+      {
+       "to": {
+        "x": 0.3,
+        "y": 0.78
+       },
+       "durSec": 1.8,
+       "gait": "walk",
+       "at": 3.4
       }
      ]
     }
    ],
-   "caption": "走位中阴影跟随：walk-left 入场 + move 位移"
+   "caption": "阴影跟随走位：位移+步态抬升衰减"
   }
  ]
 }
