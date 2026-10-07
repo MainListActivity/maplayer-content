@@ -128,7 +128,7 @@ export const Sprite: React.FC<{episodeId: string; p: Placement; speaking: boolea
 
   // 模式 2/3：序列帧或整幅
   if (src?.kind === 'png' || seqFrame) {
-    const url = seqFrame ? staticFile(`${charBase}/${seqFrame}.png`) : src!.kind === 'png' ? src!.url : '';
+    const url = seqFrame ? staticFile(`${charBase}/${seqFrame}.png`) : src!.kind === 'png' ? staticFile(src!.url) : '';
     if (!url || (seqFrame && !framesReady)) return null;
     return (
       <div style={outerStyle}>
