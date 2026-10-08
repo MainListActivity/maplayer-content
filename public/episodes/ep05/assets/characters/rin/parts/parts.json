@@ -46,7 +46,12 @@
       ],
       "depth": 2,
       "parent": "arm-far",
-      "points": {}
+      "points": {
+        "wrist": [
+          177,
+          522
+        ]
+      }
     },
     {
       "id": "arm-near",
@@ -76,14 +81,19 @@
       ],
       "depth": 8,
       "parent": "arm-near",
-      "points": {}
+      "points": {
+        "wrist": [
+          332,
+          518
+        ]
+      }
     },
     {
       "id": "hand-near",
       "file": "hand-near.png",
       "at": [
-        289,
-        400
+        309,
+        512
       ],
       "pivot": [
         332,
@@ -91,7 +101,88 @@
       ],
       "depth": 8.1,
       "parent": "fore-near",
-      "points": {}
+      "points": {
+        "wrist": [
+          332,
+          518
+        ],
+        "fingertip": [
+          332,
+          580
+        ]
+      }
+    },
+    {
+      "id": "hand-near-palm",
+      "file": "hand-near-palm.png",
+      "at": [
+        315,
+        512
+      ],
+      "pivot": [
+        332,
+        518
+      ],
+      "depth": 8.2,
+      "parent": "fore-near",
+      "points": {
+        "wrist": [
+          332,
+          518
+        ],
+        "fingertip": [
+          332,
+          580
+        ]
+      }
+    },
+    {
+      "id": "hand-near-edge",
+      "file": "hand-near-edge.png",
+      "at": [
+        321,
+        512
+      ],
+      "pivot": [
+        332,
+        518
+      ],
+      "depth": 8.15,
+      "parent": "fore-near",
+      "points": {
+        "wrist": [
+          332,
+          518
+        ],
+        "fingertip": [
+          332,
+          580
+        ]
+      }
+    },
+    {
+      "id": "hand-far",
+      "file": "hand-far.png",
+      "at": [
+        158,
+        516
+      ],
+      "pivot": [
+        177,
+        522
+      ],
+      "depth": 2.1,
+      "parent": "fore-far",
+      "points": {
+        "wrist": [
+          177,
+          522
+        ],
+        "fingertip": [
+          177,
+          584
+        ]
+      }
     },
     {
       "id": "thigh-far",

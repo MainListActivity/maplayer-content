@@ -35,10 +35,27 @@ const defs=[];
 function piece(id,index,start,end,len,pivot,depth,parent,flip=false,trim=1,minY=0){const b=bounds(atlas,index%3,Math.floor(index/3),3,4),g=normalize(atlas,b,start,end,len,id+'.png',flip,trim,minY);defs.push({id,file:id+'.png',at:[pivot[0]+g.at[0],pivot[1]+g.at[1]],pivot,depth,...(parent?{parent}:{}),points:{}});return g;}
 piece('torso',1,[.49,.12],[.54,.85],210,[250,235],5);defs[0].pivot=[250,480];
 piece('arm-far',4,[.52,.10],[.54,.68],140,[177,283],1,'torso',false,.81);
-piece('fore-far',5,[.52,.07],[.50,.79],125,[177,423],2,'arm-far');
+// Keep the cuffs; discard the original reversed hands below the wrist.
+piece('fore-far',5,[.52,.07],[.50,.79],125,[177,423],2,'arm-far',false,.68);
 piece('arm-near',2,[.51,.10],[.58,.70],140,[332,282],7,'torso',false,.81);
 piece('fore-near',3,[.50,.07],[.58,.81],125,[332,422],8,'arm-near',false,.68);
-piece('hand-near',3,[.50,.64],[.58,.81],30,[332,518],8.1,'fore-near',false,1,.60);
+// The generated atlas's actual order is right-back, left-back, left-palm.
+// Assign by visible anatomy, not by the generation prompt's requested order.
+const hands=decode(here+'/hands-atlas-v4.png');
+function hand(id,column,pivot,depth,parent,im=hands,columns=3){
+  const b=bounds(im,column,0,columns,1),sliceY=b.y+Math.round(b.h*.04);
+  let left=b.x+b.w,right=b.x;
+  for(let x=b.x;x<b.x+b.w;x++)if(im.d[(sliceY*im.w+x)*4+3]>80){left=Math.min(left,x);right=Math.max(right,x);}
+  const wristX=((left+right)/2-b.x)/b.w;
+  const g=normalize(im,b,[wristX,.04],[wristX,.98],62,id+'.png');
+  defs.push({id,file:id+'.png',at:[pivot[0]+g.at[0],pivot[1]+g.at[1]],pivot,depth,parent,points:{wrist:pivot,fingertip:[pivot[0],pivot[1]+62]}});
+}
+hand('hand-near',1,[332,518],8.1,'fore-near');
+hand('hand-near-palm',2,[332,518],8.2,'fore-near');
+hand('hand-near-edge',0,[332,518],8.15,'fore-near',decode(here+'/hand-edge-v4.png'),1);
+hand('hand-far',0,[177,522],2.1,'fore-far');
+defs.find(p=>p.id==='fore-near').points.wrist=[332,518];
+defs.find(p=>p.id==='fore-far').points.wrist=[177,522];
 piece('thigh-far',9,[.60,.10],[.30,.89],175,[233,460],0);
 piece('shin-far',10,[.55,.12],[.65,.89],175,[233,635],.1);
 piece('boot-far',11,[.34,.20],[.34,1.20],76,[233,800],.2,null,true);
@@ -91,7 +108,16 @@ function pose(t){
  const swing=walking?19*Math.sin(u*2*Math.PI):19*Math.sin(3*2*Math.PI)*(1-ease(t,3.6,4.2));
  p['arm-near']={rot:-swing-76*reach+3*react};p['fore-near']={rot:-9+19*reach+.24*swing};
  p['arm-far']={rot:swing+5*react};p['fore-far']={rot:-12-.35*swing};
- const wrist=ease(t,6.15,7.45)*(1-ease(t,10.7,12.5));p['hand-near']={rot:8*wrist-2.5*Math.sin(t*2.3)*wrist};
+ const wrist=ease(t,6.15,7.45)*(1-ease(t,10.7,12.5));
+ const wristRot=8*wrist-2.5*Math.sin(t*2.3)*wrist;
+ // Supination follows the shoulder lift; return to the dorsal hanging hand on release.
+ const roll=ease(t,6.55,6.95)*(1-ease(t,11.15,11.55));
+ // Three drawn views of the SAME left hand, one visible at a time.
+ // A narrow oblique view bridges the roll without dissolving two thumbs.
+ p['hand-near']={rot:wristRot,opacity:roll<.25?1:0};
+ p['hand-near-edge']={rot:wristRot,opacity:roll>=.25&&roll<.75?1:0};
+ p['hand-near-palm']={rot:wristRot,opacity:roll>=.75?1:0};
+ p['hand-far']={rot:0};
  let blink=0;for(const b of [2.7,4.72,8.3,12.65,16.3])blink=Math.max(blink,Math.max(0,1-Math.abs(t-b)/.10));
  const listen=ease(t,4.05,4.5)*(1-ease(t,11.75,12.3)),soft=ease(t,11.75,12.3);
  const headRot=-rot*.55-4*react+nod+.5*Math.sin(t*1.7-.4);
@@ -101,7 +127,7 @@ function pose(t){
  return p;
 }
 const clipsDir=ep+'/assets/characters/rin/actions';fs.mkdirSync(clipsDir,{recursive:true});
-for(const [name,start,dur]of [['approach',0,8.5],['answer',8.5,230/24]]){const tracks=Object.fromEntries(defs.map(p=>[p.id,[]]));for(let f=0;f<=Math.round(dur*24);f++){const p=pose(start+f/24);for(const id of Object.keys(tracks))tracks[id].push({t:f/24,...p[id],ease:'linear'});}save(clipsDir+'/'+name+'.json',{durationSec:dur,loop:false,hold:true,fps:24,tracks});}
+for(const [name,start,dur]of [['approach',0,8.5],['answer',8.5,230/24]]){const tracks=Object.fromEntries(defs.map(p=>[p.id,[]]));for(let f=0;f<=Math.round(dur*24);f++){const p=pose(start+f/24);for(const id of Object.keys(tracks))tracks[id].push({t:f/24,...p[id],ease:id.startsWith('hand-near')?'hold':'linear'});}save(clipsDir+'/'+name+'.json',{durationSec:dur,loop:false,hold:true,fps:24,tracks});}
 save(ep+'/episode.json',{id:'ep05',title:'静默信标 · 我在（人物与动作重设计）',fps:24,width:1920,height:1080,letterbox:false,grain:false,voices:{rin:'zh-CN-XiaoxiaoNeural'},names:{rin:'凛'}});
 const common={scene:'listening-room',transitionIn:'cut',props:[],shadow:{enabled:true,opacity:.27,size:.52,blur:13,contact:.72}};
 save(ep+'/shots.json',{shots:[{...common,id:'approach',holdSec:2.5,padInSec:5.25,padOutSec:.75,camera:{from:{x:.5,y:.5,zoom:1.02},to:{x:.49,y:.5,zoom:1.07},ease:'easeInOut'},characters:[{id:'rin',x:.22,y:.94,scale:.96,action:'approach',moves:[{at:.6,durSec:3,to:{x:.49,y:.94},gait:'none',ease:'linear'}]}],dialogue:[{speaker:'rin',text:'有人在吗？'}]},{...common,id:'answer',holdSec:2.5,padInSec:4.5,padOutSec:2.5,camera:{from:{x:.53,y:.57,zoom:1.55},to:{x:.52,y:.57,zoom:1.62},ease:'easeInOut'},characters:[{id:'rin',x:.49,y:.94,scale:.96,action:'answer'}],dialogue:[{speaker:'rin',text:'我在。慢慢说。'}]}]});
