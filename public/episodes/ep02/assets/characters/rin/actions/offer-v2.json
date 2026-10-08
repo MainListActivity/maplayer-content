@@ -1,0 +1,23 @@
+{
+  "durationSec": 1.75,
+  "loop": false,
+  "hold": true,
+  "fps": 8,
+  "frames": [
+    "v2/rest",
+    "v2/rest",
+    "v2/anticipate",
+    "v2/anticipate",
+    "v2/offer",
+    "v2/offer",
+    "v2/offer",
+    "v2/offer",
+    "v2/offer",
+    "v2/offer",
+    "v2/offer",
+    "v2/offer",
+    "v2/offer",
+    "v2/offer"
+  ],
+  "tracks": {}
+}

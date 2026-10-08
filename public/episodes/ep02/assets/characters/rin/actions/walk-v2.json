@@ -1,0 +1,15 @@
+{
+  "durationSec": 0.75,
+  "loop": true,
+  "hold": false,
+  "fps": 8,
+  "frames": [
+    "v2/walk-1",
+    "v2/walk-2",
+    "v2/walk-3",
+    "v2/walk-4",
+    "v2/walk-5",
+    "v2/walk-6"
+  ],
+  "tracks": {}
+}

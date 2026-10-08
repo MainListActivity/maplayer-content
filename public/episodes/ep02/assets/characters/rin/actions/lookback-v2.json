@@ -1,0 +1,26 @@
+{
+  "durationSec": 2.125,
+  "loop": false,
+  "hold": true,
+  "fps": 8,
+  "frames": [
+    "v2/rest",
+    "v2/rest",
+    "v2/rest",
+    "v2/anticipate",
+    "v2/anticipate",
+    "v2/lookback",
+    "v2/lookback",
+    "v2/lookback",
+    "v2/lookback",
+    "v2/lookback",
+    "v2/lookback",
+    "v2/lookback",
+    "v2/lookback",
+    "v2/lookback",
+    "v2/lookback",
+    "v2/lookback",
+    "v2/lookback"
+  ],
+  "tracks": {}
+}

@@ -1,0 +1,26 @@
+{
+  "durationSec": 2.125,
+  "loop": false,
+  "hold": true,
+  "fps": 8,
+  "frames": [
+    "v2/rest",
+    "v2/rest",
+    "v2/sit-mid",
+    "v2/sit-mid",
+    "v2/sit-mid",
+    "v2/sit",
+    "v2/sit",
+    "v2/sit",
+    "v2/sit",
+    "v2/sit",
+    "v2/sit",
+    "v2/sit",
+    "v2/sit",
+    "v2/sit",
+    "v2/sit",
+    "v2/sit",
+    "v2/sit"
+  ],
+  "tracks": {}
+}

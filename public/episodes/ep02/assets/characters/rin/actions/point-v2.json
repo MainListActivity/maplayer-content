@@ -1,0 +1,22 @@
+{
+  "durationSec": 1.625,
+  "loop": false,
+  "hold": true,
+  "fps": 8,
+  "frames": [
+    "v2/reach-1",
+    "v2/reach-1",
+    "v2/reach-2",
+    "v2/reach-2",
+    "v2/reach-3",
+    "v2/reach-4",
+    "v2/reach-5",
+    "v2/reach-6",
+    "v2/reach-6",
+    "v2/reach-6",
+    "v2/reach-6",
+    "v2/reach-6",
+    "v2/reach-6"
+  ],
+  "tracks": {}
+}
