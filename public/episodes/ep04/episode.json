@@ -4,7 +4,7 @@
   "fps": 24,
   "width": 1920,
   "height": 1080,
-  "letterbox": true,
+  "letterbox": false,
   "grain": false,
   "voices": {
     "rin": "zh-CN-XiaoxiaoNeural"
