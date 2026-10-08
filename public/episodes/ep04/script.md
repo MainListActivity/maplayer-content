@@ -6,7 +6,7 @@
 
 | 镜头 | 动作与情绪 | 镜头与空间 | 台词 |
 |---|---|---|---|
-| called-back | 侧身步行四次循环，3 秒时停步；留出感知停顿，再回身回眸 | 全身长镜头缓推，保留脚部；星球、云带、控台、前景产生视差 | 凛：等等…… |
+| called-back | 侧身步行四次循环，3 秒时停步；留出感知停顿，再回身回眸 | 全身长镜头缓推，保留脚部；完整舰桥远景与近处控台/前景产生视差 | 凛：等等…… |
 | not-noise | 接回眸姿态，预备、伸手指向屏幕、落定、收手，表情转坚定 | 切中景后继续缓推；保持人物 x=.44 的轴线与屏幕方位 | 凛：这个节奏……不是噪声。 |
 | heard-you | 坚定→平静→放松站姿，声线放轻；结尾停留，不再插入动作展示 | 从近景缓拉回，让人物重新属于舰桥与地球 | 凛：我听见你了。 |
 
@@ -15,7 +15,7 @@
 本任务分支基于已落地 rotate/drift 引擎 dffc58f，不修改渲染核心。
 
 `gait:walk` 与六相侧身帧配合；位移结束同时停止步态，停步后帧序列继续演出。
-场景 7 层继承 earth rotate / cloud drift / holo pulse / lights flicker / dust。
+综合入镜为完整 D+ 舰桥底图(depth .88) + 已验收 holo/lights/fg 层；继承 holo pulse / lights flicker / dust。远景旋转/漂移的切片接缝干扰人物表演，本样片不使用 earth/clouds 动态层，原场景任务资产不变。
 镜头推拉保留合法取景范围。配音、字幕、音轨时点均使用现有 pipeline。
 
 复现：`pnpm audio ep04` → `pnpm validate ep04` → `pnpm render ep04 ep04-heard-you.mp4` → `pnpm frames renders/ep04-heard-you.mp4 0.5 6`。

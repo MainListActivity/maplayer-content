@@ -1,81 +1,52 @@
 {
- "layers": [
-  {
-   "id": "space",
-   "file": "space.png",
-   "depth": 0.68
-  },
-  {
-   "id": "earth",
-   "file": "earth.png",
-   "depth": 0.7
-  },
-  {
-   "id": "clouds",
-   "file": "clouds.png",
-   "depth": 0.72
-  },
-  {
-   "id": "mid",
-   "file": "mid.png",
-   "depth": 1.0
-  },
-  {
-   "id": "holo",
-   "file": "holo.png",
-   "depth": 1.06
-  },
-  {
-   "id": "lights",
-   "file": "lights.png",
-   "depth": 1.08
-  },
-  {
-   "id": "fg",
-   "file": "fg.png",
-   "depth": 1.32,
-   "castShadow": {
-    "dx": 10,
-    "dy": 14,
-    "blur": 18,
-    "opacity": 0.3
-   }
-  }
- ],
- "ambient": [
-  {
-   "type": "rotate",
-   "layer": "earth",
-   "degPerSec": 0.22,
-   "pivot": {
-    "x": 0.5,
-    "y": 1.0
-   }
-  },
-  {
-   "type": "drift",
-   "layer": "clouds",
-   "dx": -0.009
-  },
-  {
-   "type": "pulse",
-   "layer": "holo",
-   "hz": 0.8,
-   "amp": 0.05
-  },
-  {
-   "type": "flicker",
-   "layer": "lights",
-   "hz": 0.5,
-   "amp": 0.13
-  },
-  {
-   "type": "dust",
-   "count": 42,
-   "depth": 1.12,
-   "size": 3,
-   "opacity": 0.32,
-   "color": "#dff6fb"
-  }
- ]
+  "layers": [
+    {
+      "id": "bridge",
+      "file": "bridge-base.png",
+      "depth": 0.88
+    },
+    {
+      "id": "holo",
+      "file": "holo.png",
+      "depth": 1.06
+    },
+    {
+      "id": "lights",
+      "file": "lights.png",
+      "depth": 1.08
+    },
+    {
+      "id": "fg",
+      "file": "fg.png",
+      "depth": 1.32,
+      "castShadow": {
+        "dx": 10,
+        "dy": 14,
+        "blur": 18,
+        "opacity": 0.3
+      }
+    }
+  ],
+  "ambient": [
+    {
+      "type": "pulse",
+      "layer": "holo",
+      "hz": 0.8,
+      "amp": 0.05
+    },
+    {
+      "type": "flicker",
+      "layer": "lights",
+      "hz": 0.5,
+      "amp": 0.13
+    },
+    {
+      "type": "dust",
+      "count": 42,
+      "depth": 1.12,
+      "size": 3,
+      "opacity": 0.32,
+      "color": "#dff6fb"
+    }
+  ]
 }
