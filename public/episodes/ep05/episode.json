@@ -1,0 +1,15 @@
+{
+  "id": "ep05",
+  "title": "静默信标 · 我在（人物与动作重设计）",
+  "fps": 24,
+  "width": 1920,
+  "height": 1080,
+  "letterbox": false,
+  "grain": false,
+  "voices": {
+    "rin": "zh-CN-XiaoxiaoNeural"
+  },
+  "names": {
+    "rin": "凛"
+  }
+}

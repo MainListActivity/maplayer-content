@@ -1,0 +1,301 @@
+{
+  "size": [
+    500,
+    860
+  ],
+  "parts": [
+    {
+      "id": "torso",
+      "file": "torso.png",
+      "at": [
+        125,
+        191
+      ],
+      "pivot": [
+        250,
+        480
+      ],
+      "depth": 5,
+      "points": {}
+    },
+    {
+      "id": "arm-far",
+      "file": "arm-far.png",
+      "at": [
+        132,
+        255
+      ],
+      "pivot": [
+        177,
+        283
+      ],
+      "depth": 1,
+      "parent": "torso",
+      "points": {}
+    },
+    {
+      "id": "fore-far",
+      "file": "fore-far.png",
+      "at": [
+        148,
+        407
+      ],
+      "pivot": [
+        177,
+        423
+      ],
+      "depth": 2,
+      "parent": "arm-far",
+      "points": {}
+    },
+    {
+      "id": "arm-near",
+      "file": "arm-near.png",
+      "at": [
+        281,
+        254
+      ],
+      "pivot": [
+        332,
+        282
+      ],
+      "depth": 7,
+      "parent": "torso",
+      "points": {}
+    },
+    {
+      "id": "fore-near",
+      "file": "fore-near.png",
+      "at": [
+        296,
+        406
+      ],
+      "pivot": [
+        332,
+        422
+      ],
+      "depth": 8,
+      "parent": "arm-near",
+      "points": {}
+    },
+    {
+      "id": "hand-near",
+      "file": "hand-near.png",
+      "at": [
+        289,
+        400
+      ],
+      "pivot": [
+        332,
+        518
+      ],
+      "depth": 8.1,
+      "parent": "fore-near",
+      "points": {}
+    },
+    {
+      "id": "thigh-far",
+      "file": "thigh-far.png",
+      "at": [
+        156,
+        426
+      ],
+      "pivot": [
+        233,
+        460
+      ],
+      "depth": 0,
+      "points": {}
+    },
+    {
+      "id": "shin-far",
+      "file": "shin-far.png",
+      "at": [
+        174,
+        602
+      ],
+      "pivot": [
+        233,
+        635
+      ],
+      "depth": 0.1,
+      "points": {}
+    },
+    {
+      "id": "boot-far",
+      "file": "boot-far.png",
+      "at": [
+        200,
+        781
+      ],
+      "pivot": [
+        233,
+        800
+      ],
+      "depth": 0.2,
+      "points": {}
+    },
+    {
+      "id": "thigh-near",
+      "file": "thigh-near.png",
+      "at": [
+        197,
+        429
+      ],
+      "pivot": [
+        278,
+        460
+      ],
+      "depth": 3,
+      "points": {}
+    },
+    {
+      "id": "shin-near",
+      "file": "shin-near.png",
+      "at": [
+        235,
+        608
+      ],
+      "pivot": [
+        278,
+        635
+      ],
+      "depth": 3.1,
+      "points": {}
+    },
+    {
+      "id": "boot-near",
+      "file": "boot-near.png",
+      "at": [
+        247,
+        781
+      ],
+      "pivot": [
+        278,
+        800
+      ],
+      "depth": 3.2,
+      "points": {}
+    },
+    {
+      "id": "head-neutral",
+      "file": "head-neutral.png",
+      "at": [
+        149,
+        59
+      ],
+      "pivot": [
+        250,
+        235
+      ],
+      "parent": "torso",
+      "depth": 10,
+      "points": {}
+    },
+    {
+      "id": "head-listen",
+      "file": "head-listen.png",
+      "at": [
+        149,
+        59
+      ],
+      "pivot": [
+        250,
+        235
+      ],
+      "parent": "torso",
+      "depth": 10.1,
+      "points": {}
+    },
+    {
+      "id": "head-blink",
+      "file": "head-blink.png",
+      "at": [
+        148,
+        59
+      ],
+      "pivot": [
+        250,
+        235
+      ],
+      "parent": "torso",
+      "depth": 10.2,
+      "points": {}
+    },
+    {
+      "id": "head-soft",
+      "file": "head-soft.png",
+      "at": [
+        149,
+        59
+      ],
+      "pivot": [
+        250,
+        235
+      ],
+      "parent": "torso",
+      "depth": 10.3,
+      "points": {}
+    },
+    {
+      "id": "mouth-rest",
+      "file": "mouth-rest.png",
+      "at": [
+        249,
+        170
+      ],
+      "pivot": [
+        250,
+        235
+      ],
+      "parent": "torso",
+      "depth": 15,
+      "points": {}
+    },
+    {
+      "id": "mouth-open",
+      "file": "mouth-open.png",
+      "at": [
+        249,
+        170
+      ],
+      "pivot": [
+        250,
+        235
+      ],
+      "parent": "torso",
+      "depth": 15.1,
+      "points": {}
+    },
+    {
+      "id": "mouth-o",
+      "file": "mouth-o.png",
+      "at": [
+        249,
+        170
+      ],
+      "pivot": [
+        250,
+        235
+      ],
+      "parent": "torso",
+      "depth": 15.2,
+      "points": {}
+    },
+    {
+      "id": "mouth-smile",
+      "file": "mouth-smile.png",
+      "at": [
+        249,
+        170
+      ],
+      "pivot": [
+        250,
+        235
+      ],
+      "parent": "torso",
+      "depth": 15.3,
+      "points": {}
+    }
+  ]
+}

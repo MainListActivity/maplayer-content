@@ -1,0 +1,104 @@
+{
+  "shots": [
+    {
+      "scene": "listening-room",
+      "transitionIn": "cut",
+      "props": [],
+      "shadow": {
+        "enabled": true,
+        "opacity": 0.27,
+        "size": 0.52,
+        "blur": 13,
+        "contact": 0.72
+      },
+      "id": "approach",
+      "holdSec": 2.5,
+      "padInSec": 5.25,
+      "padOutSec": 0.75,
+      "camera": {
+        "from": {
+          "x": 0.5,
+          "y": 0.5,
+          "zoom": 1.02
+        },
+        "to": {
+          "x": 0.49,
+          "y": 0.5,
+          "zoom": 1.07
+        },
+        "ease": "easeInOut"
+      },
+      "characters": [
+        {
+          "id": "rin",
+          "x": 0.22,
+          "y": 0.94,
+          "scale": 0.96,
+          "action": "approach",
+          "moves": [
+            {
+              "at": 0.6,
+              "durSec": 3,
+              "to": {
+                "x": 0.49,
+                "y": 0.94
+              },
+              "gait": "none",
+              "ease": "linear"
+            }
+          ]
+        }
+      ],
+      "dialogue": [
+        {
+          "speaker": "rin",
+          "text": "有人在吗？"
+        }
+      ]
+    },
+    {
+      "scene": "listening-room",
+      "transitionIn": "cut",
+      "props": [],
+      "shadow": {
+        "enabled": true,
+        "opacity": 0.27,
+        "size": 0.52,
+        "blur": 13,
+        "contact": 0.72
+      },
+      "id": "answer",
+      "holdSec": 2.5,
+      "padInSec": 4.5,
+      "padOutSec": 2.5,
+      "camera": {
+        "from": {
+          "x": 0.53,
+          "y": 0.57,
+          "zoom": 1.55
+        },
+        "to": {
+          "x": 0.52,
+          "y": 0.57,
+          "zoom": 1.62
+        },
+        "ease": "easeInOut"
+      },
+      "characters": [
+        {
+          "id": "rin",
+          "x": 0.49,
+          "y": 0.94,
+          "scale": 0.96,
+          "action": "answer"
+        }
+      ],
+      "dialogue": [
+        {
+          "speaker": "rin",
+          "text": "我在。慢慢说。"
+        }
+      ]
+    }
+  ]
+}

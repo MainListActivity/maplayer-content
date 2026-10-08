@@ -1,0 +1,9 @@
+{
+  "fps": 24,
+  "durationSec": 18.083333333333332,
+  "manualGait": true,
+  "stanceSegments": 8,
+  "maxAdjacentStanceFootDriftPx": 8.497641660099806e-14,
+  "pass": true,
+  "note": "Analytic ankle targets including root motion, not visual pixel tracking. Rig art contact and joint coverage require rendered inspection."
+}

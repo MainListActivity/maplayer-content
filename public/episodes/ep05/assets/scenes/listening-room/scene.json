@@ -1,0 +1,30 @@
+{
+  "layers": [
+    {
+      "id": "room",
+      "file": "background.png",
+      "depth": 0.82
+    },
+    {
+      "id": "screen",
+      "file": "screen-glow.png",
+      "depth": 1.08
+    }
+  ],
+  "ambient": [
+    {
+      "type": "flicker",
+      "layer": "screen",
+      "hz": 1.15,
+      "amp": 0.22
+    },
+    {
+      "type": "dust",
+      "count": 24,
+      "depth": 1.04,
+      "size": 2,
+      "opacity": 0.15,
+      "color": "#dff6fb"
+    }
+  ]
+}
