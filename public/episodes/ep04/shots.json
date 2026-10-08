@@ -1,0 +1,142 @@
+{
+  "shots": [
+    {
+      "scene": "bridge-live",
+      "shadow": {
+        "enabled": true,
+        "opacity": 0.25,
+        "size": 0.7,
+        "contact": 0.65
+      },
+      "transitionIn": "cut",
+      "id": "called-back",
+      "padInSec": 5,
+      "padOutSec": 2,
+      "camera": {
+        "from": {
+          "x": 0.5,
+          "y": 0.51,
+          "zoom": 1.03
+        },
+        "to": {
+          "x": 0.47,
+          "y": 0.51,
+          "zoom": 1.09
+        },
+        "ease": "easeInOut"
+      },
+      "characters": [
+        {
+          "id": "rin",
+          "x": 0.065,
+          "y": 0.91,
+          "scale": 0.95,
+          "action": "hear",
+          "moves": [
+            {
+              "at": 0,
+              "to": {
+                "x": 0.44,
+                "y": 0.91
+              },
+              "durSec": 3,
+              "gait": "walk",
+              "ease": "linear"
+            }
+          ]
+        }
+      ],
+      "dialogue": [
+        {
+          "speaker": "rin",
+          "text": "等等……",
+          "gapSec": 0.3
+        }
+      ]
+    },
+    {
+      "scene": "bridge-live",
+      "shadow": {
+        "enabled": true,
+        "opacity": 0.25,
+        "size": 0.7,
+        "contact": 0.65
+      },
+      "transitionIn": "cut",
+      "id": "not-noise",
+      "padInSec": 1.25,
+      "padOutSec": 1.5,
+      "camera": {
+        "from": {
+          "x": 0.49,
+          "y": 0.46,
+          "zoom": 1.27
+        },
+        "to": {
+          "x": 0.5,
+          "y": 0.44,
+          "zoom": 1.4
+        },
+        "ease": "easeInOut"
+      },
+      "characters": [
+        {
+          "id": "rin",
+          "x": 0.44,
+          "y": 0.91,
+          "scale": 0.95,
+          "action": "recognize"
+        }
+      ],
+      "dialogue": [
+        {
+          "speaker": "rin",
+          "text": "这个节奏……不是噪声。",
+          "gapSec": 0.5
+        }
+      ]
+    },
+    {
+      "scene": "bridge-live",
+      "shadow": {
+        "enabled": true,
+        "opacity": 0.25,
+        "size": 0.7,
+        "contact": 0.65
+      },
+      "transitionIn": "cut",
+      "id": "heard-you",
+      "padInSec": 2.5,
+      "padOutSec": 3.5,
+      "camera": {
+        "from": {
+          "x": 0.48,
+          "y": 0.43,
+          "zoom": 1.43
+        },
+        "to": {
+          "x": 0.5,
+          "y": 0.47,
+          "zoom": 1.18
+        },
+        "ease": "easeInOut"
+      },
+      "characters": [
+        {
+          "id": "rin",
+          "x": 0.44,
+          "y": 0.91,
+          "scale": 0.95,
+          "action": "reply"
+        }
+      ],
+      "dialogue": [
+        {
+          "speaker": "rin",
+          "text": "我听见你了。",
+          "gapSec": 0.5
+        }
+      ]
+    }
+  ]
+}

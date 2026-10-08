@@ -1,0 +1,15 @@
+{
+  "id": "ep04",
+  "title": "静默信标 · 我听见你了",
+  "fps": 24,
+  "width": 1920,
+  "height": 1080,
+  "letterbox": true,
+  "grain": false,
+  "voices": {
+    "rin": "zh-CN-XiaoxiaoNeural"
+  },
+  "names": {
+    "rin": "凛"
+  }
+}
