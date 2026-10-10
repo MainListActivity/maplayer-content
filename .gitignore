@@ -7,3 +7,16 @@ public/episodes/*/audio/
 renders/
 public/episodes/*/storyboard/
 qa/
+
+# vendored remotion agent skills (npx skills add remotion-dev/skills) — 本机可用，不入库
+.agents/skills/remotion-*/
+.claude/skills/
+.codex/skills/
+.devin/skills/
+.grok/skills/
+.windsurf/skills/
+skills-lock.json
+/skills/
+/agent/
+
+/data/
