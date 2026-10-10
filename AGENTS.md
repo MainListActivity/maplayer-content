@@ -15,8 +15,9 @@
 岗位轨为：`编剧`、`角色设计`、`服化道`、`场景`、`分镜`、`配音`、`合成`、`审片`、`原著`。
 任务的 `discipline` 与 `project.disciplines` 一致，单任务只挂一轨，按声明的 `tracks` 承接。
 
-- 原型：`executorRole=concept-design`，`reviewerRole=owner`。新角色、视觉风格、场景基调先交 demo，老板批准后再解锁依赖它的量产任务。
-- 量产：`executorRole=asset-production`，由 GM/QA 验收。经理按剧本、素材、分镜、配音、合成、审片的实际依赖安排任务。
+- 编剧：`executorRole=screenwriter`，任务必带 `discipline=编剧`（缺轨/错轨在创建与领取双端显式拒绝）；P 段原型剧本与 M 段剧本量产都归它（对「P 段=concept-design」约定的有意例外）。验收按段：P 段原型剧本 `reviewerRole=owner`（老板 demo 验收），M 段 `reviewerRole=gm`。同一剧本多轮修订走串依赖任务链：初稿→评审驳回→被取代稿作废关闭（void 视为依赖满足）→修订稿 v(N+1) 解锁；版本号进任务标题，驳回意见逐条转成修订要点写进下一轮 context；不为解锁依赖而批准不合格稿。
+- 原型（视频产线编剧以外七轨）：`executorRole=concept-design`，`reviewerRole=owner`。新角色、视觉风格、场景基调先交 demo，老板批准后再解锁依赖它的量产任务。
+- 量产（视频产线编剧以外七轨）：`executorRole=asset-production`，由 GM/QA 验收。经理按剧本、素材、分镜、配音、合成、审片的实际依赖安排任务。
 - 原型提交可直接打开的静帧或短样片；成片审核提交 mp4、`qa/frames/<片>/sheet.jpg` 和问题清单。多版本对比附对应静帧。
 
 ## 原著线（长篇故事创作）
