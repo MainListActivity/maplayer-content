@@ -12,12 +12,23 @@
 
 ## 任务与验收
 
-岗位轨为：`编剧`、`角色设计`、`服化道`、`场景`、`分镜`、`配音`、`合成`、`审片`。
+岗位轨为：`编剧`、`角色设计`、`服化道`、`场景`、`分镜`、`配音`、`合成`、`审片`、`原著`。
 任务的 `discipline` 与 `project.disciplines` 一致，单任务只挂一轨，按声明的 `tracks` 承接。
 
 - 原型：`executorRole=concept-design`，`reviewerRole=owner`。新角色、视觉风格、场景基调先交 demo，老板批准后再解锁依赖它的量产任务。
 - 量产：`executorRole=asset-production`，由 GM/QA 验收。经理按剧本、素材、分镜、配音、合成、审片的实际依赖安排任务。
 - 原型提交可直接打开的静帧或短样片；成片审核提交 mp4、`qa/frames/<片>/sheet.jpg` 和问题清单。多版本对比附对应静帧。
+
+## 原著线（长篇故事创作）
+
+与视频产线并列的独立产线，只负责写故事原著。种子稿见 `科幻故事续写筹备.md`，全部产出放 `story/`，不进入 `public/episodes/`。
+
+- 路由：`discipline=原著`。岗位落地后 `executorRole=story-author`；过渡期由 `concept-design`/`asset-production` 承接（编制固定 antigravity）。`product`/`gm`/`ai-content` 等岗不承接原著轨写作任务。
+- 递归流程：总体架构（故事圣经+全书总纲，reviewer=owner）→ 卷概要（owner）→ 章概要（owner）→ 正文补齐（QA→GM）→ 交付一个小章节 → 递归下一章。先概要后正文，老板只看概要。
+- 概要被驳回：修订概要再交同一验收人，不跳过直接写正文。正文被 QA/GM 驳回：按意见修订正文，概要不变。
+- 交付单位=一个小章节正文（markdown），QA 口径：与已批概要一致、文风连贯、与故事圣经无矛盾、字数达标。
+- 作家不接触视频产线概念：不分集、不定时长、不写分镜格式；改编剧本是下游编剧轨的事。任务 context 不带动画产线术语。
+- `story/` 目录约定：`story/<作品>/bible.md`（故事圣经）、`outline/<卷>.md`（卷/章概要）、`chapters/<卷>/<章>.md`（正文）、`notes/`（评审与修订记录）。版本历史靠 git，不另建版本目录。
 
 ## 文件与验证
 
