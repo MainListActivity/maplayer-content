@@ -1,146 +1,48 @@
-# maplayer-content · AI 员工流水线手册
+# maplayer-content · 内容生产
 
-本仓库是 2D 手绘风格动画的内容生产线。员工产出**数据与 SVG 资产**，由内置的
-Remotion 播放器（`src/lib/`）按分镜表自动合成成片，不要改渲染代码，除非你领的是工程任务。
+本仓库制作动画内容，使用 Remotion 按分镜合成。内容任务交付剧本、素材和分镜；渲染代码（`src/lib/`）的修改属于工程任务。
 
-## 岗位轨（discipline）
+## 素材与风格
 
-本项目岗位体系与软件线不同：产线分工用**项目岗位轨**表达，不进全局岗位枚举。
-词表与每轨说明写在项目记录 `project.disciplines`；任务按 `discipline=<轨名>`
-挂轨（下表「轨名」列是任务取值，必须与词表一致），编制声明 `tracks` 后只接
-对口轨任务，跨轨领取会被显式拒绝；任务无轨则任何对口岗位都能接。
+- 人物、场景的素材格式、媒介与制作方式自由选择，以最终画面效果为准。
+- 装饰和小物件继续使用 SVG。
+- 已验收的视觉参考见 `public/assets/style-bible/`；同一作品保持风格一致。参考图用于判断视觉效果，不限定素材格式或绘制技法。
+- 旧文档中的 SVG 骨架、固定线宽、滤镜、比例、色板和位图路线等制作限制，不再作为通用要求；具体要求以当前任务和老板验收意见为准。
+- 接入现有播放器时，查看 `src/spec.ts` 和 `docs/engine/ANIMATION.md` 确认实际支持。需要扩展能力时提出工程任务。
 
-| 轨名 | slug | 职责 | 验收人 |
-|---|---|---|---|
-| `编剧` | script | 剧本、分场、角色小传、台词 | GM→owner（原型段）|
-| `角色设计` | character | 角色 SVG、变体、三视图 | owner（demo）→GM（量产）|
-| `服化道` | prop | 道具、挂件、服装差异 | GM |
-| `场景` | scene | 背景、氛围图 | owner（基调 demo）→GM |
-| `分镜` | storyboard | shots.json、镜头设计 | GM |
-| `配音` | voice | 声线表、台词音轨 | GM |
-| `合成` | composite | 渲染、成片 | QA |
-| `审片` | review | 抽帧终验 | QA→owner（里程碑）|
+## 任务与验收
 
-承接岗位：P 原型段轨（编剧/角色设计/服化道/场景/分镜 的原型任务）由
-`concept-design` 执行、老板 demo 验收；M 量产段任务（全部八轨）由
-`asset-production` 执行、GM/QA 验收。
+岗位轨为：`编剧`、`角色设计`、`服化道`、`场景`、`分镜`、`配音`、`合成`、`审片`。
+任务的 `discipline` 与 `project.disciplines` 一致，单任务只挂一轨，按声明的 `tracks` 承接。
 
-经理拆产线任务示例（每任务标轨 + 验收人 + 依赖）：
+- 原型：`executorRole=concept-design`，`reviewerRole=owner`。新角色、视觉风格、场景基调先交 demo，老板批准后再解锁依赖它的量产任务。
+- 量产：`executorRole=asset-production`，由 GM/QA 验收。经理按剧本、素材、分镜、配音、合成、审片的实际依赖安排任务。
+- 原型提交可直接打开的静帧或短样片；成片审核提交 mp4、`qa/frames/<片>/sheet.jpg` 和问题清单。多版本对比附对应静帧。
 
-```
-create_task { executorRole:"concept-design", discipline:"角色设计",
-              reviewerRole:"owner",  title:"[P2] 凛 角色 demo", ... }
-create_task { executorRole:"asset-production", discipline:"角色设计",
-              reviewerRole:"gm",     title:"[M2] 凛 表情变体量产",
-              dependencies:["<P2 任务 id>"], ... }
-```
+## 文件与验证
 
-## 流水线（两段：原型 → 量产）
+每集内容放在 `public/episodes/<ep>/`：
 
-**原型段（`executorRole=concept-design`，验收人必须是老板）**——任何新角色、新视觉风格、新场景基调，
-先做 demo 收进「原型验收任务」（reviewerRole=owner），交付证据必须是老板能直接
-打开的产物（静帧 PNG 或短样片路径）。老板 approve 前，所有依赖它的量产任务不得解锁。
+- `script.md`：剧本。
+- `episode.json`：集信息、画幅、声线表。
+- `shots.json`：分镜。
+- `assets/`：人物、场景、道具等素材。
 
-| 原型阶段 | 轨 | 产物 | 落点 |
-|---|---|---|---|
-| P1 概念剧本 | `编剧` | 分场大纲 + 角色小传 | `episodes/<ep>/script.md` |
-| P2 角色 demo | `角色设计` | 新角色 `default` SVG + 一张入镜静帧 | `assets/characters/<id>/default.svg` + `storyboard/frames/` |
-| P3 风格 demo | `场景`、`服化道`（各拆一条任务，单任务只能挂一轨） | 场景基调图 + 道具风格样张 | `assets/scenes/<id>.svg` + `assets/props/*.svg` |
-
-**量产段（`executorRole=asset-production`，GM/QA 验收）**——原型过关后由经理解锁：
-
-| 量产阶段 | 轨 | 产物 | 落点 |
-|---|---|---|---|
-| M1 剧本定稿 | `编剧` | 完整分场剧本 | `episodes/<ep>/script.md` |
-| M2 角色量产 | `角色设计` | 表情/服装变体 SVG | `assets/characters/<id>/<variant>.svg` |
-| M3 服化道量产 | `服化道` | 全量道具、挂件 | `assets/props/*.svg` |
-| M4 场景量产 | `场景` | 全量背景 | `assets/scenes/*.svg` |
-| M5 分镜 | `分镜` | 镜头表 | `shots.json` |
-| M6 配音 | `配音` | 声线 + 音轨 | `episode.json` voices + `pnpm audio` |
-| M7 成片 | `合成` | mp4 | `pnpm render` → `renders/` |
-| M8 QA 终验 | `审片` | 抽帧检查报告 | `pnpm frames renders/<片>.mp4` → `qa/frames/` |
-
-依赖规则：M2 依赖对应角色的 P2 验收任务；M3/M4 依赖 P3；M5 依赖全部原型关；
-M6 依赖 M5；M7 依赖 M6。新增角色永远先走 P2 demo，禁止直接进量产。
-
-## 原画质量规范（开工前必读）
-
-唯一参照系是 `public/assets/style-bible/`——老板选定的风格定稿。
-**没有基线不许开工**：先走「风格方向」任务，员工出 2~3 个候选方向
-（每方向一张角色+一张场景 demo 帧），老板选定后落定基线。
-现有 ep01 资产全部是基线未定前的占位货，基线落地后要整批按基线重绘。
-
-产出纪律：
-1. 读 `docs/style/STYLE.md`（线宽/墨色/三阶上色/比例/透视硬规范）
-2. 角色一律从 `public/assets/templates/character-front.svg` 骨架起稿，
-   交付前删 `#guide` 参考线层
-3. 共享滤镜/渐变从 `public/assets/shared/defs.svg` 复制 defs 块
-4. 用色限在 `public/episodes/<ep>/palette.json` 色板容差内
-5. `pnpm validate` 的结构项（viewBox/位图/动画组/参考线）永远硬卡口；
-   风格项（复杂度/色板/线宽/滤镜）在基线落地前为警告、落地后升级失败
-
-## 数据契约
-
-`episode.json`：集号、标题、画幅、声线表（角色 id → edge-tts 声线，如
-`zh-CN-XiaoxiaoNeural`；`say:<voice>` 强制走 macOS say 兜底）。
-
-`shots.json` 每镜头字段：
-
-- `scene`：场景名，`assets/scenes/<scene>.png|.svg` 或 `<scene>/scene.json` 分层场景；`null` = 黑场
-- `camera`：`{from:{x,y,zoom}, to:{...}, ease}`，x/y 为取景中心（0..1）、zoom≥1；
-  取景范围约束 `x∈[0.5/z, 1-0.5/z]`，越界会露黑边（validate 会警告）
-- `characters`：`{id, variant, x, y, scale, flip, enter, exit, moves, action, depth, shadow}`；y 是脚底锚点。
-  `moves` 走位分段（gait/ease）、`enter/exit` 支持 `walk-left|right` 走场、`action` 引用
-  `characters/<id>/actions/<name>.json` 动作剪辑（姿势帧+部件轨道）、部件 rig 见
-  `characters/<id>/parts/`（rig 模式可纯部件无 default；frames 指 `parts/poses/<帧>/` 覆写图）；
-  详见 `docs/engine/ANIMATION.md`
-- `props`：`{file, x, y, scale, anim: none|blink|blink-fast|float, motion, attachTo, depth}`；
-  `motion` 位移关键帧，`attachTo` 跟随角色部件
-- `dialogue`：`[{speaker|null(旁白), text, voice?, gapSec?}]`
-- `caption`：顶部说明字幕（场景卡/旁白条）；`transitionIn`：cut|fade|fade-black
-- 镜头时长自动算：`padIn + Σ台词 + padOut`，无台词用 `holdSec`
-- `shadow`：落地阴影 `{enabled, opacity, size, blur, contact}` 默认开；角色 `shadow:false` 单角色豁免
-  （悬浮/全息）；场景层 `castShadow` 软投影——详见 `docs/engine/ANIMATION.md` 第 6 节
-
-## SVG 角色约定（动画挂点）
-
-- 必须有 `viewBox`；底部中心是站位锚点；建议高度 400~600 单位
-- `#mouth` 闭嘴、`#mouth-open` 说话口型（初始 `display:none`，播放器自动开合 ~6fps）
-- `#eyes`（或 `#eye-l`/`#eye-r`）眨眼组，播放器周期性压扁
-- `feTurbulence+feDisplacementMap` 滤镜（scale 3~5）营造手绘抖动线感
-
-## 命令
+命令参数与脚本见 `package.json`，常用命令：
 
 ```bash
-pnpm install        # 首次
-pnpm validate ep01  # 完整性检查（资产/机位/音轨覆盖/时间线）
-pnpm audio ep01     # 生成全部台词音轨 → audio/manifest.json（改台词后必跑）
-pnpm storyboard ep01# 每镜头静帧 + contact sheet → public/.../storyboard/
-pnpm studio         # Remotion Studio 实时预览
-pnpm render ep01    # 成片 → renders/
-pnpm frames renders/ep01-smoke.mp4  # QA 抽帧：抽样帧 + 拼贴总览 → qa/frames/
-pnpm typecheck
+pnpm validate <ep>
+pnpm audio <ep>
+pnpm storyboard <ep>
+pnpm render <ep>
+pnpm frames renders/<片>.mp4
 ```
 
-依赖：`python3 -m edge_tts`（pip install edge-tts）用于配音；缺它自动退到 `say`。
-FFmpeg 不用装——Remotion 自带合成器。
+台词或声线修改后，重新运行 `pnpm audio <ep>` 和 `pnpm validate <ep>`。
+成片交付前验证数据、完成渲染并检查抽帧与音频：画面完整，字幕可读，声音与说话人及时间线匹配，时长符合任务目标。
+验证失败需修复或说明具体阻塞；旧格式或风格检查与当前要求冲突时，提出对应的工程调整。
 
-## QA 终验标准（验收人必查）
+## 边界
 
-1. `pnpm validate <ep>` 全绿；
-2. `pnpm render <ep>` 出片成功；
-3. `pnpm frames renders/<片>.mp4` 后逐张检查抽样帧与 sheet.jpg：
-   黑帧/闪帧、字幕错位截断、口型对不上说话人、机位露黑边、资产穿帮；
-4. 音频：抽查 2~3 段台词音画同步、说话人声线符合声线表；
-5. 时长符合目标（ep01 正式版 ~5 分钟）。证据附 sheet.jpg 路径与问题清单。
-
-## 老板审核交付包（reviewerRole=owner 的任务）
-
-按公司交付包标准：证据须附老板可直接打开的样片 mp4 路径 +
-qa/frames/<片>/sheet.jpg 拼贴图；多版本对比给多张静帧。缺件视为不合格交付。
-
-## 红线
-
-- 不改公司规则；不把客户资料/凭证/`.env` 内容写进任何产物或证据。
-- 资产和分镜只动自己任务授权的集数目录。
-- 台词改动必须重跑 `pnpm audio` 再 `pnpm validate`，否则清单对不上。
+- 资产和分镜只修改任务授权的集数目录；共享资产修改需有对应授权。
+- 不改公司规则，不将客户资料、凭证或 `.env` 内容写入产物或证据。
