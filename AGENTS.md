@@ -36,6 +36,7 @@ pnpm audio <ep>
 pnpm storyboard <ep>
 pnpm render <ep>
 pnpm frames renders/<片>.mp4
+pnpm archive <子命令>   # 资产入库：add/list/show/note（见 .agents/skills/asset-archive）
 ```
 
 台词或声线修改后，重新运行 `pnpm audio <ep>` 和 `pnpm validate <ep>`。
