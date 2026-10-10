@@ -1,0 +1,143 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080">
+  <!-- 方向C「墨影粗描·警报高对比」：rq-bg scale 5；环境最暗+警报红光带；大块硬边深影 -->
+  <defs>
+    <radialGradient id="earth" cx="0.5" cy="1.35" r="1.1">
+      <stop offset="0" stop-color="#1d4d75"/>
+      <stop offset="0.4" stop-color="#0c2237"/>
+      <stop offset="0.75" stop-color="#070a12"/>
+      <stop offset="1" stop-color="#04060c"/>
+    </radialGradient>
+    <linearGradient id="deck" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0d1220"/>
+      <stop offset="1" stop-color="#04060c"/>
+    </linearGradient>
+    <linearGradient id="panelGlow" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#16202f"/>
+      <stop offset="1" stop-color="#080e18"/>
+    </linearGradient>
+    <radialGradient id="alarmGlow" cx="0.5" cy="0" r="0.9">
+      <stop offset="0" stop-color="#e04a4a" stop-opacity="0.35"/>
+      <stop offset="0.55" stop-color="#e04a4a" stop-opacity="0.1"/>
+      <stop offset="1" stop-color="#e04a4a" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="rq-bg"><feTurbulence type="fractalNoise" baseFrequency="0.012" numOctaves="2" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="5"/></filter>
+  </defs>
+  <rect width="1920" height="1080" fill="#04060c"/>
+  <g filter="url(#rq-bg)">
+    <!-- 舷窗外地球弧：压暗 -->
+    <path d="M160 120 Q960 40 1760 120 L1760 620 Q960 700 160 620Z" fill="url(#earth)" stroke="#2a3648" stroke-width="7"/>
+    <!-- 星点：稀 -->
+    <g fill="#e8f4ff" opacity="0.6">
+      <circle cx="320" cy="210" r="2"/><circle cx="520" cy="160" r="1.5"/><circle cx="760" cy="240" r="1.7"/><circle cx="1050" cy="170" r="2.2"/><circle cx="1330" cy="230" r="1.5"/><circle cx="1560" cy="180" r="1.8"/><circle cx="900" cy="140" r="1.4"/><circle cx="1200" cy="300" r="1.4"/>
+      <circle cx="440" cy="280" r="1.3"/><circle cx="680" cy="190" r="1.3"/><circle cx="1480" cy="260" r="1.5"/><circle cx="260" cy="140" r="1.3"/><circle cx="1690" cy="140" r="1.3"/>
+    </g>
+    <!-- 地球灯网：近熄 -->
+    <g fill="#dff6fb" opacity="0.3">
+      <circle cx="860" cy="470" r="1.8"/><circle cx="1080" cy="450" r="2.2"/><circle cx="1240" cy="480" r="1.6"/>
+    </g>
+    <!-- 警报红光洗墙（发光体允许渐变） -->
+    <rect x="0" y="0" width="640" height="560" fill="url(#alarmGlow)"/>
+    <rect x="1280" y="0" width="640" height="560" fill="url(#alarmGlow)"/>
+    <rect x="0" y="60" width="240" height="14" fill="#e04a4a" opacity="0.85"/>
+    <rect x="1680" y="60" width="240" height="14" fill="#e04a4a" opacity="0.85"/>
+    <rect x="0" y="74" width="240" height="6" fill="#e04a4a" opacity="0.4"/>
+    <rect x="1680" y="74" width="240" height="6" fill="#e04a4a" opacity="0.4"/>
+    <!-- 窗框结构梁 -->
+    <path d="M300 560 Q960 500 1620 560 L1620 640 Q960 700 300 640Z" fill="#0a1626" opacity="0.9"/>
+    <path d="M200 620 Q960 690 1720 620 L1720 700 Q960 790 200 700Z" fill="#10151f"/>
+    <path d="M200 620 Q960 690 1720 620 L1700 640 Q960 720 220 640Z" fill="#0a1626" stroke="none"/>
+    <g stroke="#2a3648" stroke-width="5" fill="none" opacity="0.55">
+      <path d="M480 130 L480 600"/><path d="M960 80 L960 640"/><path d="M1440 130 L1440 600"/>
+      <path d="M200 320 L1720 320"/>
+      <path d="M640 100 L640 560"/><path d="M1280 100 L1280 560"/>
+    </g>
+    <!-- 甲板 -->
+    <rect x="0" y="660" width="1920" height="420" fill="url(#deck)"/>
+    <g stroke="#1c2436" stroke-width="3" opacity="0.6">
+      <path d="M80 780 L1840 780"/><path d="M120 900 L1800 900"/><path d="M40 1010 L1880 1010"/>
+    </g>
+    <path d="M0 660 L1920 660" stroke="#1c2436" stroke-width="3" opacity="0.7"/>
+    <!-- 侧台与值守台 -->
+    <g stroke="#232d42" stroke-width="6" fill="#10182a">
+      <path d="M300 700 L560 700 L620 860 L260 860Z"/>
+      <path d="M1360 700 L1620 700 L1660 860 L1300 860Z"/>
+      <path d="M700 720 L1220 720 L1270 900 L650 900Z"/>
+    </g>
+    <!-- 大块硬边深影 -->
+    <path d="M540 700 L620 860 L480 860 L460 760Z" fill="#0a1626" stroke="none"/>
+    <path d="M1180 720 L1270 900 L1100 900 L1060 760Z" fill="#0a1626" stroke="none"/>
+    <path d="M1600 700 L1660 860 L1520 860 L1500 760Z" fill="#0a1626" stroke="none"/>
+    <path d="M300 700 L340 700 L300 820 L260 860Z" fill="#0a1626" stroke="none" opacity="0.9"/>
+    <!-- 面板 -->
+    <g fill="url(#panelGlow)" stroke="#2a3648" stroke-width="4">
+      <rect x="330" y="720" width="200" height="70" rx="6"/>
+      <rect x="1400" y="720" width="200" height="70" rx="6"/>
+      <rect x="760" y="740" width="400" height="90" rx="8"/>
+      <rect x="340" y="800" width="180" height="40" rx="4"/>
+      <rect x="1400" y="800" width="180" height="40" rx="4"/>
+    </g>
+    <!-- 螺丝 -->
+    <g fill="#232d42">
+      <circle cx="338" cy="726" r="3"/><circle cx="522" cy="726" r="3"/><circle cx="338" cy="784" r="3"/><circle cx="522" cy="784" r="3"/>
+      <circle cx="1408" cy="726" r="3"/><circle cx="1592" cy="726" r="3"/><circle cx="1408" cy="784" r="3"/><circle cx="1592" cy="784" r="3"/>
+      <circle cx="770" cy="748" r="3"/><circle cx="1150" cy="748" r="3"/><circle cx="770" cy="822" r="3"/><circle cx="1150" cy="822" r="3"/>
+    </g>
+    <!-- 指示灯：红主琥珀次 -->
+    <g fill="#e04a4a">
+      <circle cx="420" cy="740" r="7"/><circle cx="470" cy="740" r="5" opacity="0.7"/>
+      <circle cx="1480" cy="740" r="7"/><circle cx="1520" cy="745" r="5" opacity="0.7"/>
+      <circle cx="370" cy="755" r="4" opacity="0.8"/><circle cx="1570" cy="755" r="4" opacity="0.8"/>
+      <circle cx="960" cy="712" r="5" opacity="0.9"/>
+    </g>
+    <g fill="#ffd27a">
+      <circle cx="520" cy="755" r="4" opacity="0.5"/><circle cx="1440" cy="755" r="4" opacity="0.5"/>
+    </g>
+    <!-- 频段条：异常高亮 -->
+    <g fill="#3aa6a0">
+      <rect x="780" y="760" width="90" height="14" rx="7" opacity="0.9"/>
+      <rect x="890" y="760" width="40" height="14" rx="7" opacity="0.6"/>
+      <rect x="950" y="760" width="70" height="14" rx="7" opacity="0.45"/>
+      <rect x="1050" y="760" width="120" height="14" rx="7" opacity="0.8"/>
+    </g>
+    <g fill="#e04a4a">
+      <rect x="1040" y="760" width="30" height="14" rx="7" opacity="0.9"/>
+    </g>
+    <g fill="#2a6a78" opacity="0.7">
+      <rect x="780" y="790" width="55" height="10" rx="5"/>
+      <rect x="850" y="790" width="80" height="10" rx="5"/>
+      <rect x="950" y="790" width="35" height="10" rx="5"/>
+      <rect x="1010" y="790" width="100" height="10" rx="5"/>
+      <rect x="790" y="812" width="70" height="8" rx="4"/>
+      <rect x="1030" y="812" width="60" height="8" rx="4"/>
+    </g>
+    <!-- 左侧屏波形：尖峰异常 -->
+    <g stroke="#e04a4a" stroke-width="4" fill="none" opacity="0.9">
+      <path d="M350 755 L370 755 L375 745 L380 765 L385 735 L392 775 L398 745 L405 755 L435 755 L445 748 L452 762 L460 755 L500 755"/>
+    </g>
+    <g stroke="#3aa6a0" stroke-width="3" fill="none" opacity="0.4">
+      <path d="M1420 755 L1450 755 L1455 748 L1460 762 L1465 755 L1520 755"/>
+    </g>
+    <!-- 中央立柱/全息座：冷 -->
+    <rect x="930" y="690" width="60" height="180" rx="8" fill="#0d1220" stroke="#232d42" stroke-width="5"/>
+    <ellipse cx="960" cy="690" rx="46" ry="12" fill="#4aa8c0" opacity="0.35"/>
+    <ellipse cx="960" cy="685" rx="28" ry="6" fill="#6ec8d8" opacity="0.22"/>
+    <rect x="946" y="720" width="28" height="120" rx="4" fill="#0a1626" stroke="none"/>
+    <!-- 透视引导线 -->
+    <g stroke="#2a3648" stroke-width="5" fill="none" opacity="0.7">
+      <path d="M0 700 L260 860"/><path d="M1920 700 L1660 860"/><path d="M700 720 L650 900"/><path d="M1220 720 L1270 900"/>
+    </g>
+    <!-- 天花：红灯带 -->
+    <g fill="#e04a4a" opacity="0.5">
+      <rect x="400" y="100" width="240" height="10" rx="5"/>
+      <rect x="1280" y="100" width="240" height="10" rx="5"/>
+    </g>
+    <g fill="#4aa8c0" opacity="0.15">
+      <rect x="840" y="70" width="240" height="8" rx="4"/>
+    </g>
+    <!-- 舱壁接缝 -->
+    <g stroke="#1c2436" stroke-width="3" opacity="0.5">
+      <path d="M0 160 L160 160"/><path d="M1760 160 L1920 160"/>
+      <path d="M0 240 L120 240"/><path d="M1800 240 L1920 240"/>
+    </g>
+  </g>
+</svg>
