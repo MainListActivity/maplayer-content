@@ -24,7 +24,7 @@
 
 与视频产线并列的独立产线，只负责写故事原著。种子稿见 `科幻故事续写筹备.md`，全部产出放 `story/`，不进入 `public/episodes/`。
 
-- 路由：`discipline=原著`。岗位落地后 `executorRole=story-author`；过渡期由 `concept-design`/`asset-production` 承接（编制固定 antigravity）。`product`/`gm`/`ai-content` 等岗不承接原著轨写作任务。
+- 路由：`discipline=原著` 且 `executorRole=story-author`（只有该岗位能承接原著轨，系统在建单时校验，派给其他岗位会被拒绝）。`product`/`gm`/`ai-content` 等岗不承接原著轨写作任务。
 - 递归流程：总体架构（故事圣经+全书总纲，reviewer=owner）→ 卷概要（owner）→ 章概要（owner）→ 正文补齐（QA→GM）→ 交付一个小章节 → 递归下一章。先概要后正文，老板只看概要。
 - 概要被驳回：修订概要再交同一验收人，不跳过直接写正文。正文被 QA/GM 驳回：按意见修订正文，概要不变。
 - 交付单位=一个小章节正文（markdown），QA 口径：与已批概要一致、文风连贯、与故事圣经无矛盾、字数达标。
