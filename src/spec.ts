@@ -196,7 +196,7 @@ export type ShotSpec = z.infer<typeof ShotSchema>;
 export const ShotsFileSchema = z.object({shots: z.array(ShotSchema).min(1)});
 
 export const EpisodeSchema = z.object({
-  id: z.string().regex(/^ep\d+$/),
+  id: z.string().regex(/^[a-z][a-z0-9-]*$/),
   title: z.string(),
   fps: z.number().int().min(12).max(60).default(24),
   width: z.number().int().default(1920),
