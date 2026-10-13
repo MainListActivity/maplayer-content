@@ -9,7 +9,7 @@ export const fixtureShot = (mode: string) => ShotSchema.parse({
   id: mode, scene: mode === 'media' ? 'backdrop' : null, holdSec: 3, padInSec: 0, padOutSec: 0,
   camera: mode.startsWith('contact') ? {from: {x: .5, y: .5, zoom: 1}, to: {x: .55, y: .5, zoom: 1.25}} : {from: {x: .5, y: .5, zoom: 1}},
   shadow: {enabled: false},
-  characters: mode === 'media' ? [] : [{id: 'actor', x: mode === 'contact-left' ? .7 : .4, y: .9, action: 'gesture', face: mode === 'face' ? face : {},
+  characters: mode === 'media' ? [] : [{id: 'actor', x: mode === 'contact-left' ? .7 : .4, y: .9, action: mode === 'face' ? undefined : 'gesture', face: mode === 'face' ? face : {},
     moves: mode.startsWith('contact') ? [{to: {x: mode === 'contact-left' ? .4 : .7, y: .9}, durSec: 3, ease: 'linear', gait: 'walk'}] : []}],
   props: mode.startsWith('contact') ? [{file: 'core', x: 0, y: 0, scale: .3, depth: 1, attachTo: {character: 'actor', part: 'hand', anchor: 'grip'}}] : [],
   dialogue: mode === 'face' ? [{speaker: 'actor', text: '机制对白一', gapSec: .5}, {speaker: 'actor', text: '机制对白二', gapSec: 0}] : [],

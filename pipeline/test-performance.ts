@@ -109,6 +109,10 @@ near(at(f6,150,127),[255,255,0]);near(at(f60,150,127),[255,0,255]); // brow
 near(at(f6,155,157),[255,0,0]);near(at(f24,155,152),[0,0,255]);near(at(f36,155,157),[0,255,255]);near(at(f60,155,152),[0,0,255]); // mouth during gap & after
 near(at(f6,167,135),[255,255,255]);near(at(f60,167,135),[0,0,0]); // eyelid
 near(at(f6,155,220),at(f60,155,220),0); // 身体区域不伸缩
+for (const image of [f24,f36,f60]) {
+  for (let y=0;y<300;y++) for (let x=0;x<400;x++)
+    if (!(x>=140 && x<=180 && y>=120 && y<=160)) near(at(image,x,y),at(f6,x,y),0);
+} // 面部区域之外的全部像素完全一致，身体/手臂姿态固定
 console.log('PASS actual facial pixels: independent gaze/brow/mouth, both silent intervals closed, body stable');
 for(const mode of ['contact','contact-left']) for(const frame of [0,12,36,71]) {
   const image=await still(mode,frame);
