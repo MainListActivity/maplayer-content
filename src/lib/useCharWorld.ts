@@ -7,7 +7,7 @@ import {buildLoco, evalLoco, evalParts, gaitBob, idleBob, legacyEnterSlide, Part
 
 export type Placement = z.infer<typeof PlacementSchema>;
 
-const actionCfg = (a: Placement['action']): {name: string; speed: number; loop?: boolean} | null =>
+const actionCfg = (a: Placement['action']): {name: string; speed: number; loop?: boolean; offsetSec?: number} | null =>
   a == null ? null : typeof a === 'string' ? {name: a, speed: 1} : a;
 
 export interface CharWorld {
@@ -17,7 +17,7 @@ export interface CharWorld {
   partsReady: boolean;
   partsFile: PartsFile | null;
   clip: ActionClip | null;
-  cfg: {name: string; speed: number; loop?: boolean} | null;
+  cfg: {name: string; speed: number; loop?: boolean; offsetSec?: number} | null;
   /** 世界系归一化锚点（脚底中心，含步态起伏）+ 自动朝向 + 步态倾斜。 */
   pos: {x: number; y: number};
   /** 地面锚点（不含 bob 起伏）：落地阴影钉在这里，脚下有影而影不随脚抬。 */
@@ -49,7 +49,7 @@ export const useCharWorld = (episodeId: string, p: Placement | null, shotDurSec:
   const clipRaw = useJsonOpt<ActionClip>(cfg ? `${charBase}/actions/${cfg.name}.json` : null);
   const clip = useMemo(() => {
     const parsed = clipRaw.data ? ActionClipSchema.parse(clipRaw.data) : null;
-    return parsed && cfg?.loop != null ? {...parsed, loop: cfg.loop} : parsed;
+    return parsed ? {...parsed, loop: !parsed.hold && (cfg?.loop ?? parsed.loop)} : null;
   }, [clipRaw, cfg?.loop]);
 
   const segs = useMemo(() => (p ? buildLoco(p, shotDurSec) : []), [p, shotDurSec]);
@@ -60,8 +60,8 @@ export const useCharWorld = (episodeId: string, p: Placement | null, shotDurSec:
   const x = loco.x + (p ? legacyEnterSlide(p, tSec) : 0);
 
   const worlds = useMemo(
-    () => (partsFile ? evalParts(partsFile, clip, tSec, cfg?.speed ?? 1) : null),
-    [partsFile, clip, tSec, cfg?.speed],
+    () => (partsFile ? evalParts(partsFile, clip, tSec + (cfg?.offsetSec ?? 0), cfg?.speed ?? 1) : null),
+    [partsFile, clip, tSec, cfg?.speed, cfg?.offsetSec],
   );
 
   // 与 Sprite 同款 legacy 判定：常驻闲置 bob 也计入抬升量，阴影随其衰减。

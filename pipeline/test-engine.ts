@@ -164,3 +164,12 @@ await renderStill({
 assert.ok(!readFileSync(delayedPath).equals(poseA), '竞态渲染产物应与 idle 帧不同（alert 姿势）');
 console.log('PASS delayed parts.json (action resolves first) still renders rig pose frame');
 console.log(`  stills → ${outDir}`);
+
+// 旧整幅 PNG/SVG 路径：旧镜头和序列资源仍能完成逐帧渲染。
+const defaultA = await still('look', .3, 'legacy-default-a.png');
+const defaultB = await still('look', 1, 'legacy-default-b.png');
+assert.ok(defaultA.length > 10000 && defaultB.length > 10000, '旧默认立绘和分层场景应有可见内容');
+const svgA = await still('svg-sequence', .2, 'legacy-svg-a.png');
+const svgB = await still('svg-sequence', .7, 'legacy-svg-b.png');
+assert.ok(!svgA.equals(svgB), '旧 SVG 序列/命名组轨道应改变实际渲染');
+console.log('PASS legacy default PNG loading and SVG sequence/tracks render');

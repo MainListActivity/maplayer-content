@@ -210,3 +210,75 @@ rotate 平面根据画幅比例、pivot 到最远角的距离和最大漂移余�
   `rig-pose` 验证 rig 模式姿势覆写×关节叠加、`rig-only` 验证纯部件渲染、
   末镜 `svg-sequence` 验证 SVG 帧序列与关节叠加；末四镜 `shadow-*` 验证落地阴影开关/单角色豁免/走位跟随）。
   `bot2`/`svg-fixture` 为工程机制夹具，不代表正式角色或美术风格验收。
+
+## 8. 独立面部演出（face）
+
+`characters[].face` 是 `partId → {role, keys, closedFile?}`，仅用于有 `parts.json`
+的角色。每条轨道在该部件原有 at/pivot/parent 上换贴图，继承头部运动；贴图自然
+尺寸由作者决定，透明底 PNG 推荐。眼神、眉、眼睑、嘴分别建部件，不把身体缩放当嘴型。
+
+```json
+{"id":"rin", "x":0.5, "y":0.9,
+ "action":{"name":"react", "speed":0.8, "offsetSec":0.25},
+ "face":{
+   "eyes":{"role":"gaze", "keys":[{"t":0,"file":"face/eyes-left.png"},{"t":1.2,"file":"face/eyes-right.png"}]},
+   "brows":{"role":"brow", "keys":[{"t":0,"file":"face/brows-neutral.png"},{"t":1.8,"file":"face/brows-up.png"}]},
+   "lids":{"role":"eyelid", "keys":[{"t":0,"file":"face/lids-open.png"},{"t":2,"file":"face/lids-closed.png"},{"t":2.12,"file":"face/lids-open.png"}]},
+   "mouth":{"role":"mouth", "closedFile":"face/closed.png", "keys":[{"t":0.4,"file":"face/a.png"},{"t":0.6,"file":"face/i.png"},{"t":0.8,"file":"face/closed.png"}]}
+ }}
+```
+
+- 文件相对 `characters/<id>/parts/`，带扩展名；部件 id 必须存在，validate 检查全部贴图。
+- `t` 是镜头内秒，严格递增；按最后一个 `t ≤ 当前时间` 取图，有意 hold 保持到下一时间码。
+  首个时间码之前用原姿势/基底贴图；优先级：面部轨道 > 姿势覆写 > 部件基底。
+- `role` 为 gaze/brow/eyelid/mouth，默认 gaze。mouth 必须声明 `closedFile`。
+  该角色声音区间外强制取闭口图；声音区间按 audio manifest 的完整对白实测时长，
+  缺清单时使用既有估时。台词间 gap 与末句之后都闭口。音频 Sequence 在实测区间结束。
+  有 closedFile 的其他角色轨道也会使用这一声音门控，通常仅嘴轨道需要它。
+- 面部时间码独立于身体 action 的 speed、loop、offsetSec；作者按音频时间码创作。
+  不自动生成音素，也不替代动作或表情创作。
+- `action.offsetSec` 为动作时间相位：动作时刻 `(镜头秒 + offsetSec) × speed`；
+  同时作用于 frames 与 tracks。hold 会让两者都停住，不只姿势图停住。
+- 修正镜头总长的 gap 统计为「每句之后，除末句」，与原 lineFrames 算法一致。
+  不同 gap 的旧数据可能因此得到正确的新总长；不更改台词起点。
+
+## 9. 镜头级预制源（media）
+
+```json
+{"media":[
+  {"source":{"type":"video","file":"episodes/demo/assets/animation/reaction.webm","transparent":true},
+   "from":12,"durationFrames":48,"trimStartSec":0.5,"playbackRate":1,
+   "space":"screen","x":0,"y":0,"width":1,"height":1,"fit":"cover"},
+  {"source":{"type":"sequence","files":["episodes/demo/assets/fx/001.png","episodes/demo/assets/fx/002.png"],"fps":12},
+   "from":24,"durationFrames":24,"space":"world","depth":1}
+]}
+```
+
+- 源是 `public/` 相对本地路径，带扩展名；不提供浏览器原生播放时钟、网络生成服务或随机取帧。
+- `from`/`durationFrames` 使用合成 fps，区间 `[from, from + durationFrames)`。
+  `trimStartSec` 为源裁头秒。局部播放秒 = `(镜头帧-from)/合成fps × playbackRate`。
+  视频由 Remotion OffthreadVideo 按帧提取，trimBefore 按合成 fps 四舍五入；
+  PNG 序列索引为 `floor((trimStartSec + 局部播放秒) × 源fps)`，超出序列末帧保持，
+  不默认循环。视频源必须包含所需播放区间，避免超尾行为；不自动拉长镜头。
+- `space:screen`（默认）在前景之后、字幕之前合成，适合预制完整镜头/覆盖特效；
+  `world` 与角色道具按 depth 混排，复用同一相机。x/y/width/height 为画幅归一化，
+  左上角锚定；fit=contain（默认）/cover/fill，视口裁切。opacity 默认 1。
+- 透明 PNG 自带 alpha；透明视频声明 transparent:true（例如带 alpha WebM）。
+  源内容是否有 alpha 由创作端保证。所有视频强制 muted，不重复叠入源对白/配乐；
+  正式声音仍走已有对白音轨。
+- 本任务使用锁文件 Remotion **4.0.532**，未升级依赖。官方依据：
+  [OffthreadVideo](https://www.remotion.dev/docs/offthreadvideo)、
+  [Sequence](https://www.remotion.dev/docs/sequence)、[Img](https://www.remotion.dev/docs/img)。
+  API 同时核对已安装版本类型定义。PNG 节点用 Img 等待加载，避免首帧缺道具。
+
+### 机制验证与回归
+
+`pnpm test:performance` 在临时目录生成确定性 PNG/parts/action/音源与预制视频，
+真实调用 Remotion renderStill/renderMedia。设置 `PERFORMANCE_EVIDENCE_DIR=/绝对目录`
+可将三段 3 秒机制片、逐帧静帧、输入 JSON 与全部源放进指定证据目录；不写正式集目录。
+夹具源码在 `pipeline/fixtures/performance/`，色块为工程验证用途，不构成角色美术验收。
+
+检查面部区域的独立颜色变化、两段无声区间闭口、固定身体区域；检查握持道具中心的解析坐标与
+白色手端在左右行走/镜像/动作/相机变焦八个时相的实际像素接触；检查视频和 PNG 序列裁头后的首/中/末
+帧颜色、开始/结束独占边界、两种 alpha 合成，以及源有音轨但接入后无音轨。
+对白输出检查声音区间有 tone、gap/尾段静音。`pnpm test` 保留既有 parts/姿势/默认资产回归。

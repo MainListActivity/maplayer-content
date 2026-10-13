@@ -12,7 +12,8 @@
     "typecheck": "tsc --noEmit",
     "test": "tsx pipeline/test-engine.ts && tsx pipeline/test-ambient.ts",
     "frames": "tsx pipeline/frames.ts",
-    "archive": "tsx pipeline/archive.ts"
+    "archive": "tsx pipeline/archive.ts",
+    "test:performance": "tsx pipeline/test-performance.ts"
   },
   "dependencies": {
     "@remotion/bundler": "^4.0.393",

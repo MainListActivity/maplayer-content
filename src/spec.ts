@@ -24,8 +24,20 @@ export const MoveSchema = z.object({
 /** 动作引用：characters/<id>/actions/<name>.json 声明式剪辑（帧序列+部件轨道）。 */
 export const ActionRefSchema = z.union([
   z.string(),
-  z.object({name: z.string(), speed: z.number().min(0.1).max(4).default(1), loop: z.boolean().optional()}),
+  z.object({name: z.string(), speed: z.number().min(0.1).max(4).default(1), loop: z.boolean().optional(), offsetSec: z.number().min(0).default(0)}),
 ]);
+
+/** 独立面部贴图轨道：镜头内秒，不跟随身体动作 speed/loop。文件相对 parts/。 */
+export const FaceTrackSchema = z.object({
+  role: z.enum(['gaze', 'brow', 'eyelid', 'mouth']).default('gaze'),
+  closedFile: z.string().optional(), // 声音区间外强制闭口；嘴轨道必须声明
+  keys: z.array(z.object({t: z.number().min(0), file: z.string()})).min(1),
+}).superRefine((v, ctx) => {
+  if (v.role === 'mouth' && !v.closedFile)
+    ctx.addIssue({code: 'custom', path: ['closedFile'], message: '嘴轨道必须声明 closedFile'});
+  if (v.keys.some((k, i) => i > 0 && k.t <= v.keys[i - 1].t))
+    ctx.addIssue({code: 'custom', path: ['keys'], message: '面部时间码必须严格递增'});
+});
 
 /** 角色站位：x,y 为「变焦 1 时的画面」归一化坐标（与背景同一世界系），随镜头运动。 */
 export const PlacementSchema = z.object({
@@ -39,6 +51,7 @@ export const PlacementSchema = z.object({
   exit: z.enum(['none', 'left', 'right', 'walk-left', 'walk-right']).default('none'),
   moves: z.array(MoveSchema).default([]),      // 走位分段（时间轴按序/可 at 指定）
   action: ActionRefSchema.optional(),          // 动作剪辑名（部件轨道 / 姿势帧序列）
+  face: z.record(z.string(), FaceTrackSchema).default({}), // partId -> 独立面部贴图
   depth: z.number().min(-2).max(2).default(0), // 世界系 z 序：越大越靠前
   shadow: z.boolean().default(true),           // 落地阴影开关：false = 悬浮/全息类角色不投影
 });
@@ -177,6 +190,25 @@ export const ShadowSchema = z.object({
 });
 export type ShadowSpec = z.infer<typeof ShadowSchema>;
 
+/** 预制源：本地 public 相对路径；帧范围以当前合成 fps 计，结束独占。 */
+export const MediaLayerSchema = z.object({
+  source: z.discriminatedUnion('type', [
+    z.object({type: z.literal('video'), file: z.string(), transparent: z.boolean().default(false)}),
+    z.object({type: z.literal('sequence'), files: z.array(z.string()).min(1), fps: z.number().min(1).max(120)}),
+  ]),
+  from: z.number().int().min(0).default(0),
+  durationFrames: z.number().int().min(1),
+  trimStartSec: z.number().min(0).default(0),
+  playbackRate: z.number().min(0.1).max(4).default(1),
+  space: z.enum(['screen', 'world']).default('screen'),
+  x: z.number().default(0), y: z.number().default(0),
+  width: z.number().positive().default(1), height: z.number().positive().default(1),
+  fit: z.enum(['cover', 'contain', 'fill']).default('contain'),
+  opacity: z.number().min(0).max(1).default(1),
+  depth: z.number().min(-2).max(2).default(0),
+});
+export type MediaLayerSpec = z.infer<typeof MediaLayerSchema>;
+
 export const ShotSchema = z.object({
   id: z.string().regex(/^[a-z0-9_-]+$/),
   scene: z.string().nullable(),                // assets/scenes/<scene>.png|.svg 或 <scene>/scene.json 分层；null = 黑场
@@ -186,6 +218,7 @@ export const ShotSchema = z.object({
   camera: CameraSchema.default({from: {x: 0.5, y: 0.5, zoom: 1.15}, ease: 'easeInOut'}),
   characters: z.array(PlacementSchema).default([]),
   props: z.array(PropSchema).default([]),
+  media: z.array(MediaLayerSchema).default([]),
   dialogue: z.array(DialogueSchema).default([]),
   caption: z.string().nullable().default(null), // 顶部说明字幕（场景卡/旁白条）
   transitionIn: z.enum(['cut', 'fade', 'fade-black']).default('cut'),
@@ -221,7 +254,7 @@ export const lineDuration = (shotId: string, idx: number, text: string, manifest
   return hit ? hit.durationSec : Math.max(0.8, text.length / 4.6 + 0.3);
 };
 
-export interface ShotTimeline {shot: ShotSpec; startFrame: number; durationFrames: number; lineFrames: number[];}
+export interface ShotTimeline {shot: ShotSpec; startFrame: number; durationFrames: number; lineFrames: number[]; lineDurationFrames?: number[];}
 
 /** 计算整集时间线：镜头时长 = padIn + Σ(台词+停顿) + padOut，无台词用 holdSec。 */
 export const buildTimeline = (ep: EpisodeSpec, shots: ShotSpec[], manifest?: AudioManifest): ShotTimeline[] => {
@@ -229,7 +262,7 @@ export const buildTimeline = (ep: EpisodeSpec, shots: ShotSpec[], manifest?: Aud
   return shots.map((shot) => {
     const lineSecs = shot.dialogue.map((d, i) => lineDuration(shot.id, i, d.text, manifest));
     const bodySec = shot.dialogue.length
-      ? Math.max(shot.holdSec, lineSecs.reduce((a, b) => a + b, 0) + shot.dialogue.reduce((a, d, i) => a + (i ? d.gapSec : 0), 0))
+      ? Math.max(shot.holdSec, lineSecs.reduce((a, b) => a + b, 0) + shot.dialogue.reduce((a, d, i) => a + (i < shot.dialogue.length - 1 ? d.gapSec : 0), 0))
       : shot.holdSec;
     const durationFrames = Math.round((shot.padInSec + bodySec + shot.padOutSec) * ep.fps);
     const lineFrames: number[] = [];
@@ -238,7 +271,7 @@ export const buildTimeline = (ep: EpisodeSpec, shots: ShotSpec[], manifest?: Aud
       lineFrames.push(Math.round(t * ep.fps));
       t += lineSecs[i] + (i < shot.dialogue.length - 1 ? d.gapSec : 0);
     });
-    const tl = {shot, startFrame: cursor, durationFrames, lineFrames};
+    const tl = {shot, startFrame: cursor, durationFrames, lineFrames, lineDurationFrames: lineSecs.map(s => Math.round(s * ep.fps))};
     cursor += durationFrames;
     return tl;
   });

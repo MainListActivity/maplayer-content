@@ -48,6 +48,12 @@ const actionOf = (c: string, name: string) => {
 };
 
 for (const s of shots) {
+  for (const m of s.media) {
+    const files = m.source.type === 'video' ? [m.source.file] : m.source.files;
+    for (const f of files) if (!existsSync(join(epDir(id), '..', '..', f))) problems.push(`${s.id}: 预制源缺失 ${f}`);
+    if (m.source.type === 'sequence' && m.trimStartSec * m.source.fps >= m.source.files.length)
+      problems.push(`${s.id}: 序列裁切起点超出源`);
+  }
   if (s.scene && !hasScene(s.scene)) problems.push(`${s.id}: 缺场景 ${s.scene}（.png/.svg/scene.json 均无）`);
   else if (s.scene && existsSync(join(scenesDir, s.scene, 'scene.json'))) {
     const r = SceneFileSchema.safeParse(readJson(join(scenesDir, s.scene, 'scene.json')));
@@ -69,6 +75,12 @@ for (const s of shots) {
     }
   }
   for (const c of s.characters) {
+    const faceParts = partsOf(c.id);
+    for (const [pid, track] of Object.entries(c.face)) {
+      if (!faceParts?.ids.has(pid)) problems.push(`${s.id}: 面部轨道 ${c.id}.${pid} 必须对应 parts 部件`);
+      for (const f of [...track.keys.map(k => k.file), ...(track.closedFile ? [track.closedFile] : [])])
+        if (!existsSync(join(charsDir, c.id, 'parts', f))) problems.push(`${s.id}: 缺面部贴图 ${c.id}/parts/${f}`);
+    }
     partsOf(c.id); // 即使有 default 变体，也必须校验存在的 parts 元数据。
     const variants = variantsOf(c.id);
     if (!variants.length && !partsOf(c.id)) {problems.push(`${s.id}: 缺角色目录 ${c.id}`); continue;}

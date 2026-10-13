@@ -1,5 +1,5 @@
 import React, {useEffect, useMemo, useRef} from 'react';
-import {staticFile, useVideoConfig} from 'remotion';
+import {Img, staticFile, useVideoConfig} from 'remotion';
 import {useAssetSrc, useAssetsReady, usePngProbeMap, usePngReady} from './load';
 import {evalKf, idleBob, sequenceIndex, spriteHash} from './rig';
 import {Placement, useCharWorld} from './useCharWorld';
@@ -25,7 +25,7 @@ export const Sprite: React.FC<{episodeId: string; p: Placement; speaking: boolea
     [clip, charBase, rigMode, partsMetaReady],
   );
   const framesReady = useAssetsReady(frameUrls);
-  const frameIdx = clip ? sequenceIndex(clip, tSec, cfg?.speed ?? 1) : 0;
+  const frameIdx = clip ? sequenceIndex(clip, tSec + (cfg?.offsetSec ?? 0), cfg?.speed ?? 1) : 0;
   const seqFrame = rigMode ? undefined : clip?.frames?.[frameIdx];
 
   // rig 模式姿势帧：探测所有候选覆写图 parts/poses/<frame>/<partFile>（404→基底贴图）
@@ -37,7 +37,13 @@ export const Sprite: React.FC<{episodeId: string; p: Placement; speaking: boolea
     [partsFile, clip, charBase],
   );
   const poseMap = usePngProbeMap(poseUrls);
-  const partSrc = (d: {file: string}) => {
+  const partSrc = (d: {id: string; file: string}) => {
+    const face = p.face[d.id];
+    if (face) {
+      const key = [...face.keys].reverse().find(k => k.t <= tSec);
+      const file = face.closedFile && !speaking ? face.closedFile : key?.file;
+      if (file) return `${charBase}/parts/${file}`;
+    }
     const override = poseFrame ? `${charBase}/parts/poses/${poseFrame}/${d.file}` : null;
     return override && poseMap?.[override] ? override : `${charBase}/parts/${d.file}`;
   };
@@ -75,7 +81,7 @@ export const Sprite: React.FC<{episodeId: string; p: Placement; speaking: boolea
         for (const [pid, kfs] of Object.entries(clip.tracks)) {
           const el = root.querySelector(`#${CSS.escape(pid)}`) as SVGGraphicsElement | null;
           if (!el || !kfs.length) continue;
-          const pose = evalKf(kfs, tSec * (cfg?.speed ?? 1), clip.durationSec, clip.loop);
+          const pose = evalKf(kfs, (tSec + (cfg?.offsetSec ?? 0)) * (cfg?.speed ?? 1), clip.durationSec, clip.loop);
           let px = 0, py = 0;
           const attr = el.getAttribute('data-pivot');
           if (attr) {[px, py] = attr.split(/[\s,]+/).map(Number);} else {
@@ -90,8 +96,13 @@ export const Sprite: React.FC<{episodeId: string; p: Placement; speaking: boolea
       }
     }
   }
-  }, [src, tSec, fps, speaking, p.id, clip, cfg?.speed, framesReady]);
+  }, [src, tSec, fps, speaking, p.id, clip, cfg?.speed, cfg?.offsetSec, framesReady]);
 
+  if (partsMetaReady && Object.keys(p.face).length) {
+    if (!partsFile) throw new Error(`Face tracks require parts.json: ${p.id}`);
+    for (const pid of Object.keys(p.face))
+      if (!partsFile.parts.some(d => d.id === pid)) throw new Error(`Unknown face part: ${p.id}.${pid}`);
+  }
   if (!src && !partsFile) return null;
 
   const legacy = !partsFile && !clip && !p.moves.length && !p.enter.startsWith('walk') && !p.exit.startsWith('walk');
@@ -125,7 +136,7 @@ export const Sprite: React.FC<{episodeId: string; p: Placement; speaking: boolea
               const e = (m[0] * d.at[0] + m[2] * d.at[1] + m[4]) * unit;
               const f = (m[1] * d.at[0] + m[3] * d.at[1] + m[5]) * unit;
               return (
-                <img
+                <Img
                   key={d.id}
                   src={staticFile(partSrc(d))}
                   data-part={d.id}
@@ -151,7 +162,7 @@ export const Sprite: React.FC<{episodeId: string; p: Placement; speaking: boolea
     if (!url || (seqFrame && !framesReady)) return null;
     return (
       <div style={outerStyle}>
-        <div style={innerStyle}><img src={url} style={style} /></div>
+        <div style={innerStyle}><Img src={url} style={style} /></div>
       </div>
     );
   }
