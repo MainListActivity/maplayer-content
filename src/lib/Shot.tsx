@@ -4,9 +4,10 @@ import {useAssetSrc, useJsonOpt} from './load';
 import {CameraRig, useCamPose} from './CameraRig';
 import {ambientMotion} from './ambient';
 import {Sprite} from './Sprite';
+import {MediaLayer} from './MediaLayer';
 import {Placement, useCharWorld} from './useCharWorld';
 import {evalPropMotion, evalShadow, layerTransform, partAnchorWorld} from './rig';
-import {AmbientSchema, AudioManifest, PropSchema, SceneFile, SceneFileSchema, ShotSpec, ShotTimeline, lineKey} from '../spec';
+import {AmbientSchema, AudioManifest, PropSchema, SceneFile, SceneFileSchema, ShotSpec, ShotTimeline, lineKey, lineDuration} from '../spec';
 import {z} from 'zod';
 
 type PropSpec = z.infer<typeof PropSchema>;
@@ -19,7 +20,7 @@ const FlatScene: React.FC<{episodeId: string; scene: string; pose: {fx: number; 
   return (
     <div style={{position: 'absolute', left: 0, top: 0, width: W, height: H, transform: layerTransform(pose, 1, W, H), transformOrigin: '0 0'}}>
       {src?.kind === 'png' ? (
-        <img src={staticFile(src.url)} style={{width: '100%', height: '100%', objectFit: 'cover', display: 'block'}} />
+        <Img src={staticFile(src.url)} style={{width: '100%', height: '100%', objectFit: 'cover', display: 'block'}} />
       ) : src?.kind === 'svg' ? (
         <div style={{width: '100%', height: '100%'}} dangerouslySetInnerHTML={{__html: src.svg.replace('<svg', '<svg style="width:100%;height:100%;display:block" preserveAspectRatio="xMidYMid slice"')}} />
       ) : null}
@@ -129,11 +130,14 @@ const Prop: React.FC<{episodeId: string; pr: PropSpec; shot: ShotSpec; shotDurSe
     const anchor = partAnchorWorld(cw.partsFile, cw.worlds, pr.attachTo.part, pr.attachTo.anchor);
     if (anchor) {
       const unit = cw.hPx / cw.partsFile.size[1];
-      const dx = (anchor.x - cw.partsFile.size[0] / 2) * unit * (cw.flip ? -1 : 1);
-      const dy = (anchor.y - cw.partsFile.size[1]) * unit;
+      const rawDx = (anchor.x - cw.partsFile.size[0] / 2) * unit;
+      const rawDy = (anchor.y - cw.partsFile.size[1]) * unit;
+      const angle = cw.tilt * Math.PI / 180;
+      const dx = (rawDx * Math.cos(angle) - rawDy * Math.sin(angle)) * (cw.flip ? -1 : 1);
+      const dy = rawDx * Math.sin(angle) + rawDy * Math.cos(angle);
       x = cw.pos.x + dx / W;
       y = cw.pos.y + dy / H;
-      rot = anchor.rot * (cw.flip ? -1 : 1);
+      rot = (cw.tilt + anchor.rot) * (cw.flip ? -1 : 1);
       extraOp = anchor.opacity;
     }
   } else if (pr.motion.length) {
@@ -146,7 +150,7 @@ const Prop: React.FC<{episodeId: string; pr: PropSpec; shot: ShotSpec; shotDurSe
   return (
     <div style={{position: 'absolute', left: x * W, top: y * H + float, transform: `translate(-50%,-50%) rotate(${rot}deg)`, width: W * 0.12 * pr.scale, opacity: (blinkOn ? 1 : 0.15) * extraOp}}>
       {src?.kind === 'png' ? (
-        <img src={staticFile(src.url)} style={{width: '100%', height: 'auto', display: 'block'}} />
+        <Img src={staticFile(src.url)} style={{width: '100%', height: 'auto', display: 'block'}} />
       ) : src?.kind === 'svg' ? (
         <div style={{width: '100%'}} dangerouslySetInnerHTML={{__html: src.svg.replace('<svg', '<svg style="width:100%;height:auto;display:block;overflow:visible"')}} />
       ) : null}
@@ -218,7 +222,7 @@ export const Shot: React.FC<{episodeId: string; tl: ShotTimeline; manifest?: Aud
   }, [sceneRaw]);
 
   const speakingAt = (charId: string) => lineFrames.some((s, i) => {
-    const end = i + 1 < lineFrames.length ? lineFrames[i + 1] : durationFrames;
+    const end = s + (tl.lineDurationFrames?.[i] ?? Math.round(lineDuration(shot.id, i, shot.dialogue[i].text, manifest) * fps));
     return shot.dialogue[i].speaker === charId && frame >= s && frame < end;
   });
 
@@ -229,6 +233,7 @@ export const Shot: React.FC<{episodeId: string; tl: ShotTimeline; manifest?: Aud
 
   // 世界系混排：角色与道具按 depth 升序（同级保持声明顺序）
   const actors = [
+    ...shot.media.filter(m => m.space === 'world').map((m, i) => ({d: m.depth, k: `m:${i}`, node: <MediaLayer layer={m} />})),
     ...shot.props.map((pr, i) => ({d: pr.depth, k: `p:${i}`, node: <Prop key={i} episodeId={episodeId} pr={pr} shot={shot} shotDurSec={shotDurSec} />})),
     ...shot.characters.flatMap((p) => [
       {d: p.depth - 0.001, k: `s:${p.id}`, node: <CharShadow key={`s:${p.id}`} episodeId={episodeId} p={p} shot={shot} shotDurSec={shotDurSec} />},
@@ -254,11 +259,12 @@ export const Shot: React.FC<{episodeId: string; tl: ShotTimeline; manifest?: Aud
       {sceneDef && (front.length > 0 || sceneDef.ambient.some((a) => a.type === 'dust' && a.depth > 1)) ? (
         <SceneLayers episodeId={episodeId} scene={shot.scene!} layers={front} ambient={sceneDef.ambient} pose={pose} back={false} />
       ) : null}
+      {shot.media.filter(m => m.space === 'screen').sort((a, b) => a.depth - b.depth).map((m, i) => <MediaLayer key={`media:${i}`} layer={m} />)}
       {shot.dialogue.map((d, i) => {
         const line = manifest?.lines[lineKey(shot.id, i)];
         if (!line) return null;
         return (
-          <Sequence key={i} from={lineFrames[i]} durationInFrames={durationFrames - lineFrames[i]}>
+          <Sequence key={i} from={lineFrames[i]} durationInFrames={Math.max(1, Math.round(line.durationSec * fps))}>
             <Audio src={staticFile(`episodes/${episodeId}/audio/${line.file}`)} />
           </Sequence>
         );
