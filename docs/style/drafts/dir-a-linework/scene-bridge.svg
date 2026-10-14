@@ -1,0 +1,120 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080">
+  <!-- 方向A「细线冷调·二阶平涂」：rq-bg scale 3；冷蓝主导、琥珀极稀；无高光；暗而静 -->
+  <defs>
+    <radialGradient id="earth" cx="0.5" cy="1.35" r="1.1">
+      <stop offset="0" stop-color="#1d4d75"/>
+      <stop offset="0.4" stop-color="#0c2237"/>
+      <stop offset="0.7" stop-color="#0a1626"/>
+      <stop offset="1" stop-color="#05080f"/>
+    </radialGradient>
+    <linearGradient id="deck" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#10151f"/>
+      <stop offset="1" stop-color="#070a12"/>
+    </linearGradient>
+    <linearGradient id="panelGlow" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#141a26"/>
+      <stop offset="1" stop-color="#0a1626"/>
+    </linearGradient>
+    <filter id="rq-bg"><feTurbulence type="fractalNoise" baseFrequency="0.012" numOctaves="2" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="3"/></filter>
+  </defs>
+  <rect width="1920" height="1080" fill="#070a12"/>
+  <g filter="url(#rq-bg)">
+    <!-- 舷窗外地球弧：更暗更冷 -->
+    <path d="M160 120 Q960 40 1760 120 L1760 620 Q960 700 160 620Z" fill="url(#earth)" stroke="#2a3648" stroke-width="6"/>
+    <!-- 星点：稀、小 -->
+    <g fill="#e8f4ff" opacity="0.55">
+      <circle cx="320" cy="210" r="1.8"/><circle cx="520" cy="160" r="1.4"/><circle cx="760" cy="240" r="1.6"/><circle cx="1050" cy="170" r="1.8"/><circle cx="1330" cy="230" r="1.4"/><circle cx="1560" cy="180" r="1.6"/><circle cx="900" cy="140" r="1.3"/><circle cx="1200" cy="300" r="1.3"/>
+      <circle cx="440" cy="280" r="1.2"/><circle cx="680" cy="190" r="1.2"/><circle cx="1480" cy="260" r="1.3"/><circle cx="260" cy="140" r="1.2"/><circle cx="1690" cy="140" r="1.2"/>
+    </g>
+    <!-- 地球灯网：战前稀疏 -->
+    <g fill="#dff6fb" opacity="0.35">
+      <circle cx="700" cy="430" r="2"/><circle cx="860" cy="470" r="1.6"/><circle cx="1080" cy="450" r="2"/><circle cx="1240" cy="480" r="1.5"/><circle cx="960" cy="510" r="1.6"/>
+    </g>
+    <!-- 窗框结构梁 -->
+    <path d="M300 560 Q960 500 1620 560 L1620 640 Q960 700 300 640Z" fill="#0a1626" opacity="0.85"/>
+    <path d="M200 620 Q960 690 1720 620 L1720 700 Q960 790 200 700Z" fill="#10151f"/>
+    <g stroke="#2a3648" stroke-width="4" fill="none" opacity="0.45">
+      <path d="M480 130 L480 600"/><path d="M960 80 L960 640"/><path d="M1440 130 L1440 600"/>
+      <path d="M200 320 L1720 320"/>
+      <path d="M640 100 L640 560"/><path d="M1280 100 L1280 560"/>
+    </g>
+    <!-- 甲板 -->
+    <rect x="0" y="660" width="1920" height="420" fill="url(#deck)"/>
+    <g stroke="#1c2436" stroke-width="3" opacity="0.5">
+      <path d="M80 780 L1840 780"/><path d="M120 900 L1800 900"/><path d="M40 1010 L1880 1010"/>
+    </g>
+    <path d="M0 660 L1920 660" stroke="#1c2436" stroke-width="3" opacity="0.6"/>
+    <!-- 侧台与值守台 -->
+    <g stroke="#232d42" stroke-width="5" fill="#111827">
+      <path d="M300 700 L560 700 L620 860 L260 860Z"/>
+      <path d="M1360 700 L1620 700 L1660 860 L1300 860Z"/>
+      <path d="M700 720 L1220 720 L1270 900 L650 900Z"/>
+    </g>
+    <!-- 台体阴影块（二阶） -->
+    <path d="M560 700 L620 860 L560 860 L520 700Z" fill="#0a1626" stroke="none" opacity="0.8"/>
+    <path d="M1220 720 L1270 900 L1200 900 L1170 720Z" fill="#0a1626" stroke="none" opacity="0.8"/>
+    <path d="M1620 700 L1660 860 L1600 860 L1560 700Z" fill="#0a1626" stroke="none" opacity="0.8"/>
+    <!-- 面板 -->
+    <g fill="url(#panelGlow)" stroke="#2a3648" stroke-width="3">
+      <rect x="330" y="720" width="200" height="70" rx="6"/>
+      <rect x="1400" y="720" width="200" height="70" rx="6"/>
+      <rect x="760" y="740" width="400" height="90" rx="8"/>
+      <rect x="340" y="800" width="180" height="40" rx="4"/>
+      <rect x="1400" y="800" width="180" height="40" rx="4"/>
+    </g>
+    <!-- 面板螺丝 -->
+    <g fill="#232d42">
+      <circle cx="338" cy="726" r="2.5"/><circle cx="522" cy="726" r="2.5"/><circle cx="338" cy="784" r="2.5"/><circle cx="522" cy="784" r="2.5"/>
+      <circle cx="1408" cy="726" r="2.5"/><circle cx="1592" cy="726" r="2.5"/><circle cx="1408" cy="784" r="2.5"/><circle cx="1592" cy="784" r="2.5"/>
+      <circle cx="770" cy="748" r="2.5"/><circle cx="1150" cy="748" r="2.5"/><circle cx="770" cy="822" r="2.5"/><circle cx="1150" cy="822" r="2.5"/>
+    </g>
+    <!-- 琥珀指示灯：A 方向仅 3 点且弱 -->
+    <g fill="#ffd27a">
+      <circle cx="420" cy="740" r="5" opacity="0.6"/>
+      <circle cx="1480" cy="740" r="4" opacity="0.4"/>
+      <circle cx="960" cy="712" r="3.5" opacity="0.5"/>
+    </g>
+    <!-- 频段条：冷青 -->
+    <g fill="#3aa6a0">
+      <rect x="780" y="760" width="90" height="14" rx="7" opacity="0.7"/>
+      <rect x="890" y="760" width="40" height="14" rx="7" opacity="0.4"/>
+      <rect x="950" y="760" width="70" height="14" rx="7" opacity="0.3"/>
+      <rect x="1050" y="760" width="120" height="14" rx="7" opacity="0.55"/>
+    </g>
+    <g fill="#2a6a78" opacity="0.5">
+      <rect x="780" y="790" width="55" height="10" rx="5"/>
+      <rect x="850" y="790" width="80" height="10" rx="5"/>
+      <rect x="950" y="790" width="35" height="10" rx="5"/>
+      <rect x="1010" y="790" width="100" height="10" rx="5"/>
+      <rect x="790" y="812" width="70" height="8" rx="4"/>
+      <rect x="1030" y="812" width="60" height="8" rx="4"/>
+    </g>
+    <!-- 左侧面板波形：静默 -->
+    <g stroke="#3aa6a0" stroke-width="3" fill="none" opacity="0.5">
+      <path d="M350 755 L370 755 L375 745 L380 765 L385 755 L410 755 L420 755 L425 750 L430 760 L435 755 L500 755"/>
+    </g>
+    <g stroke="#3aa6a0" stroke-width="3" fill="none" opacity="0.35">
+      <path d="M1420 755 L1450 755 L1455 748 L1460 762 L1465 755 L1520 755"/>
+    </g>
+    <!-- 中央立柱/全息座 -->
+    <rect x="930" y="690" width="60" height="180" rx="8" fill="#0d1220" stroke="#232d42" stroke-width="4"/>
+    <ellipse cx="960" cy="690" rx="46" ry="12" fill="#4aa8c0" opacity="0.3"/>
+    <ellipse cx="960" cy="685" rx="28" ry="6" fill="#6ec8d8" opacity="0.18"/>
+    <rect x="946" y="720" width="28" height="120" rx="4" fill="#141a26" stroke="none" opacity="0.8"/>
+    <!-- 透视引导线 -->
+    <g stroke="#2a3648" stroke-width="4" fill="none" opacity="0.6">
+      <path d="M0 700 L260 860"/><path d="M1920 700 L1660 860"/><path d="M700 720 L650 900"/><path d="M1220 720 L1270 900"/>
+    </g>
+    <!-- 天花灯带：极弱 -->
+    <g fill="#4aa8c0" opacity="0.1">
+      <rect x="400" y="100" width="240" height="8" rx="4"/>
+      <rect x="840" y="70" width="240" height="8" rx="4"/>
+      <rect x="1280" y="100" width="240" height="8" rx="4"/>
+    </g>
+    <!-- 舱壁接缝 -->
+    <g stroke="#1c2436" stroke-width="3" opacity="0.4">
+      <path d="M0 160 L160 160"/><path d="M1760 160 L1920 160"/>
+      <path d="M0 240 L120 240"/><path d="M1800 240 L1920 240"/>
+    </g>
+  </g>
+</svg>
